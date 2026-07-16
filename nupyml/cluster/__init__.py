@@ -256,5 +256,8 @@ class SpectralClustering(BaseEstimator, ClusterMixin):
         return self
 
 
+from ._extra import Birch, OPTICS, AffinityPropagation, HDBSCAN  # noqa: E402
+
 __all__ = ["KMeans", "MiniBatchKMeans", "DBSCAN", "AgglomerativeClustering",
-           "MeanShift", "SpectralClustering"]
+           "MeanShift", "SpectralClustering", "Birch", "OPTICS",
+           "AffinityPropagation", "HDBSCAN"]

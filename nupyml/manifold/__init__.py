@@ -199,4 +199,7 @@ class LocallyLinearEmbedding(BaseEstimator):
         return self
 
 
-__all__ = ["TSNE", "Isomap", "MDS", "LocallyLinearEmbedding"]
+from ._extra import SpectralEmbedding, TSNEBarnesHut  # noqa: E402
+
+__all__ = ["TSNE", "Isomap", "MDS", "LocallyLinearEmbedding",
+           "SpectralEmbedding", "TSNEBarnesHut"]

@@ -180,4 +180,6 @@ class GaussianMixture(BaseEstimator, DensityMixin, ClusterMixin):
         return float(-2 * self.score(X) * len(X) + 2 * n_params)
 
 
-__all__ = ["GaussianMixture"]
+from ._bayesian import BayesianGaussianMixture  # noqa: E402
+
+__all__ = ["GaussianMixture", "BayesianGaussianMixture"]
