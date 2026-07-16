@@ -17,7 +17,7 @@ def check_random_state(seed):
 
 
 def check_array(X, dtype=np.float64, accept_sparse=False, ensure_2d=True,
-                allow_nd=False, copy=False):
+                allow_nd=False, copy=False, force_all_finite=True):
     """Input validation on an array-like."""
     if sp.issparse(X):
         if not accept_sparse:
@@ -36,13 +36,20 @@ def check_array(X, dtype=np.float64, accept_sparse=False, ensure_2d=True,
             )
         if X.ndim != 2 and not allow_nd:
             raise ValueError(f"Expected 2D array, got {X.ndim}D array")
-    if X.dtype.kind == "f" and not np.all(np.isfinite(X.data if sp.issparse(X) else X)):
-        raise ValueError("Input contains NaN or infinity")
+    if X.dtype.kind == "f" and force_all_finite:
+        data = X.data if sp.issparse(X) else X
+        bad = ~np.isfinite(data) if force_all_finite is True \
+            else np.isinf(data)          # "allow-nan": only infinities fail
+        if bad.any():
+            what = "NaN or infinity" if force_all_finite is True else "infinity"
+            raise ValueError(f"Input contains {what}")
     return X
 
 
-def check_X_y(X, y, dtype=np.float64, accept_sparse=False, y_numeric=False):
-    X = check_array(X, dtype=dtype, accept_sparse=accept_sparse)
+def check_X_y(X, y, dtype=np.float64, accept_sparse=False, y_numeric=False,
+              force_all_finite=True):
+    X = check_array(X, dtype=dtype, accept_sparse=accept_sparse,
+                    force_all_finite=force_all_finite)
     y = column_or_1d(y)
     n = X.shape[0]
     if y.shape[0] != n:

@@ -77,7 +77,8 @@ class BaggingRegressor(_BaseBagging, RegressorMixin):
 class _BaseForest(BaseEstimator):
     def __init__(self, n_estimators=100, criterion=None, max_depth=None,
                  min_samples_split=2, min_samples_leaf=1, max_features="sqrt",
-                 bootstrap=True, random_state=None):
+                 bootstrap=True, ccp_alpha=0.0, monotonic_cst=None,
+                 random_state=None):
         self.n_estimators = n_estimators
         self.criterion = criterion
         self.max_depth = max_depth
@@ -85,6 +86,8 @@ class _BaseForest(BaseEstimator):
         self.min_samples_leaf = min_samples_leaf
         self.max_features = max_features
         self.bootstrap = bootstrap
+        self.ccp_alpha = ccp_alpha
+        self.monotonic_cst = monotonic_cst
         self.random_state = random_state
 
     _bootstrap_samples = True
@@ -113,6 +116,8 @@ class _BaseForest(BaseEstimator):
                 min_samples_split=self.min_samples_split,
                 min_samples_leaf=self.min_samples_leaf,
                 max_features=self.max_features,
+                ccp_alpha=self.ccp_alpha,
+                monotonic_cst=self.monotonic_cst,
                 random_state=rng.randint(0, 2 ** 31 - 1),
             )
             if self.bootstrap and self._bootstrap_samples:
@@ -129,14 +134,15 @@ class RandomForestClassifier(_BaseForest, ClassifierMixin):
     def __init__(self, n_estimators=100, criterion="gini", max_depth=None,
                  min_samples_split=2, min_samples_leaf=1, max_features="sqrt",
                  bootstrap=True, oob_score=False, warm_start=False,
-                 random_state=None):
+                 ccp_alpha=0.0, monotonic_cst=None, random_state=None):
         super().__init__(n_estimators, criterion, max_depth, min_samples_split,
-                         min_samples_leaf, max_features, bootstrap, random_state)
+                         min_samples_leaf, max_features, bootstrap, ccp_alpha,
+                         monotonic_cst, random_state)
         self.oob_score = oob_score
         self.warm_start = warm_start
 
     def fit(self, X, y, sample_weight=None):
-        X, y = check_X_y(X, y)
+        X, y = check_X_y(X, y, force_all_finite="allow-nan")
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         self._fit_forest(X, y, DecisionTreeClassifier, self.criterion,
@@ -154,7 +160,7 @@ class RandomForestClassifier(_BaseForest, ClassifierMixin):
 
     def predict_proba(self, X):
         check_is_fitted(self, "estimators_")
-        X = check_array(X)
+        X = check_array(X, force_all_finite="allow-nan")
         proba = np.zeros((len(X), len(self.classes_)))
         for tree in self.estimators_:
             proba += tree.predict_proba(X)
@@ -168,14 +174,16 @@ class RandomForestRegressor(_BaseForest, RegressorMixin):
     def __init__(self, n_estimators=100, criterion="squared_error",
                  max_depth=None, min_samples_split=2, min_samples_leaf=1,
                  max_features=1.0, bootstrap=True, oob_score=False,
-                 warm_start=False, random_state=None):
+                 warm_start=False, ccp_alpha=0.0, monotonic_cst=None,
+                 random_state=None):
         super().__init__(n_estimators, criterion, max_depth, min_samples_split,
-                         min_samples_leaf, max_features, bootstrap, random_state)
+                         min_samples_leaf, max_features, bootstrap, ccp_alpha,
+                         monotonic_cst, random_state)
         self.oob_score = oob_score
         self.warm_start = warm_start
 
     def fit(self, X, y, sample_weight=None):
-        X, y = check_X_y(X, y, y_numeric=True)
+        X, y = check_X_y(X, y, y_numeric=True, force_all_finite="allow-nan")
         self._fit_forest(X, y, DecisionTreeRegressor, self.criterion,
                          sample_weight)
         if self.oob_score:
@@ -192,7 +200,7 @@ class RandomForestRegressor(_BaseForest, RegressorMixin):
 
     def predict(self, X):
         check_is_fitted(self, "estimators_")
-        X = check_array(X)
+        X = check_array(X, force_all_finite="allow-nan")
         return np.mean([t.predict(X) for t in self.estimators_], axis=0)
 
 

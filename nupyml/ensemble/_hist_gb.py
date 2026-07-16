@@ -7,21 +7,56 @@ from ..utils import check_X_y, check_array, check_random_state, softmax, sigmoid
 
 
 class _BinMapper:
-    def __init__(self, max_bins=256):
+    """Quantile binning. NaN is mapped to the last bin, so a split can isolate
+    missing values instead of requiring them to be imputed first."""
+
+    def __init__(self, max_bins=256, categorical_features=None):
         self.max_bins = max_bins
+        self.categorical_features = categorical_features
 
     def fit(self, X):
         self.bin_edges_ = []
+        self.categories_ = []
+        cat = set(self.categorical_features or [])
+        self.categorical_ = cat
         for j in range(X.shape[1]):
             col = X[:, j]
-            qs = np.unique(np.percentile(col, np.linspace(0, 100, self.max_bins + 1)[1:-1]))
-            self.bin_edges_.append(qs)
+            obs = col[~np.isnan(col)]
+            if j in cat:
+                cats = np.unique(obs)
+                if len(cats) > self.max_bins:
+                    raise ValueError(
+                        f"categorical feature {j} has {len(cats)} categories, "
+                        f"more than max_bins={self.max_bins}")
+                self.categories_.append(cats)
+                self.bin_edges_.append(None)
+            else:
+                self.categories_.append(None)
+                if len(obs) == 0:
+                    self.bin_edges_.append(np.array([0.0]))
+                    continue
+                qs = np.unique(np.percentile(
+                    obs, np.linspace(0, 100, self.max_bins + 1)[1:-1]))
+                self.bin_edges_.append(qs)
         return self
+
+    @property
+    def missing_bin_(self):
+        return self.max_bins
 
     def transform(self, X):
         out = np.empty(X.shape, dtype=np.uint8)
         for j, edges in enumerate(self.bin_edges_):
-            out[:, j] = np.searchsorted(edges, X[:, j], side="right")
+            col = X[:, j]
+            nan = np.isnan(col)
+            if self.categories_[j] is not None:
+                idx = np.searchsorted(self.categories_[j],
+                                      np.where(nan, self.categories_[j][0], col))
+                out[:, j] = np.clip(idx, 0, self.max_bins - 1)
+            else:
+                out[:, j] = np.searchsorted(edges, np.where(nan, 0.0, col),
+                                            side="right")
+            out[nan, j] = self.missing_bin_
         return out
 
 
@@ -128,8 +163,9 @@ class _HistTree:
 class _BaseHistGB(BaseEstimator):
     def __init__(self, max_iter=100, learning_rate=0.1, max_depth=None,
                  max_leaf_nodes=31, min_samples_leaf=20, l2_regularization=1.0,
-                 max_bins=255, early_stopping=False, validation_fraction=0.1,
-                 n_iter_no_change=10, tol=1e-7, random_state=None):
+                 max_bins=255, categorical_features=None, early_stopping=False,
+                 validation_fraction=0.1, n_iter_no_change=10, tol=1e-7,
+                 random_state=None):
         self.max_iter = max_iter
         self.learning_rate = learning_rate
         self.max_depth = max_depth
@@ -137,6 +173,7 @@ class _BaseHistGB(BaseEstimator):
         self.min_samples_leaf = min_samples_leaf
         self.l2_regularization = l2_regularization
         self.max_bins = max_bins
+        self.categorical_features = categorical_features
         self.early_stopping = early_stopping
         self.validation_fraction = validation_fraction
         self.n_iter_no_change = n_iter_no_change
@@ -154,6 +191,7 @@ class _BaseHistGB(BaseEstimator):
         return X[tr], y[tr], w[tr], X[val], y[val], w[val]
 
     def _new_tree(self):
+        # +1 for the dedicated missing-value bin
         return _HistTree(max_depth=self.max_depth,
                          max_leaf_nodes=self.max_leaf_nodes,
                          min_samples_leaf=self.min_samples_leaf,
@@ -162,11 +200,12 @@ class _BaseHistGB(BaseEstimator):
 
 class HistGradientBoostingRegressor(_BaseHistGB, RegressorMixin):
     def fit(self, X, y, sample_weight=None):
-        X, y = check_X_y(X, y, y_numeric=True)
+        X, y = check_X_y(X, y, y_numeric=True, force_all_finite="allow-nan")
         w = np.ones(len(y)) if sample_weight is None \
             else np.asarray(sample_weight, dtype=np.float64)
         X, y, w, X_val, y_val, w_val = self._maybe_split(X, y, w)
-        self._mapper = _BinMapper(self.max_bins).fit(X)
+        self._mapper = _BinMapper(
+            self.max_bins, getattr(self, "categorical_features", None)).fit(X)
         Xb = self._mapper.transform(X)
         self.init_ = float(np.average(y, weights=w))
         pred = np.full(len(y), self.init_)
@@ -194,7 +233,8 @@ class HistGradientBoostingRegressor(_BaseHistGB, RegressorMixin):
 
     def predict(self, X):
         check_is_fitted(self, "trees_")
-        Xb = self._mapper.transform(check_array(X))
+        Xb = self._mapper.transform(
+            check_array(X, force_all_finite="allow-nan"))
         pred = np.full(len(Xb), self.init_)
         for tree in self.trees_:
             pred += self.learning_rate * tree.predict(Xb)
@@ -203,14 +243,15 @@ class HistGradientBoostingRegressor(_BaseHistGB, RegressorMixin):
 
 class HistGradientBoostingClassifier(_BaseHistGB, ClassifierMixin):
     def fit(self, X, y, sample_weight=None):
-        X, y = check_X_y(X, y)
+        X, y = check_X_y(X, y, force_all_finite="allow-nan")
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
         w = np.ones(len(y)) if sample_weight is None \
             else np.asarray(sample_weight, dtype=np.float64)
         k = len(self.classes_)
-        self._mapper = _BinMapper(self.max_bins).fit(X)
+        self._mapper = _BinMapper(
+            self.max_bins, getattr(self, "categorical_features", None)).fit(X)
         Xb = self._mapper.transform(X)
         n = len(y_idx)
         if k == 2:
@@ -245,7 +286,8 @@ class HistGradientBoostingClassifier(_BaseHistGB, ClassifierMixin):
 
     def decision_function(self, X):
         check_is_fitted(self, "trees_")
-        Xb = self._mapper.transform(check_array(X))
+        Xb = self._mapper.transform(
+            check_array(X, force_all_finite="allow-nan"))
         k = len(self.classes_)
         n_out = 1 if k == 2 else k
         F = np.tile(self.init_, (len(Xb), 1)) if n_out > 1 else \
