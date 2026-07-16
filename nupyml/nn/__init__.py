@@ -12,6 +12,11 @@ from .optim import (
     SGD, Adam, AdamW, RMSprop, clip_grad_norm, StepLR, CosineAnnealingLR,
     WarmupLR,
 )
+from .recurrent import RNN, GRU, LSTM
+from .attention import (
+    scaled_dot_product_attention, MultiHeadAttention, causal_mask,
+    TransformerEncoderLayer, PositionalEncoding,
+)
 from .data import DataLoader
 from .mlp import MLPClassifier, MLPRegressor
 from . import init
@@ -25,5 +30,8 @@ __all__ = [
     "BCELoss", "BCEWithLogitsLoss",
     "SGD", "Adam", "AdamW", "RMSprop", "clip_grad_norm",
     "StepLR", "CosineAnnealingLR", "WarmupLR",
+    "RNN", "GRU", "LSTM",
+    "scaled_dot_product_attention", "MultiHeadAttention", "causal_mask",
+    "TransformerEncoderLayer", "PositionalEncoding",
     "DataLoader", "MLPClassifier", "MLPRegressor", "init",
 ]
