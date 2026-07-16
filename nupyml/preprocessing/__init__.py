@@ -23,6 +23,28 @@ class StandardScaler(BaseEstimator, TransformerMixin):
             self.scale_ = np.ones(X.shape[1])
         return self
 
+    def partial_fit(self, X, y=None):
+        """Update mean/variance from a new chunk (Welford-style)."""
+        X = check_array(X)
+        if not hasattr(self, "n_samples_seen_"):
+            self.n_samples_seen_ = 0
+            self._sum = np.zeros(X.shape[1])
+            self._sq_sum = np.zeros(X.shape[1])
+        self.n_samples_seen_ += len(X)
+        self._sum += X.sum(axis=0)
+        self._sq_sum += (X ** 2).sum(axis=0)
+        mean = self._sum / self.n_samples_seen_
+        var = np.maximum(self._sq_sum / self.n_samples_seen_ - mean ** 2, 0.0)
+        self.mean_ = mean if self.with_mean else np.zeros(X.shape[1])
+        if self.with_std:
+            scale = np.sqrt(var)
+            scale[scale == 0.0] = 1.0
+            self.scale_ = scale
+        else:
+            self.scale_ = np.ones(X.shape[1])
+        self.var_ = var
+        return self
+
     def transform(self, X):
         check_is_fitted(self, "mean_")
         X = check_array(X)
@@ -42,6 +64,22 @@ class MinMaxScaler(BaseEstimator, TransformerMixin):
         lo, hi = self.feature_range
         data_min = X.min(axis=0)
         data_max = X.max(axis=0)
+        rng = data_max - data_min
+        rng[rng == 0.0] = 1.0
+        self.data_min_ = data_min
+        self.data_max_ = data_max
+        self.scale_ = (hi - lo) / rng
+        self.min_ = lo - data_min * self.scale_
+        return self
+
+    def partial_fit(self, X, y=None):
+        X = check_array(X)
+        lo, hi = self.feature_range
+        data_min = X.min(axis=0)
+        data_max = X.max(axis=0)
+        if hasattr(self, "data_min_"):
+            data_min = np.minimum(data_min, self.data_min_)
+            data_max = np.maximum(data_max, self.data_max_)
         rng = data_max - data_min
         rng[rng == 0.0] = 1.0
         self.data_min_ = data_min

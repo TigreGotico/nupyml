@@ -33,7 +33,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.tol = tol
         self.random_state = random_state
 
-    def _single_run(self, X, rng):
+    def _single_run(self, X, rng, w):
         k = self.n_clusters
         if self.init == "k-means++":
             centers = _kmeans_plusplus(X, k, rng)
@@ -47,8 +47,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             new_centers = np.empty_like(centers)
             for c in range(k):
                 mask = labels == c
-                if mask.any():
-                    new_centers[c] = X[mask].mean(axis=0)
+                if mask.any() and w[mask].sum() > 0:
+                    new_centers[c] = np.average(X[mask], axis=0, weights=w[mask])
                 else:  # dead cluster: reseed at farthest point
                     new_centers[c] = X[dist.min(axis=1).argmax()]
             shift = np.linalg.norm(new_centers - centers)
@@ -57,16 +57,18 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
                 break
         dist = cdist(X, centers)
         labels = dist.argmin(axis=1)
-        inertia = float((dist[np.arange(len(X)), labels] ** 2).sum())
+        inertia = float((w * dist[np.arange(len(X)), labels] ** 2).sum())
         return centers, labels, inertia
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, sample_weight=None):
         X = check_array(X)
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
         rng = check_random_state(self.random_state)
         runs = 1 if not isinstance(self.init, str) else self.n_init
         best = None
         for _ in range(runs):
-            centers, labels, inertia = self._single_run(X, rng)
+            centers, labels, inertia = self._single_run(X, rng, w)
             if best is None or inertia < best[2]:
                 best = (centers, labels, inertia)
         self.cluster_centers_, self.labels_, self.inertia_ = best
@@ -105,6 +107,24 @@ class MiniBatchKMeans(BaseEstimator, ClusterMixin):
                 centers[c] = (1 - eta) * centers[c] + eta * pts.mean(axis=0)
         self.cluster_centers_ = centers
         self.labels_ = cdist(X, centers).argmin(axis=1)
+        return self
+
+    def partial_fit(self, X, y=None):
+        """Update centers from one mini-batch of data."""
+        X = check_array(X)
+        if not hasattr(self, "cluster_centers_"):
+            rng = check_random_state(self.random_state)
+            k = min(self.n_clusters, len(X))
+            self.cluster_centers_ = _kmeans_plusplus(X, k, rng)
+            self._counts = np.zeros(len(self.cluster_centers_))
+        labels = cdist(X, self.cluster_centers_).argmin(axis=1)
+        for c in np.unique(labels):
+            pts = X[labels == c]
+            self._counts[c] += len(pts)
+            eta = len(pts) / self._counts[c]
+            self.cluster_centers_[c] = ((1 - eta) * self.cluster_centers_[c]
+                                        + eta * pts.mean(axis=0))
+        self.labels_ = labels
         return self
 
     def predict(self, X):

@@ -8,27 +8,33 @@ from ..utils import column_or_1d, check_consistent_length
 # classification
 # --------------------------------------------------------------------------
 
-def accuracy_score(y_true, y_pred):
+def accuracy_score(y_true, y_pred, sample_weight=None):
     y_true, y_pred = column_or_1d(y_true), column_or_1d(y_pred)
     check_consistent_length(y_true, y_pred)
-    return float(np.mean(y_true == y_pred))
+    if sample_weight is None:
+        return float(np.mean(y_true == y_pred))
+    w = np.asarray(sample_weight, dtype=np.float64)
+    return float(np.average(y_true == y_pred, weights=w))
 
 
-def confusion_matrix(y_true, y_pred, labels=None):
+def confusion_matrix(y_true, y_pred, labels=None, sample_weight=None):
     y_true, y_pred = column_or_1d(y_true), column_or_1d(y_pred)
     if labels is None:
         labels = np.unique(np.concatenate([y_true, y_pred]))
     labels = np.asarray(labels)
     n = len(labels)
     idx = {l: i for i, l in enumerate(labels)}
-    cm = np.zeros((n, n), dtype=np.int64)
-    for t, p in zip(y_true, y_pred):
-        cm[idx[t], idx[p]] += 1
+    w = np.ones(len(y_true)) if sample_weight is None \
+        else np.asarray(sample_weight, dtype=np.float64)
+    cm = np.zeros((n, n), dtype=np.int64 if sample_weight is None else np.float64)
+    for t, p, wi in zip(y_true, y_pred, w):
+        cm[idx[t], idx[p]] += wi
     return cm
 
 
-def _prf_counts(y_true, y_pred, labels):
-    cm = confusion_matrix(y_true, y_pred, labels=labels)
+def _prf_counts(y_true, y_pred, labels, sample_weight=None):
+    cm = confusion_matrix(y_true, y_pred, labels=labels,
+                          sample_weight=sample_weight)
     tp = np.diag(cm).astype(float)
     fp = cm.sum(axis=0) - tp
     fn = cm.sum(axis=1) - tp
@@ -51,23 +57,25 @@ def _average_prf(num, den, average, support):
     raise ValueError(f"Unknown average: {average!r}")
 
 
-def precision_score(y_true, y_pred, average="binary", labels=None):
-    return _prf(y_true, y_pred, average, labels, "precision")
+def precision_score(y_true, y_pred, average="binary", labels=None,
+                    sample_weight=None):
+    return _prf(y_true, y_pred, average, labels, "precision", sample_weight)
 
 
-def recall_score(y_true, y_pred, average="binary", labels=None):
-    return _prf(y_true, y_pred, average, labels, "recall")
+def recall_score(y_true, y_pred, average="binary", labels=None,
+                 sample_weight=None):
+    return _prf(y_true, y_pred, average, labels, "recall", sample_weight)
 
 
-def f1_score(y_true, y_pred, average="binary", labels=None):
-    return _prf(y_true, y_pred, average, labels, "f1")
+def f1_score(y_true, y_pred, average="binary", labels=None, sample_weight=None):
+    return _prf(y_true, y_pred, average, labels, "f1", sample_weight)
 
 
-def _prf(y_true, y_pred, average, labels, which):
+def _prf(y_true, y_pred, average, labels, which, sample_weight=None):
     y_true, y_pred = column_or_1d(y_true), column_or_1d(y_pred)
     if labels is None:
         labels = np.unique(np.concatenate([y_true, y_pred]))
-    tp, fp, fn, support = _prf_counts(y_true, y_pred, labels)
+    tp, fp, fn, support = _prf_counts(y_true, y_pred, labels, sample_weight)
     if average == "binary":
         if len(labels) != 2:
             raise ValueError("average='binary' requires binary targets")
@@ -87,7 +95,7 @@ def _prf(y_true, y_pred, average, labels, which):
     return _average_prf(2 * tp, 2 * tp + fp + fn, average, support)
 
 
-def log_loss(y_true, y_proba, labels=None, eps=1e-15):
+def log_loss(y_true, y_proba, labels=None, eps=1e-15, sample_weight=None):
     y_true = column_or_1d(y_true)
     y_proba = np.asarray(y_proba, dtype=np.float64)
     if labels is None:
@@ -98,7 +106,8 @@ def log_loss(y_true, y_proba, labels=None, eps=1e-15):
     y_proba = np.clip(y_proba, eps, 1 - eps)
     y_proba = y_proba / y_proba.sum(axis=1, keepdims=True)
     idx = np.searchsorted(labels, y_true)
-    return float(-np.mean(np.log(y_proba[np.arange(len(y_true)), idx])))
+    picked = np.log(y_proba[np.arange(len(y_true)), idx])
+    return float(-np.average(picked, weights=sample_weight))
 
 
 def roc_curve(y_true, y_score):
@@ -162,10 +171,10 @@ def classification_report(y_true, y_pred, labels=None, digits=2):
 # regression
 # --------------------------------------------------------------------------
 
-def mean_squared_error(y_true, y_pred, squared=True):
+def mean_squared_error(y_true, y_pred, squared=True, sample_weight=None):
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
-    mse = float(np.mean((y_true - y_pred) ** 2))
+    mse = float(np.average((y_true - y_pred) ** 2, weights=sample_weight))
     return mse if squared else float(np.sqrt(mse))
 
 
@@ -173,17 +182,19 @@ def root_mean_squared_error(y_true, y_pred):
     return mean_squared_error(y_true, y_pred, squared=False)
 
 
-def mean_absolute_error(y_true, y_pred):
+def mean_absolute_error(y_true, y_pred, sample_weight=None):
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
-    return float(np.mean(np.abs(y_true - y_pred)))
+    return float(np.average(np.abs(y_true - y_pred), weights=sample_weight))
 
 
-def r2_score(y_true, y_pred):
+def r2_score(y_true, y_pred, sample_weight=None):
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
-    ss_res = np.sum((y_true - y_pred) ** 2)
-    ss_tot = np.sum((y_true - np.mean(y_true, axis=0)) ** 2)
+    w = np.ones(len(y_true)) if sample_weight is None \
+        else np.asarray(sample_weight, dtype=np.float64)
+    ss_res = np.sum(w * (y_true - y_pred) ** 2)
+    ss_tot = np.sum(w * (y_true - np.average(y_true, weights=w)) ** 2)
     if ss_tot == 0:
         return 0.0 if ss_res > 0 else 1.0
     return float(1.0 - ss_res / ss_tot)

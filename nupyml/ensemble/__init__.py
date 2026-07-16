@@ -18,7 +18,7 @@ class _BaseBagging(BaseEstimator):
         self.bootstrap = bootstrap
         self.random_state = random_state
 
-    def _fit_members(self, X, y, default):
+    def _fit_members(self, X, y, default, sample_weight=None):
         rng = check_random_state(self.random_state)
         n = len(X)
         n_draw = int(self.max_samples * n) if isinstance(self.max_samples, float) \
@@ -31,16 +31,20 @@ class _BaseBagging(BaseEstimator):
             est = clone(base)
             if "random_state" in est.get_params():
                 est.set_params(random_state=rng.randint(0, 2 ** 31 - 1))
-            est.fit(X[idx], y[idx])
+            if sample_weight is not None and "sample_weight" in \
+                    est.fit.__code__.co_varnames:
+                est.fit(X[idx], y[idx], sample_weight=np.asarray(sample_weight)[idx])
+            else:
+                est.fit(X[idx], y[idx])
             self.estimators_.append(est)
 
 
 class BaggingClassifier(_BaseBagging, ClassifierMixin):
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
-        self._fit_members(X, y, DecisionTreeClassifier())
+        self._fit_members(X, y, DecisionTreeClassifier(), sample_weight)
         return self
 
     def predict_proba(self, X):
@@ -59,9 +63,9 @@ class BaggingClassifier(_BaseBagging, ClassifierMixin):
 
 
 class BaggingRegressor(_BaseBagging, RegressorMixin):
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
-        self._fit_members(X, y, DecisionTreeRegressor())
+        self._fit_members(X, y, DecisionTreeRegressor(), sample_weight)
         return self
 
     def predict(self, X):
@@ -90,11 +94,20 @@ class _BaseForest(BaseEstimator):
         check_is_fitted(self, "estimators_")
         return np.mean([t.feature_importances_ for t in self.estimators_], axis=0)
 
-    def _fit_forest(self, X, y, tree_cls, criterion):
-        rng = check_random_state(self.random_state)
+    def _fit_forest(self, X, y, tree_cls, criterion, sample_weight=None):
+        if getattr(self, "warm_start", False) and hasattr(self, "estimators_"):
+            existing = self.estimators_
+            rng = self._rng
+        else:
+            existing = []
+            rng = check_random_state(self.random_state)
+            self._rng = rng
+            self._oob_idx = []
         n = len(X)
-        self.estimators_ = []
-        for _ in range(self.n_estimators):
+        self.estimators_ = list(existing)
+        w = None if sample_weight is None else np.asarray(sample_weight,
+                                                          dtype=np.float64)
+        for _ in range(self.n_estimators - len(existing)):
             tree = tree_cls(
                 criterion=criterion, max_depth=self.max_depth,
                 min_samples_split=self.min_samples_split,
@@ -104,24 +117,39 @@ class _BaseForest(BaseEstimator):
             )
             if self.bootstrap and self._bootstrap_samples:
                 idx = rng.randint(0, n, size=n)
-                tree.fit(X[idx], y[idx])
+                tree.fit(X[idx], y[idx], sample_weight=None if w is None else w[idx])
+                self._oob_idx.append(np.setdiff1d(np.arange(n), idx))
             else:
-                tree.fit(X, y)
+                tree.fit(X, y, sample_weight=w)
+                self._oob_idx.append(np.array([], dtype=int))
             self.estimators_.append(tree)
 
 
 class RandomForestClassifier(_BaseForest, ClassifierMixin):
     def __init__(self, n_estimators=100, criterion="gini", max_depth=None,
                  min_samples_split=2, min_samples_leaf=1, max_features="sqrt",
-                 bootstrap=True, random_state=None):
+                 bootstrap=True, oob_score=False, warm_start=False,
+                 random_state=None):
         super().__init__(n_estimators, criterion, max_depth, min_samples_split,
                          min_samples_leaf, max_features, bootstrap, random_state)
+        self.oob_score = oob_score
+        self.warm_start = warm_start
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
-        self._fit_forest(X, y, DecisionTreeClassifier, self.criterion)
+        self._fit_forest(X, y, DecisionTreeClassifier, self.criterion,
+                         sample_weight)
+        if self.oob_score:
+            k = len(self.classes_)
+            votes = np.zeros((len(X), k))
+            for tree, oob in zip(self.estimators_, self._oob_idx):
+                if len(oob):
+                    votes[oob] += tree.predict_proba(X[oob])
+            covered = votes.sum(axis=1) > 0
+            pred = self.classes_[np.argmax(votes[covered], axis=1)]
+            self.oob_score_ = float(np.mean(pred == y[covered]))
         return self
 
     def predict_proba(self, X):
@@ -139,13 +167,27 @@ class RandomForestClassifier(_BaseForest, ClassifierMixin):
 class RandomForestRegressor(_BaseForest, RegressorMixin):
     def __init__(self, n_estimators=100, criterion="squared_error",
                  max_depth=None, min_samples_split=2, min_samples_leaf=1,
-                 max_features=1.0, bootstrap=True, random_state=None):
+                 max_features=1.0, bootstrap=True, oob_score=False,
+                 warm_start=False, random_state=None):
         super().__init__(n_estimators, criterion, max_depth, min_samples_split,
                          min_samples_leaf, max_features, bootstrap, random_state)
+        self.oob_score = oob_score
+        self.warm_start = warm_start
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
-        self._fit_forest(X, y, DecisionTreeRegressor, self.criterion)
+        self._fit_forest(X, y, DecisionTreeRegressor, self.criterion,
+                         sample_weight)
+        if self.oob_score:
+            preds = np.zeros(len(X))
+            counts = np.zeros(len(X))
+            for tree, oob in zip(self.estimators_, self._oob_idx):
+                if len(oob):
+                    preds[oob] += tree.predict(X[oob])
+                    counts[oob] += 1
+            covered = counts > 0
+            from ..metrics import r2_score
+            self.oob_score_ = r2_score(y[covered], preds[covered] / counts[covered])
         return self
 
     def predict(self, X):
@@ -190,9 +232,11 @@ class AdaBoostClassifier(BaseEstimator, ClassifierMixin):
             est = clone(base)
             if "random_state" in est.get_params():
                 est.set_params(random_state=rng.randint(0, 2 ** 31 - 1))
-            # weighted fit via weighted resampling
-            idx = rng.choice(n, size=n, p=w)
-            est.fit(X[idx], y_idx[idx])
+            if "sample_weight" in est.fit.__code__.co_varnames:
+                est.fit(X, y_idx, sample_weight=w)
+            else:  # fall back to weighted resampling
+                idx = rng.choice(n, size=n, p=w)
+                est.fit(X[idx], y_idx[idx])
             pred = est.predict(X)
             err = np.sum(w * (pred != y_idx)) / w.sum()
             if err >= 1.0 - 1.0 / k:
@@ -232,32 +276,43 @@ class AdaBoostClassifier(BaseEstimator, ClassifierMixin):
 
 class GradientBoostingRegressor(BaseEstimator, RegressorMixin):
     def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=3,
-                 min_samples_leaf=1, subsample=1.0, random_state=None):
+                 min_samples_leaf=1, subsample=1.0, warm_start=False,
+                 random_state=None):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
         self.min_samples_leaf = min_samples_leaf
         self.subsample = subsample
+        self.warm_start = warm_start
         self.random_state = random_state
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
-        rng = check_random_state(self.random_state)
         n = len(X)
-        self.init_ = float(y.mean())
-        pred = np.full(n, self.init_)
-        self.estimators_ = []
+        w = None if sample_weight is None else np.asarray(sample_weight,
+                                                          dtype=np.float64)
+        if self.warm_start and hasattr(self, "estimators_"):
+            rng = self._rng
+            pred = self.init_ + self.learning_rate * np.sum(
+                [t.predict(X) for t in self.estimators_], axis=0)
+        else:
+            rng = check_random_state(self.random_state)
+            self._rng = rng
+            self.init_ = float(np.average(y, weights=w))
+            pred = np.full(n, self.init_)
+            self.estimators_ = []
         n_sub = int(self.subsample * n)
-        for _ in range(self.n_estimators):
+        for _ in range(self.n_estimators - len(self.estimators_)):
             resid = y - pred
             tree = DecisionTreeRegressor(
                 max_depth=self.max_depth, min_samples_leaf=self.min_samples_leaf,
                 random_state=rng.randint(0, 2 ** 31 - 1))
             if self.subsample < 1.0:
                 idx = rng.choice(n, size=n_sub, replace=False)
-                tree.fit(X[idx], resid[idx])
+                tree.fit(X[idx], resid[idx],
+                         sample_weight=None if w is None else w[idx])
             else:
-                tree.fit(X, resid)
+                tree.fit(X, resid, sample_weight=w)
             pred += self.learning_rate * tree.predict(X)
             self.estimators_.append(tree)
         return self

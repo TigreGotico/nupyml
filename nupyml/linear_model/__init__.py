@@ -18,13 +18,21 @@ class LinearRegression(BaseEstimator, RegressorMixin):
     def __init__(self, fit_intercept=True):
         self.fit_intercept = fit_intercept
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
         if self.fit_intercept:
-            X_mean, y_mean = _add_intercept_stats(X, y)
+            if sample_weight is not None:
+                w = np.asarray(sample_weight, dtype=np.float64)
+                X_mean = np.average(X, axis=0, weights=w)
+                y_mean = np.average(y, weights=w)
+            else:
+                X_mean, y_mean = _add_intercept_stats(X, y)
             Xc, yc = X - X_mean, y - y_mean
         else:
             Xc, yc = X, y
+        if sample_weight is not None:
+            sw = np.sqrt(np.asarray(sample_weight, dtype=np.float64))
+            Xc, yc = Xc * sw[:, None], yc * sw
         coef, *_ = np.linalg.lstsq(Xc, yc, rcond=None)
         self.coef_ = coef
         self.intercept_ = (y_mean - X_mean @ coef) if self.fit_intercept else 0.0
@@ -40,13 +48,21 @@ class Ridge(BaseEstimator, RegressorMixin):
         self.alpha = alpha
         self.fit_intercept = fit_intercept
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
         if self.fit_intercept:
-            X_mean, y_mean = _add_intercept_stats(X, y)
+            if sample_weight is not None:
+                w = np.asarray(sample_weight, dtype=np.float64)
+                X_mean = np.average(X, axis=0, weights=w)
+                y_mean = np.average(y, weights=w)
+            else:
+                X_mean, y_mean = _add_intercept_stats(X, y)
             Xc, yc = X - X_mean, y - y_mean
         else:
             Xc, yc = X, y
+        if sample_weight is not None:
+            sw = np.sqrt(np.asarray(sample_weight, dtype=np.float64))
+            Xc, yc = Xc * sw[:, None], yc * sw
         n_features = X.shape[1]
         A = Xc.T @ Xc + self.alpha * np.eye(n_features)
         self.coef_ = np.linalg.solve(A, Xc.T @ yc)
@@ -132,7 +148,7 @@ class LogisticRegression(BaseEstimator, ClassifierMixin):
         self.max_iter = max_iter
         self.tol = tol
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, accept_sparse=True)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
@@ -141,6 +157,8 @@ class LogisticRegression(BaseEstimator, ClassifierMixin):
         k = len(self.classes_)
         n_out = 1 if k == 2 else k
         Y = None if k == 2 else np.eye(k)[y_idx]
+        sw = np.ones(n) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
 
         def unpack(theta):
             W = theta[: d * n_out].reshape(d, n_out)
@@ -154,13 +172,13 @@ class LogisticRegression(BaseEstimator, ClassifierMixin):
                 z = Z.ravel()
                 p = sigmoid(z)
                 eps = 1e-15
-                nll = -np.sum(y_idx * np.log(p + eps)
-                              + (1 - y_idx) * np.log(1 - p + eps))
-                dz = (p - y_idx)[:, None]
+                nll = -np.sum(sw * (y_idx * np.log(p + eps)
+                                    + (1 - y_idx) * np.log(1 - p + eps)))
+                dz = (sw * (p - y_idx))[:, None]
             else:
                 P = softmax(Z, axis=1)
-                nll = -np.sum(np.log(P[np.arange(n), y_idx] + 1e-15))
-                dz = P - Y
+                nll = -np.sum(sw * np.log(P[np.arange(n), y_idx] + 1e-15))
+                dz = (P - Y) * sw[:, None]
             reg = 0.5 / self.C * np.sum(W ** 2)
             gW = X.T @ dz + W / self.C
             gW = np.asarray(gW)
@@ -296,6 +314,38 @@ class SGDClassifier(BaseEstimator, ClassifierMixin):
         self.n_iter_ = epoch + 1
         return self
 
+    def partial_fit(self, X, y, classes=None, sample_weight=None):
+        """One SGD pass over the given chunk; keeps existing coefficients."""
+        X, y = check_X_y(X, y)
+        if not hasattr(self, "coef_"):
+            if classes is None:
+                raise ValueError("classes must be passed on the first call")
+            self.classes_ = np.asarray(classes)
+            self._le = LabelEncoder()
+            self._le.classes_ = self.classes_
+            k = len(self.classes_)
+            n_out = 1 if k == 2 else k
+            self.coef_ = np.zeros((n_out, X.shape[1]))
+            self.intercept_ = np.zeros(n_out)
+        y_idx = self._le.transform(y)
+        k = len(self.classes_)
+        W = self.coef_.T.copy()
+        b = self.intercept_.copy()
+        T = (2.0 * y_idx - 1.0)[:, None] if k == 2 else np.eye(k)[y_idx] * 2 - 1
+        sw = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
+        Z = X @ W + b
+        if self.loss == "hinge":
+            dZ = -T * ((1 - T * Z) > 0)
+        else:
+            dZ = -T * sigmoid(-T * Z)
+        dZ = dZ * sw[:, None]
+        W -= self.learning_rate * (X.T @ dZ / len(X) + self.alpha * W)
+        b -= self.learning_rate * dZ.mean(axis=0)
+        self.coef_ = W.T
+        self.intercept_ = b
+        return self
+
     def decision_function(self, X):
         check_is_fitted(self, "coef_")
         scores = check_array(X) @ self.coef_.T + self.intercept_
@@ -342,6 +392,19 @@ class SGDRegressor(BaseEstimator, RegressorMixin):
         self.coef_ = w
         self.intercept_ = b
         self.n_iter_ = epoch + 1
+        return self
+
+    def partial_fit(self, X, y, sample_weight=None):
+        X, y = check_X_y(X, y, y_numeric=True)
+        if not hasattr(self, "coef_"):
+            self.coef_ = np.zeros(X.shape[1])
+            self.intercept_ = 0.0
+        sw = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
+        err = (X @ self.coef_ + self.intercept_ - y) * sw
+        self.coef_ -= self.learning_rate * (X.T @ err / len(X)
+                                            + self.alpha * self.coef_)
+        self.intercept_ -= self.learning_rate * err.mean()
         return self
 
     def predict(self, X):

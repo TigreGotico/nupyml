@@ -8,9 +8,9 @@ from ..utils import check_X_y, check_array, check_random_state
 
 class _Node:
     __slots__ = ("feature", "threshold", "left", "right", "value", "impurity",
-                 "n_samples")
+                 "n_samples", "weight")
 
-    def __init__(self, value, impurity, n_samples):
+    def __init__(self, value, impurity, n_samples, weight):
         self.feature = -1
         self.threshold = 0.0
         self.left = None
@@ -18,34 +18,36 @@ class _Node:
         self.value = value
         self.impurity = impurity
         self.n_samples = n_samples
+        self.weight = weight
 
     @property
     def is_leaf(self):
         return self.left is None
 
 
-def _best_split_classification(X, y_onehot, feature_indices, criterion, min_leaf):
-    """Vectorized best split: for each feature, sort once and score every
-    threshold via cumulative class counts. Returns (feature, threshold, gain)."""
+def _best_split_classification(X, y_onehot, w, feature_indices, criterion,
+                               min_leaf):
+    """Vectorized best split with sample weights: sort each feature once and
+    score every threshold via cumulative weighted class counts."""
     n, k = y_onehot.shape
-    total = y_onehot.sum(axis=0)
+    wy = y_onehot * w[:, None]
+    total = wy.sum(axis=0)
+    total_w = w.sum()
 
     def impurity(counts, sizes):
-        # counts: (m, k), sizes: (m,)
         p = counts / sizes[:, None]
         if criterion == "gini":
             return 1.0 - (p ** 2).sum(axis=1)
         logp = np.log2(np.where(p > 0, p, 1.0))
         return -(p * logp).sum(axis=1)
 
-    parent_imp = impurity(total[None, :], np.array([n]))[0]
+    parent_imp = impurity(total[None, :], np.array([total_w]))[0]
     best = (-1, 0.0, 0.0)
     for j in feature_indices:
         order = np.argsort(X[:, j], kind="stable")
         xs = X[order, j]
-        ys = y_onehot[order]
-        cum = np.cumsum(ys, axis=0)         # (n, k)
-        # candidate split positions: between distinct consecutive values
+        cum = np.cumsum(wy[order], axis=0)
+        cum_w = np.cumsum(w[order])
         distinct = np.nonzero(np.diff(xs))[0]
         if len(distinct) == 0:
             continue
@@ -53,11 +55,17 @@ def _best_split_classification(X, y_onehot, feature_indices, criterion, min_leaf
         if len(pos) == 0:
             continue
         left_counts = cum[pos]
-        left_sizes = (pos + 1).astype(float)
+        left_sizes = cum_w[pos]
         right_counts = total - left_counts
-        right_sizes = n - left_sizes
+        right_sizes = total_w - left_sizes
+        ok = (left_sizes > 0) & (right_sizes > 0)
+        if not ok.any():
+            continue
+        pos, left_counts, left_sizes, right_counts, right_sizes = (
+            pos[ok], left_counts[ok], left_sizes[ok], right_counts[ok],
+            right_sizes[ok])
         imp = (left_sizes * impurity(left_counts, left_sizes)
-               + right_sizes * impurity(right_counts, right_sizes)) / n
+               + right_sizes * impurity(right_counts, right_sizes)) / total_w
         i = np.argmin(imp)
         gain = parent_imp - imp[i]
         if gain > best[2] + 1e-12:
@@ -66,31 +74,38 @@ def _best_split_classification(X, y_onehot, feature_indices, criterion, min_leaf
     return best
 
 
-def _best_split_regression(X, y, feature_indices, min_leaf):
+def _best_split_regression(X, y, w, feature_indices, min_leaf):
     n = len(y)
-    total_sum = y.sum()
-    total_sq = (y ** 2).sum()
-    parent_imp = total_sq / n - (total_sum / n) ** 2
+    total_w = w.sum()
+    total_sum = (w * y).sum()
+    total_sq = (w * y ** 2).sum()
+    parent_imp = total_sq / total_w - (total_sum / total_w) ** 2
     best = (-1, 0.0, 0.0)
     for j in feature_indices:
         order = np.argsort(X[:, j], kind="stable")
         xs = X[order, j]
         ys = y[order]
-        cum_sum = np.cumsum(ys)
-        cum_sq = np.cumsum(ys ** 2)
+        ws = w[order]
+        cum_w = np.cumsum(ws)
+        cum_sum = np.cumsum(ws * ys)
+        cum_sq = np.cumsum(ws * ys ** 2)
         distinct = np.nonzero(np.diff(xs))[0]
         if len(distinct) == 0:
             continue
         pos = distinct[(distinct + 1 >= min_leaf) & (n - distinct - 1 >= min_leaf)]
         if len(pos) == 0:
             continue
-        nl = (pos + 1).astype(float)
-        nr = n - nl
+        nl = cum_w[pos]
+        nr = total_w - nl
+        ok = (nl > 0) & (nr > 0)
+        if not ok.any():
+            continue
+        pos, nl, nr = pos[ok], nl[ok], nr[ok]
         sl, sr = cum_sum[pos], total_sum - cum_sum[pos]
         ql, qr = cum_sq[pos], total_sq - cum_sq[pos]
         var_l = ql / nl - (sl / nl) ** 2
         var_r = qr / nr - (sr / nr) ** 2
-        imp = (nl * var_l + nr * var_r) / n
+        imp = (nl * var_l + nr * var_r) / total_w
         i = np.argmin(imp)
         gain = parent_imp - imp[i]
         if gain > best[2] + 1e-12:
@@ -123,20 +138,22 @@ class _BaseDecisionTree(BaseEstimator):
             return max(1, int(mf * d))
         return min(int(mf), d)
 
-    def _grow(self, X, y_enc, depth, rng, is_classification):
+    def _grow(self, X, y_enc, w, depth, rng, is_classification):
         n, d = X.shape
+        wsum = w.sum()
         if is_classification:
-            counts = y_enc.sum(axis=0)
+            counts = (y_enc * w[:, None]).sum(axis=0)
             value = counts
-            p = counts / n
+            p = counts / wsum
             if self.criterion == "entropy":
                 imp = float(-(p[p > 0] * np.log2(p[p > 0])).sum())
             else:
                 imp = float(1.0 - (p ** 2).sum())
         else:
-            value = float(y_enc.mean())
-            imp = float(y_enc.var())
-        node = _Node(value, imp, n)
+            mean = (w * y_enc).sum() / wsum
+            value = float(mean)
+            imp = float((w * (y_enc - mean) ** 2).sum() / wsum)
+        node = _Node(value, imp, n, wsum)
         if (n < self.min_samples_split or imp <= 1e-12
                 or (self.max_depth is not None and depth >= self.max_depth)):
             return node
@@ -144,17 +161,19 @@ class _BaseDecisionTree(BaseEstimator):
         features = rng.choice(d, size=k, replace=False) if k < d else np.arange(d)
         if is_classification:
             j, thr, gain = _best_split_classification(
-                X, y_enc, features, self.criterion, self.min_samples_leaf)
+                X, y_enc, w, features, self.criterion, self.min_samples_leaf)
         else:
             j, thr, gain = _best_split_regression(
-                X, y_enc, features, self.min_samples_leaf)
-        if j < 0 or gain * n / self._n_total < self.min_impurity_decrease + 1e-15:
+                X, y_enc, w, features, self.min_samples_leaf)
+        if j < 0 or gain * wsum / self._w_total < self.min_impurity_decrease + 1e-15:
             return node
         mask = X[:, j] <= thr
         node.feature = j
         node.threshold = thr
-        node.left = self._grow(X[mask], y_enc[mask], depth + 1, rng, is_classification)
-        node.right = self._grow(X[~mask], y_enc[~mask], depth + 1, rng, is_classification)
+        node.left = self._grow(X[mask], y_enc[mask], w[mask], depth + 1, rng,
+                               is_classification)
+        node.right = self._grow(X[~mask], y_enc[~mask], w[~mask], depth + 1,
+                                rng, is_classification)
         return node
 
     def _predict_values(self, X):
@@ -181,9 +200,9 @@ class _BaseDecisionTree(BaseEstimator):
         def walk(node):
             if node.is_leaf:
                 return
-            decrease = (node.n_samples * node.impurity
-                        - node.left.n_samples * node.left.impurity
-                        - node.right.n_samples * node.right.impurity)
+            decrease = (node.weight * node.impurity
+                        - node.left.weight * node.left.impurity
+                        - node.right.weight * node.right.impurity)
             imp[node.feature] += decrease
             walk(node.left)
             walk(node.right)
@@ -211,14 +230,16 @@ class DecisionTreeClassifier(_BaseDecisionTree, ClassifierMixin):
                          min_samples_leaf, max_features, min_impurity_decrease,
                          random_state)
 
-    def fit(self, X, y, sample_indices=None):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
         rng = check_random_state(self.random_state)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_onehot = np.eye(len(self.classes_))[self._le.transform(y)]
-        self._n_total = len(X)
-        self.tree_ = self._grow(X, y_onehot, 0, rng, True)
+        self._w_total = w.sum()
+        self.tree_ = self._grow(X, y_onehot, w, 0, rng, True)
         self.n_features_in_ = X.shape[1]
         return self
 
@@ -238,11 +259,13 @@ class DecisionTreeRegressor(_BaseDecisionTree, RegressorMixin):
                          min_samples_leaf, max_features, min_impurity_decrease,
                          random_state)
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
         rng = check_random_state(self.random_state)
-        self._n_total = len(X)
-        self.tree_ = self._grow(X, y, 0, rng, False)
+        self._w_total = w.sum()
+        self.tree_ = self._grow(X, y, w, 0, rng, False)
         self.n_features_in_ = X.shape[1]
         return self
 

@@ -128,7 +128,8 @@ class _HistTree:
 class _BaseHistGB(BaseEstimator):
     def __init__(self, max_iter=100, learning_rate=0.1, max_depth=None,
                  max_leaf_nodes=31, min_samples_leaf=20, l2_regularization=1.0,
-                 max_bins=255, early_stopping=False, tol=1e-7, random_state=None):
+                 max_bins=255, early_stopping=False, validation_fraction=0.1,
+                 n_iter_no_change=10, tol=1e-7, random_state=None):
         self.max_iter = max_iter
         self.learning_rate = learning_rate
         self.max_depth = max_depth
@@ -137,8 +138,20 @@ class _BaseHistGB(BaseEstimator):
         self.l2_regularization = l2_regularization
         self.max_bins = max_bins
         self.early_stopping = early_stopping
+        self.validation_fraction = validation_fraction
+        self.n_iter_no_change = n_iter_no_change
         self.tol = tol
         self.random_state = random_state
+
+    def _maybe_split(self, X, y, w):
+        """Hold out a validation slice when early_stopping is enabled."""
+        if not self.early_stopping:
+            return X, y, w, None, None, None
+        rng = check_random_state(self.random_state)
+        n_val = max(1, int(self.validation_fraction * len(X)))
+        perm = rng.permutation(len(X))
+        val, tr = perm[:n_val], perm[n_val:]
+        return X[tr], y[tr], w[tr], X[val], y[val], w[val]
 
     def _new_tree(self):
         return _HistTree(max_depth=self.max_depth,
@@ -148,19 +161,35 @@ class _BaseHistGB(BaseEstimator):
 
 
 class HistGradientBoostingRegressor(_BaseHistGB, RegressorMixin):
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
+        w = np.ones(len(y)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
+        X, y, w, X_val, y_val, w_val = self._maybe_split(X, y, w)
         self._mapper = _BinMapper(self.max_bins).fit(X)
         Xb = self._mapper.transform(X)
-        self.init_ = float(y.mean())
+        self.init_ = float(np.average(y, weights=w))
         pred = np.full(len(y), self.init_)
         self.trees_ = []
+        self.validation_score_ = []
+        best, stall = np.inf, 0
         for _ in range(self.max_iter):
-            g = pred - y                      # gradient of 0.5*(pred-y)^2
-            h = np.ones(len(y))
+            g = w * (pred - y)                # weighted gradient of 0.5*(pred-y)^2
+            h = w.copy()
             tree = self._new_tree().fit(Xb, g, h)
             pred += self.learning_rate * tree.predict(Xb)
             self.trees_.append(tree)
+            if X_val is not None:
+                mse = float(np.average((self.predict(X_val) - y_val) ** 2,
+                                       weights=w_val))
+                self.validation_score_.append(mse)
+                if mse < best - self.tol:
+                    best, stall = mse, 0
+                else:
+                    stall += 1
+                    if stall >= self.n_iter_no_change:
+                        break
+        self.n_iter_ = len(self.trees_)
         return self
 
     def predict(self, X):
@@ -173,17 +202,19 @@ class HistGradientBoostingRegressor(_BaseHistGB, RegressorMixin):
 
 
 class HistGradientBoostingClassifier(_BaseHistGB, ClassifierMixin):
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
+        w = np.ones(len(y)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
         k = len(self.classes_)
         self._mapper = _BinMapper(self.max_bins).fit(X)
         Xb = self._mapper.transform(X)
         n = len(y_idx)
         if k == 2:
-            p0 = np.clip(y_idx.mean(), 1e-12, 1 - 1e-12)
+            p0 = np.clip(np.average(y_idx, weights=w), 1e-12, 1 - 1e-12)
             self.init_ = np.array([np.log(p0 / (1 - p0))])
             F = np.full((n, 1), self.init_[0])
         else:
@@ -195,8 +226,8 @@ class HistGradientBoostingClassifier(_BaseHistGB, ClassifierMixin):
             round_trees = []
             if k == 2:
                 p = sigmoid(F[:, 0])
-                g = p - y_idx
-                h = np.maximum(p * (1 - p), 1e-6)
+                g = w * (p - y_idx)
+                h = w * np.maximum(p * (1 - p), 1e-6)
                 tree = self._new_tree().fit(Xb, g, h)
                 F[:, 0] += self.learning_rate * tree.predict(Xb)
                 round_trees.append(tree)
@@ -204,8 +235,8 @@ class HistGradientBoostingClassifier(_BaseHistGB, ClassifierMixin):
                 P = softmax(F, axis=1)
                 for c in range(k):
                     yc = (y_idx == c).astype(float)
-                    g = P[:, c] - yc
-                    h = np.maximum(P[:, c] * (1 - P[:, c]), 1e-6)
+                    g = w * (P[:, c] - yc)
+                    h = w * np.maximum(P[:, c] * (1 - P[:, c]), 1e-6)
                     tree = self._new_tree().fit(Xb, g, h)
                     F[:, c] += self.learning_rate * tree.predict(Xb)
                     round_trees.append(tree)

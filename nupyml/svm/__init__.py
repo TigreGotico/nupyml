@@ -20,9 +20,13 @@ def _kernel_fn(kernel, gamma, degree, coef0):
 
 
 def _smo(K, y, C, tol=1e-3, max_passes=10, max_iter=10000, rng=None):
-    """Simplified SMO (Platt) for binary SVM. y in {-1, +1}. Returns alpha, b."""
+    """Simplified SMO (Platt) for binary SVM. y in {-1, +1}. Returns alpha, b.
+
+    ``C`` may be a scalar or a per-sample array (sample weights scale C).
+    """
     rng = rng or np.random
     n = len(y)
+    C = np.broadcast_to(np.asarray(C, dtype=np.float64), (n,))
     alpha = np.zeros(n)
     b = 0.0
     passes = 0
@@ -35,16 +39,18 @@ def _smo(K, y, C, tol=1e-3, max_passes=10, max_iter=10000, rng=None):
         num_changed = 0
         for i in range(n):
             Ei = f(i) - y[i]
-            if (y[i] * Ei < -tol and alpha[i] < C) or (y[i] * Ei > tol and alpha[i] > 0):
+            if (y[i] * Ei < -tol and alpha[i] < C[i]) or \
+                    (y[i] * Ei > tol and alpha[i] > 0):
                 j = rng.randint(n - 1)
                 if j >= i:
                     j += 1
                 Ej = f(j) - y[j]
                 ai_old, aj_old = alpha[i], alpha[j]
+                Ci, Cj = C[i], C[j]
                 if y[i] != y[j]:
-                    L, H = max(0, aj_old - ai_old), min(C, C + aj_old - ai_old)
+                    L, H = max(0, aj_old - ai_old), min(Cj, Ci + aj_old - ai_old)
                 else:
-                    L, H = max(0, ai_old + aj_old - C), min(C, ai_old + aj_old)
+                    L, H = max(0, ai_old + aj_old - Ci), min(Cj, ai_old + aj_old)
                 if L == H:
                     continue
                 eta = 2 * K[i, j] - K[i, i] - K[j, j]
@@ -59,9 +65,9 @@ def _smo(K, y, C, tol=1e-3, max_passes=10, max_iter=10000, rng=None):
                 b2 = b - Ej - y[i] * (ai - ai_old) * K[i, j] \
                     - y[j] * (aj - aj_old) * K[j, j]
                 alpha[i], alpha[j] = ai, aj
-                if 0 < ai < C:
+                if 0 < ai < Ci:
                     b = b1
-                elif 0 < aj < C:
+                elif 0 < aj < Cj:
                     b = b2
                 else:
                     b = (b1 + b2) / 2
@@ -92,12 +98,14 @@ class SVC(BaseEstimator, ClassifierMixin):
             return 1.0 / X.shape[1]
         return float(self.gamma)
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
         rng = check_random_state(self.random_state)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
         self._gamma = self._gamma_value(X)
         self._kfn = _kernel_fn(self.kernel, self._gamma, self.degree, self.coef0)
         k = len(self.classes_)
@@ -108,7 +116,7 @@ class SVC(BaseEstimator, ClassifierMixin):
                 Xa = X[mask]
                 ya = np.where(y_idx[mask] == bcls, 1.0, -1.0)
                 K = self._kfn(Xa, Xa)
-                alpha, b = _smo(K, ya, self.C, tol=self.tol,
+                alpha, b = _smo(K, ya, self.C * w[mask], tol=self.tol,
                                 max_iter=self.max_iter, rng=rng)
                 sv = alpha > 1e-8
                 self._models[(a, bcls)] = (Xa[sv], ya[sv] * alpha[sv], b)

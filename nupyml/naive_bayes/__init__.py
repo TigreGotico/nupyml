@@ -27,8 +27,10 @@ class GaussianNB(_BaseNB):
     def __init__(self, var_smoothing=1e-9):
         self.var_smoothing = var_smoothing
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
@@ -38,11 +40,48 @@ class GaussianNB(_BaseNB):
         self.var_ = np.zeros((k, d))
         self.class_prior_ = np.zeros(k)
         for c in range(k):
-            Xc = X[y_idx == c]
-            self.theta_[c] = Xc.mean(axis=0)
-            self.var_[c] = Xc.var(axis=0)
-            self.class_prior_[c] = len(Xc) / len(X)
+            mask = y_idx == c
+            wc = w[mask]
+            self.theta_[c] = np.average(X[mask], axis=0, weights=wc)
+            self.var_[c] = np.average((X[mask] - self.theta_[c]) ** 2, axis=0,
+                                      weights=wc)
+            self.class_prior_[c] = wc.sum() / w.sum()
         self.var_ += self.var_smoothing * X.var(axis=0).max()
+        return self
+
+    def partial_fit(self, X, y, classes=None, sample_weight=None):
+        """Incremental fit via per-class running sums."""
+        X, y = check_X_y(X, y)
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
+        if not hasattr(self, "_sums"):
+            if classes is None:
+                raise ValueError("classes must be passed on the first call")
+            self.classes_ = np.asarray(classes)
+            self._le = LabelEncoder()
+            self._le.classes_ = self.classes_
+            k, d = len(self.classes_), X.shape[1]
+            self._sums = np.zeros((k, d))
+            self._sq_sums = np.zeros((k, d))
+            self._counts = np.zeros(k)
+            self._var_floor = 0.0
+        y_idx = self._le.transform(y)
+        for c in range(len(self.classes_)):
+            mask = y_idx == c
+            if mask.any():
+                wc = w[mask][:, None]
+                self._sums[c] += (X[mask] * wc).sum(axis=0)
+                self._sq_sums[c] += (X[mask] ** 2 * wc).sum(axis=0)
+                self._counts[c] += w[mask].sum()
+        self._var_floor = max(self._var_floor,
+                              self.var_smoothing * X.var(axis=0).max())
+        seen = self._counts > 0
+        counts = np.where(seen, self._counts, 1.0)[:, None]
+        self.theta_ = self._sums / counts
+        self.var_ = np.maximum(self._sq_sums / counts - self.theta_ ** 2, 0.0) \
+            + self._var_floor
+        self.class_prior_ = np.where(seen, self._counts, 0.0) / self._counts.sum()
+        self.class_prior_ = np.maximum(self.class_prior_, 1e-12)
         return self
 
     def _joint_log_likelihood(self, X):
@@ -63,23 +102,56 @@ class _DiscreteNB(_BaseNB):
     def _count(self, X, Y):
         raise NotImplementedError
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, accept_sparse=True)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
         k = len(self.classes_)
         Y = np.eye(k)[y_idx]
+        if sample_weight is not None:
+            Y = Y * np.asarray(sample_weight, dtype=np.float64)[:, None]
         self.class_count_ = Y.sum(axis=0)
-        self.class_log_prior_ = np.log(self.class_count_ / len(y))
+        self.class_log_prior_ = np.log(self.class_count_ / self.class_count_.sum())
         self._fit_counts(X, Y)
         return self
+
+    def partial_fit(self, X, y, classes=None, sample_weight=None):
+        X, y = check_X_y(X, y, accept_sparse=True)
+        if not hasattr(self, "_acc_fc"):
+            if classes is None:
+                raise ValueError("classes must be passed on the first call")
+            self.classes_ = np.asarray(classes)
+            self._le = LabelEncoder()
+            self._le.classes_ = self.classes_
+            self._acc_fc = None
+            self._acc_cc = np.zeros(len(self.classes_))
+        y_idx = self._le.transform(y)
+        k = len(self.classes_)
+        Y = np.eye(k)[y_idx]
+        if sample_weight is not None:
+            Y = Y * np.asarray(sample_weight, dtype=np.float64)[:, None]
+        import scipy.sparse as _sp
+        Xd = np.asarray(X.todense()) if _sp.issparse(X) else X
+        fc = Y.T @ Xd
+        self._acc_fc = fc if self._acc_fc is None else self._acc_fc + fc
+        self._acc_cc += Y.sum(axis=0)
+        self.class_count_ = self._acc_cc
+        self.class_log_prior_ = np.log(self._acc_cc / self._acc_cc.sum())
+        self._fit_from_accumulated(self._acc_fc, self._acc_cc)
+        return self
+
+    def _fit_from_accumulated(self, fc, cc):
+        raise NotImplementedError
 
 
 class MultinomialNB(_DiscreteNB):
     def _fit_counts(self, X, Y):
         fc = np.asarray(Y.T @ X if not sp.issparse(X) else (sp.csr_matrix(Y.T) @ X).todense())
-        fc = np.asarray(fc) + self.alpha
+        self._fit_from_accumulated(np.asarray(fc), None)
+
+    def _fit_from_accumulated(self, fc, cc):
+        fc = fc + self.alpha
         self.feature_log_prob_ = np.log(fc) - np.log(fc.sum(axis=1, keepdims=True))
 
     def _joint_log_likelihood(self, X):
@@ -92,7 +164,9 @@ class MultinomialNB(_DiscreteNB):
 class ComplementNB(_DiscreteNB):
     def _fit_counts(self, X, Y):
         Xd = np.asarray(X.todense()) if sp.issparse(X) else X
-        fc = Y.T @ Xd
+        self._fit_from_accumulated(Y.T @ Xd, Y.sum(axis=0))
+
+    def _fit_from_accumulated(self, fc, cc):
         comp = fc.sum(axis=0, keepdims=True) - fc + self.alpha
         logw = np.log(comp / comp.sum(axis=1, keepdims=True))
         self.feature_log_prob_ = -logw
@@ -112,10 +186,21 @@ class BernoulliNB(_DiscreteNB):
         Xd = np.asarray(X.todense()) if sp.issparse(X) else X
         if self.binarize is not None:
             Xd = (Xd > self.binarize).astype(np.float64)
-        fc = Y.T @ Xd + self.alpha
-        cc = Y.sum(axis=0)[:, None] + 2 * self.alpha
+        self._fit_from_accumulated(Y.T @ Xd, Y.sum(axis=0))
+
+    def _fit_from_accumulated(self, fc, cc):
+        fc = fc + self.alpha
+        cc = cc[:, None] + 2 * self.alpha
         self.feature_log_prob_ = np.log(fc / cc)
         self._neg_log_prob = np.log(1 - fc / cc)
+
+    def partial_fit(self, X, y, classes=None, sample_weight=None):
+        import scipy.sparse as _sp
+        Xd = np.asarray(X.todense()) if _sp.issparse(X) else np.asarray(X, dtype=np.float64)
+        if self.binarize is not None:
+            Xd = (Xd > self.binarize).astype(np.float64)
+        return super().partial_fit(Xd, y, classes=classes,
+                                   sample_weight=sample_weight)
 
     def _joint_log_likelihood(self, X):
         check_is_fitted(self, "feature_log_prob_")
