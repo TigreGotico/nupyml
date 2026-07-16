@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nupyml"
+version = "0.1.0a1"
+description = "A scikit-learn-like machine learning and neural network library with only numpy and scipy as dependencies"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "JarbasAi", email = "jarbasai@mailfence.com" }]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.22",
+    "scipy>=1.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "scikit-learn",  # test-only: cross-validation of results, never imported at runtime
+]
+
+[tool.setuptools.packages.find]
+include = ["nupyml*"]
