@@ -388,9 +388,10 @@ class GradientBoostingClassifier(BaseEstimator, ClassifierMixin):
 
 
 class VotingClassifier(BaseEstimator, ClassifierMixin):
-    def __init__(self, estimators, voting="hard"):
+    def __init__(self, estimators, voting="hard", weights=None):
         self.estimators = estimators
         self.voting = voting
+        self.weights = weights
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -413,9 +414,127 @@ class VotingClassifier(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
         check_is_fitted(self, "estimators_")
-        proba = np.mean([est.predict_proba(check_array(X))
-                         for _, est in self.estimators_], axis=0)
+        proba = np.average([est.predict_proba(check_array(X))
+                            for _, est in self.estimators_], axis=0,
+                           weights=self.weights)
         return proba
+
+
+
+
+class _BaseStacking(BaseEstimator):
+    """Fit base estimators, then a meta-learner on their cross-val predictions."""
+
+    def __init__(self, estimators, final_estimator=None, cv=5,
+                 passthrough=False):
+        self.estimators = estimators
+        self.final_estimator = final_estimator
+        self.cv = cv
+        self.passthrough = passthrough
+
+    def _meta_features(self, X, y):
+        from ..model_selection import _check_cv
+        is_clf = self._estimator_type == "classifier"
+        cv = _check_cv(self.cv, y, classifier=is_clf)
+        blocks = []
+        for _, est in self.estimators:
+            width = self._block_width(est, y)
+            oof = np.zeros((len(X), width))
+            for train, test in cv.split(X, y):
+                fitted = clone(est).fit(X[train], y[train])
+                oof[test] = self._transform_one(fitted, X[test])
+            blocks.append(oof)
+        return np.hstack(blocks)
+
+    def fit(self, X, y):
+        X, y = check_X_y(X, y) if self._estimator_type == "classifier" \
+            else check_X_y(X, y, y_numeric=True)
+        self._prepare(y)
+        meta = self._meta_features(X, y)
+        if self.passthrough:
+            meta = np.hstack([meta, X])
+        # base estimators are refit on the full data for prediction time
+        self.estimators_ = [clone(est).fit(X, y) for _, est in self.estimators]
+        self.final_estimator_ = clone(
+            self.final_estimator if self.final_estimator is not None
+            else self._default_final()).fit(meta, y)
+        return self
+
+    def _build_meta(self, X):
+        check_is_fitted(self, "estimators_")
+        X = check_array(X)
+        meta = np.hstack([self._transform_one(est, X) for est in self.estimators_])
+        return np.hstack([meta, X]) if self.passthrough else meta
+
+    def transform(self, X):
+        return self._build_meta(X)
+
+
+class StackingClassifier(_BaseStacking, ClassifierMixin):
+    _estimator_type = "classifier"
+
+    def _prepare(self, y):
+        self._le = LabelEncoder().fit(y)
+        self.classes_ = self._le.classes_
+
+    def _default_final(self):
+        from ..linear_model import LogisticRegression
+        return LogisticRegression()
+
+    def _block_width(self, est, y):
+        # drop one column for binary targets: the probabilities are redundant
+        k = len(np.unique(y))
+        return 1 if k == 2 else k
+
+    @staticmethod
+    def _transform_one(est, X):
+        proba = est.predict_proba(X)
+        return proba[:, 1:] if proba.shape[1] == 2 else proba
+
+    def predict(self, X):
+        return self.final_estimator_.predict(self._build_meta(X))
+
+    def predict_proba(self, X):
+        return self.final_estimator_.predict_proba(self._build_meta(X))
+
+
+class StackingRegressor(_BaseStacking, RegressorMixin):
+    _estimator_type = "regressor"
+
+    def _prepare(self, y):
+        pass
+
+    def _default_final(self):
+        from ..linear_model import Ridge
+        return Ridge()
+
+    def _block_width(self, est, y):
+        return 1
+
+    @staticmethod
+    def _transform_one(est, X):
+        return est.predict(X)[:, None]
+
+    def predict(self, X):
+        return self.final_estimator_.predict(self._build_meta(X))
+
+
+class VotingRegressor(BaseEstimator, RegressorMixin):
+    def __init__(self, estimators, weights=None):
+        self.estimators = estimators
+        self.weights = weights
+
+    def fit(self, X, y):
+        X, y = check_X_y(X, y, y_numeric=True)
+        self.estimators_ = [(name, clone(est).fit(X, y))
+                            for name, est in self.estimators]
+        return self
+
+    def predict(self, X):
+        check_is_fitted(self, "estimators_")
+        X = check_array(X)
+        preds = np.column_stack([est.predict(X) for _, est in self.estimators_])
+        return np.average(preds, axis=1, weights=self.weights)
 
 
 __all__ = [
@@ -425,5 +544,6 @@ __all__ = [
     "AdaBoostClassifier",
     "GradientBoostingClassifier", "GradientBoostingRegressor",
     "HistGradientBoostingClassifier", "HistGradientBoostingRegressor",
-    "VotingClassifier",
+    "VotingClassifier", "VotingRegressor",
+    "StackingClassifier", "StackingRegressor",
 ]
