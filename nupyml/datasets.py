@@ -1,7 +1,72 @@
-"""Synthetic dataset generators for testing and examples."""
+"""Dataset generators and small bundled real datasets."""
+import os
+
 import numpy as np
 
 from .utils import check_random_state
+
+_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+
+
+class Bunch(dict):
+    """A dict whose keys are also attributes."""
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError as exc:
+            raise AttributeError(key) from exc
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+
+def _load_bundled(name, return_X_y=False):
+    path = os.path.join(_DATA_DIR, f"{name}.npz")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"bundled dataset {name!r} is missing at {path}")
+    with np.load(path, allow_pickle=True) as f:
+        data, target = f["data"], f["target"]
+        feature_names = [str(x) for x in f["feature_names"]]
+        target_names = np.array([str(x) for x in f["target_names"]])
+    if return_X_y:
+        return data, target
+    return Bunch(data=data, target=target, feature_names=feature_names,
+                 target_names=target_names)
+
+
+def load_iris(return_X_y=False):
+    """150 iris flowers, 4 measurements, 3 species."""
+    return _load_bundled("iris", return_X_y)
+
+
+def load_wine(return_X_y=False):
+    """178 wines, 13 chemical measurements, 3 cultivars."""
+    return _load_bundled("wine", return_X_y)
+
+
+def load_breast_cancer(return_X_y=False):
+    """569 tumours, 30 features, malignant/benign."""
+    return _load_bundled("breast_cancer", return_X_y)
+
+
+def load_digits(return_X_y=False):
+    """1797 8x8 handwritten digit images, 10 classes."""
+    bunch = _load_bundled("digits", return_X_y)
+    if return_X_y:
+        return bunch
+    bunch.images = bunch.data.reshape(-1, 8, 8)
+    return bunch
+
+
+def load_diabetes(return_X_y=False):
+    """442 patients, 10 baseline features, disease progression target."""
+    return _load_bundled("diabetes", return_X_y)
+
+
+def load_linnerud(return_X_y=False):
+    """20 athletes: exercise measurements and physiological targets."""
+    return _load_bundled("linnerud", return_X_y)
 
 
 def make_blobs(n_samples=100, n_features=2, centers=3, cluster_std=1.0,
@@ -110,4 +175,6 @@ def make_spiral(n_samples=100, n_arms=2, noise=0.1, random_state=None):
 
 
 __all__ = ["make_blobs", "make_moons", "make_circles", "make_classification",
-           "make_regression", "make_spiral"]
+           "make_regression", "make_spiral", "Bunch", "load_iris", "load_wine",
+           "load_breast_cancer", "load_digits", "load_diabetes",
+           "load_linnerud"]

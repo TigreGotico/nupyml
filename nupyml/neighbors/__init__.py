@@ -1,5 +1,6 @@
 """Nearest-neighbor estimators built on scipy cKDTree."""
 import numpy as np
+import scipy.sparse as sp
 from scipy.spatial import cKDTree
 from scipy.special import logsumexp
 
@@ -7,6 +8,12 @@ from ..base import (BaseEstimator, ClassifierMixin, RegressorMixin,
                     DensityMixin, check_is_fitted)
 from ..preprocessing import LabelEncoder
 from ..utils import check_X_y, check_array
+
+
+def _densify(X):
+    """cKDTree needs dense coordinates, so sparse input is expanded once."""
+    X = check_array(X, accept_sparse=True)
+    return np.asarray(X.todense()) if sp.issparse(X) else X
 
 
 class _KNeighborsBase(BaseEstimator):
@@ -45,7 +52,8 @@ class _KNeighborsBase(BaseEstimator):
 
 class KNeighborsClassifier(_KNeighborsBase, ClassifierMixin):
     def fit(self, X, y):
-        X, y = check_X_y(X, y)
+        X, y = check_X_y(X, y, accept_sparse=True)
+        X = _densify(X)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         self._y = self._le.transform(y)
@@ -54,7 +62,7 @@ class KNeighborsClassifier(_KNeighborsBase, ClassifierMixin):
 
     def predict_proba(self, X):
         check_is_fitted(self, "_tree")
-        X = check_array(X)
+        X = _densify(X)
         dist, idx = self._kneighbors(X)
         w = self._weights_for(dist)
         k = len(self.classes_)
@@ -71,14 +79,14 @@ class KNeighborsClassifier(_KNeighborsBase, ClassifierMixin):
 
 class KNeighborsRegressor(_KNeighborsBase, RegressorMixin):
     def fit(self, X, y):
-        X, y = check_X_y(X, y, y_numeric=True)
+        X, y = check_X_y(X, y, y_numeric=True, accept_sparse=True)
         self._y = y
-        self._tree = cKDTree(X)
+        self._tree = cKDTree(_densify(X))
         return self
 
     def predict(self, X):
         check_is_fitted(self, "_tree")
-        X = check_array(X)
+        X = _densify(X)
         dist, idx = self._kneighbors(X)
         w = self._weights_for(dist)
         return (self._y[idx] * w).sum(axis=1) / w.sum(axis=1)
@@ -90,7 +98,7 @@ class NearestNeighbors(BaseEstimator):
         self.radius = radius
 
     def fit(self, X, y=None):
-        self._X = check_array(X)
+        self._X = _densify(X)
         self._tree = cKDTree(self._X)
         return self
 

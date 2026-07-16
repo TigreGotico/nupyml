@@ -23,3 +23,6 @@ dev = [
 
 [tool.setuptools.packages.find]
 include = ["nupyml*"]
+
+[tool.setuptools.package-data]
+nupyml = ["data/*.npz"]

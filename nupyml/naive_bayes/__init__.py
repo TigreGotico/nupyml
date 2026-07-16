@@ -212,4 +212,50 @@ class BernoulliNB(_DiscreteNB):
         return jll + self.class_log_prior_
 
 
-__all__ = ["GaussianNB", "MultinomialNB", "ComplementNB", "BernoulliNB"]
+class CategoricalNB(_BaseNB):
+    """Naive Bayes for categorical features: each feature has its own
+    conditional distribution over its own categories."""
+
+    def __init__(self, alpha=1.0, min_categories=None):
+        self.alpha = alpha
+        self.min_categories = min_categories
+
+    def fit(self, X, y, sample_weight=None):
+        X, y = check_X_y(X, y)
+        Xi = X.astype(np.int64)
+        if (Xi < 0).any():
+            raise ValueError("CategoricalNB requires non-negative integer features")
+        w = np.ones(len(X)) if sample_weight is None \
+            else np.asarray(sample_weight, dtype=np.float64)
+        self._le = LabelEncoder().fit(y)
+        self.classes_ = self._le.classes_
+        y_idx = self._le.transform(y)
+        k, d = len(self.classes_), X.shape[1]
+        self.class_count_ = np.array([w[y_idx == c].sum() for c in range(k)])
+        self.class_log_prior_ = np.log(self.class_count_ / w.sum())
+        self.n_categories_ = np.array([
+            max(int(Xi[:, j].max()) + 1,
+                self.min_categories or 0) for j in range(d)])
+        self.category_log_prob_ = []
+        for j in range(d):
+            n_cat = self.n_categories_[j]
+            counts = np.zeros((k, n_cat))
+            np.add.at(counts, (y_idx, Xi[:, j]), w)
+            counts += self.alpha
+            self.category_log_prob_.append(
+                np.log(counts / counts.sum(axis=1, keepdims=True)))
+        return self
+
+    def _joint_log_likelihood(self, X):
+        check_is_fitted(self, "category_log_prob_")
+        Xi = check_array(X).astype(np.int64)
+        jll = np.tile(self.class_log_prior_, (len(Xi), 1))
+        for j, log_prob in enumerate(self.category_log_prob_):
+            # unseen categories carry no evidence rather than crashing
+            idx = np.clip(Xi[:, j], 0, log_prob.shape[1] - 1)
+            jll += log_prob[:, idx].T
+        return jll
+
+
+__all__ = ["GaussianNB", "MultinomialNB", "ComplementNB", "BernoulliNB",
+           "CategoricalNB"]

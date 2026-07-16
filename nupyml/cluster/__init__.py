@@ -61,7 +61,11 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         return centers, labels, inertia
 
     def fit(self, X, y=None, sample_weight=None):
-        X = check_array(X)
+        X = check_array(X, accept_sparse=True)
+        if sp.issparse(X):
+            # centroids are dense anyway, so densify once rather than in the
+            # inner loop
+            X = np.asarray(X.todense())
         w = np.ones(len(X)) if sample_weight is None \
             else np.asarray(sample_weight, dtype=np.float64)
         rng = check_random_state(self.random_state)
@@ -74,13 +78,17 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.cluster_centers_, self.labels_, self.inertia_ = best
         return self
 
+    def _densify(self, X):
+        X = check_array(X, accept_sparse=True)
+        return np.asarray(X.todense()) if sp.issparse(X) else X
+
     def predict(self, X):
         check_is_fitted(self, "cluster_centers_")
-        return cdist(check_array(X), self.cluster_centers_).argmin(axis=1)
+        return cdist(self._densify(X), self.cluster_centers_).argmin(axis=1)
 
     def transform(self, X):
         check_is_fitted(self, "cluster_centers_")
-        return cdist(check_array(X), self.cluster_centers_)
+        return cdist(self._densify(X), self.cluster_centers_)
 
 
 class MiniBatchKMeans(BaseEstimator, ClusterMixin):
