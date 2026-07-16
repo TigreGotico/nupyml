@@ -233,4 +233,11 @@ class KernelPCA(BaseEstimator, TransformerMixin):
         return Kc @ alphas
 
 
-__all__ = ["PCA", "TruncatedSVD", "NMF", "FastICA", "KernelPCA"]
+from ._sparse import (  # noqa: E402
+    SparsePCA, DictionaryLearning, SparseCoder, MiniBatchNMF,
+    LatentDirichletAllocation,
+)
+
+__all__ = ["PCA", "TruncatedSVD", "NMF", "FastICA", "KernelPCA",
+           "SparsePCA", "DictionaryLearning", "SparseCoder", "MiniBatchNMF",
+           "LatentDirichletAllocation"]

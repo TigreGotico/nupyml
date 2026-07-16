@@ -9,77 +9,14 @@ from ..preprocessing import LabelEncoder
 from ..utils import check_X_y, check_array, sigmoid
 
 
-class RBF:
-    def __init__(self, length_scale=1.0):
-        self.length_scale = length_scale
-
-    def __call__(self, A, B):
-        return np.exp(-0.5 * cdist(A, B, "sqeuclidean") / self.length_scale ** 2)
-
-    @property
-    def theta(self):
-        return np.array([np.log(self.length_scale)])
-
-    @theta.setter
-    def theta(self, t):
-        self.length_scale = float(np.exp(t[0]))
-
-    def clone(self):
-        return RBF(self.length_scale)
+from .kernels import (Kernel, ConstantKernel, WhiteKernel, RBF, Matern,
+                      RationalQuadratic, ExpSineSquared, DotProduct, Sum,
+                      Product)
 
 
-class Matern:
-    """Matern kernel with nu in {0.5, 1.5, 2.5}."""
-
-    def __init__(self, length_scale=1.0, nu=1.5):
-        self.length_scale = length_scale
-        self.nu = nu
-
-    def __call__(self, A, B):
-        d = cdist(A, B) / self.length_scale
-        if self.nu == 0.5:
-            return np.exp(-d)
-        if self.nu == 1.5:
-            s = np.sqrt(3) * d
-            return (1 + s) * np.exp(-s)
-        if self.nu == 2.5:
-            s = np.sqrt(5) * d
-            return (1 + s + s ** 2 / 3) * np.exp(-s)
-        raise ValueError("nu must be 0.5, 1.5, or 2.5")
-
-    @property
-    def theta(self):
-        return np.array([np.log(self.length_scale)])
-
-    @theta.setter
-    def theta(self, t):
-        self.length_scale = float(np.exp(t[0]))
-
-    def clone(self):
-        return Matern(self.length_scale, self.nu)
-
-
-class ConstantTimes:
-    """scale^2 * kernel wrapper."""
-
-    def __init__(self, kernel, scale=1.0):
-        self.kernel = kernel
-        self.scale = scale
-
-    def __call__(self, A, B):
-        return self.scale ** 2 * self.kernel(A, B)
-
-    @property
-    def theta(self):
-        return np.r_[np.log(self.scale), self.kernel.theta]
-
-    @theta.setter
-    def theta(self, t):
-        self.scale = float(np.exp(t[0]))
-        self.kernel.theta = t[1:]
-
-    def clone(self):
-        return ConstantTimes(self.kernel.clone(), self.scale)
+def ConstantTimes(kernel, scale=1.0):
+    """Backwards-compatible helper: scale**2 * kernel."""
+    return ConstantKernel(scale ** 2) * kernel
 
 
 class GaussianProcessRegressor(BaseEstimator, RegressorMixin):
@@ -105,7 +42,7 @@ class GaussianProcessRegressor(BaseEstimator, RegressorMixin):
     def fit(self, X, y):
         from ..utils import check_random_state
         X, y = check_X_y(X, y, y_numeric=True)
-        kernel = (self.kernel or ConstantTimes(RBF(1.0), 1.0)).clone()
+        kernel = (self.kernel or ConstantKernel(1.0) * RBF(1.0)).clone()
         self._y_mean = y.mean()
         yc = y - self._y_mean
         if self.optimize:
@@ -135,7 +72,7 @@ class GaussianProcessRegressor(BaseEstimator, RegressorMixin):
         if not return_std:
             return mean
         v = scipy.linalg.solve_triangular(self._L, Ks.T, lower=True)
-        var = np.maximum(np.diag(self.kernel_(X, X)) - (v ** 2).sum(axis=0), 0)
+        var = np.maximum(self.kernel_.diag(X) - (v ** 2).sum(axis=0), 0)
         return mean, np.sqrt(var)
 
 
@@ -153,7 +90,7 @@ class GaussianProcessClassifier(BaseEstimator, ClassifierMixin):
         if len(self.classes_) != 2:
             raise ValueError("GaussianProcessClassifier is binary only")
         t = self._le.transform(y).astype(np.float64)  # {0,1}
-        kernel = self.kernel or ConstantTimes(RBF(1.0), 1.0)
+        kernel = (self.kernel or ConstantKernel(1.0) * RBF(1.0)).clone()
         K = kernel(X, X) + 1e-8 * np.eye(len(X))
         f = np.zeros(len(X))
         # Newton iterations for the Laplace mode
@@ -189,7 +126,7 @@ class GaussianProcessClassifier(BaseEstimator, ClassifierMixin):
         f_mean = Ks @ self._grad
         v = scipy.linalg.solve_triangular(
             self._L, self._sqrtW[:, None] * Ks.T, lower=True)
-        f_var = np.maximum(np.diag(self._kernel(X, X)) - (v ** 2).sum(axis=0), 0)
+        f_var = np.maximum(self._kernel.diag(X) - (v ** 2).sum(axis=0), 0)
         # probit-style correction for the logistic link
         kappa = 1.0 / np.sqrt(1.0 + np.pi * f_var / 8)
         p = sigmoid(kappa * f_mean)
@@ -199,5 +136,7 @@ class GaussianProcessClassifier(BaseEstimator, ClassifierMixin):
         return self.classes_[(self.predict_proba(X)[:, 1] > 0.5).astype(int)]
 
 
-__all__ = ["RBF", "Matern", "ConstantTimes", "GaussianProcessRegressor",
+__all__ = ["Kernel", "ConstantKernel", "WhiteKernel", "RBF", "Matern",
+           "RationalQuadratic", "ExpSineSquared", "DotProduct", "Sum",
+           "Product", "ConstantTimes", "GaussianProcessRegressor",
            "GaussianProcessClassifier"]
