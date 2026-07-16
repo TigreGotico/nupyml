@@ -412,7 +412,20 @@ class SGDRegressor(BaseEstimator, RegressorMixin):
         return check_array(X) @ self.coef_ + self.intercept_
 
 
+from ._robust import (  # noqa: E402
+    HuberRegressor, QuantileRegressor, TheilSenRegressor, RANSACRegressor,
+)
+from ._bayes_glm import (  # noqa: E402
+    BayesianRidge, ARDRegression, PoissonRegressor, GammaRegressor,
+    TweedieRegressor, RidgeCV, LassoCV, ElasticNetCV, LogisticRegressionCV,
+    OrthogonalMatchingPursuit,
+)
+
 __all__ = [
     "LinearRegression", "Ridge", "Lasso", "ElasticNet", "LogisticRegression",
     "Perceptron", "SGDClassifier", "SGDRegressor",
+    "HuberRegressor", "QuantileRegressor", "TheilSenRegressor",
+    "RANSACRegressor", "BayesianRidge", "ARDRegression", "PoissonRegressor",
+    "GammaRegressor", "TweedieRegressor", "RidgeCV", "LassoCV", "ElasticNetCV",
+    "LogisticRegressionCV", "OrthogonalMatchingPursuit",
 ]
