@@ -173,6 +173,25 @@ class _BaseDecisionTree(BaseEstimator):
             stack.append((node.right, idx[~mask]))
         return out
 
+    @property
+    def feature_importances_(self):
+        check_is_fitted(self, "tree_")
+        imp = np.zeros(self.n_features_in_)
+
+        def walk(node):
+            if node.is_leaf:
+                return
+            decrease = (node.n_samples * node.impurity
+                        - node.left.n_samples * node.left.impurity
+                        - node.right.n_samples * node.right.impurity)
+            imp[node.feature] += decrease
+            walk(node.left)
+            walk(node.right)
+
+        walk(self.tree_)
+        total = imp.sum()
+        return imp / total if total > 0 else imp
+
     def get_depth(self):
         def depth(node):
             return 0 if node.is_leaf else 1 + max(depth(node.left), depth(node.right))

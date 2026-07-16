@@ -85,6 +85,11 @@ class _BaseForest(BaseEstimator):
 
     _bootstrap_samples = True
 
+    @property
+    def feature_importances_(self):
+        check_is_fitted(self, "estimators_")
+        return np.mean([t.feature_importances_ for t in self.estimators_], axis=0)
+
     def _fit_forest(self, X, y, tree_cls, criterion):
         rng = check_random_state(self.random_state)
         n = len(X)

@@ -119,6 +119,8 @@ def _index(X, idx):
 
 
 def cross_val_score(estimator, X, y=None, cv=None, scoring=None):
+    from ._scoring import check_scoring
+    scoring = check_scoring(scoring)
     is_clf = getattr(estimator, "_estimator_type", None) == "classifier"
     cv = _check_cv(cv, y, classifier=is_clf)
     scores = []
@@ -216,7 +218,24 @@ class GridSearchCV:
         return self.best_estimator_.score(X, y)
 
 
+from ._splitters import (  # noqa: E402
+    GroupKFold, StratifiedGroupKFold, TimeSeriesSplit, ShuffleSplit,
+    StratifiedShuffleSplit, RepeatedKFold, RepeatedStratifiedKFold,
+    LeavePOut, PredefinedSplit,
+)
+from ._search import (  # noqa: E402
+    ParameterSampler, RandomizedSearchCV, HalvingGridSearchCV,
+    learning_curve, validation_curve, permutation_importance,
+)
+from ._scoring import get_scorer, get_scorer_names, check_scoring  # noqa: E402
+
 __all__ = [
     "train_test_split", "KFold", "StratifiedKFold", "LeaveOneOut",
     "cross_val_score", "cross_val_predict", "ParameterGrid", "GridSearchCV",
+    "GroupKFold", "StratifiedGroupKFold", "TimeSeriesSplit", "ShuffleSplit",
+    "StratifiedShuffleSplit", "RepeatedKFold", "RepeatedStratifiedKFold",
+    "LeavePOut", "PredefinedSplit",
+    "ParameterSampler", "RandomizedSearchCV", "HalvingGridSearchCV",
+    "learning_curve", "validation_curve", "permutation_importance",
+    "get_scorer", "get_scorer_names", "check_scoring",
 ]

@@ -235,9 +235,30 @@ def adjusted_rand_score(labels_true, labels_pred):
     return float((sum_comb - expected) / (max_index - expected))
 
 
+from ._extra import (  # noqa: E402
+    balanced_accuracy_score, matthews_corrcoef, cohen_kappa_score,
+    brier_score_loss, hinge_loss, precision_recall_curve,
+    average_precision_score, calibration_curve, top_k_accuracy_score,
+    median_absolute_error, explained_variance_score,
+    mean_absolute_percentage_error, max_error, mean_poisson_deviance,
+    mean_gamma_deviance, mean_pinball_loss, dcg_score, ndcg_score,
+    mutual_info_score, normalized_mutual_info_score, homogeneity_score,
+    completeness_score, v_measure_score, fowlkes_mallows_score,
+    calinski_harabasz_score, davies_bouldin_score,
+)
+
 __all__ = [
     "accuracy_score", "confusion_matrix", "precision_score", "recall_score",
     "f1_score", "log_loss", "roc_curve", "roc_auc_score", "classification_report",
     "mean_squared_error", "root_mean_squared_error", "mean_absolute_error",
     "r2_score", "silhouette_score", "adjusted_rand_score",
+    "balanced_accuracy_score", "matthews_corrcoef", "cohen_kappa_score",
+    "brier_score_loss", "hinge_loss", "precision_recall_curve",
+    "average_precision_score", "calibration_curve", "top_k_accuracy_score",
+    "median_absolute_error", "explained_variance_score",
+    "mean_absolute_percentage_error", "max_error", "mean_poisson_deviance",
+    "mean_gamma_deviance", "mean_pinball_loss", "dcg_score", "ndcg_score",
+    "mutual_info_score", "normalized_mutual_info_score", "homogeneity_score",
+    "completeness_score", "v_measure_score", "fowlkes_mallows_score",
+    "calinski_harabasz_score", "davies_bouldin_score",
 ]
