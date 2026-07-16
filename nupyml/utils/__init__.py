@@ -27,7 +27,7 @@ def check_array(X, dtype=np.float64, accept_sparse=False, ensure_2d=True,
             )
         X = X.tocsr().astype(dtype, copy=copy) if dtype is not None else X.tocsr()
         return X
-    X = np.array(X, dtype=dtype, copy=copy)
+    X = np.array(X, dtype=dtype) if copy else np.asarray(X, dtype=dtype)
     if ensure_2d:
         if X.ndim == 1:
             raise ValueError(
