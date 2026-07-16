@@ -96,14 +96,26 @@ class GaussianNB(_BaseNB):
 
 
 class _DiscreteNB(_BaseNB):
+    _requires_non_negative = False
+
     def __init__(self, alpha=1.0):
         self.alpha = alpha
 
     def _count(self, X, Y):
         raise NotImplementedError
 
+    def _check_non_negative(self, X):
+        if not self._requires_non_negative:
+            return
+        data = X.data if sp.issparse(X) else X
+        if (data < 0).any():
+            raise ValueError(
+                f"{type(self).__name__} requires non-negative features; "
+                f"the multinomial likelihood is defined over counts")
+
     def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, accept_sparse=True)
+        self._check_non_negative(X)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
@@ -118,6 +130,7 @@ class _DiscreteNB(_BaseNB):
 
     def partial_fit(self, X, y, classes=None, sample_weight=None):
         X, y = check_X_y(X, y, accept_sparse=True)
+        self._check_non_negative(X)
         if not hasattr(self, "_acc_fc"):
             if classes is None:
                 raise ValueError("classes must be passed on the first call")
@@ -146,6 +159,9 @@ class _DiscreteNB(_BaseNB):
 
 
 class MultinomialNB(_DiscreteNB):
+    _requires_non_negative = True
+    _estimator_tags = {"requires_positive_X": True}
+
     def _fit_counts(self, X, Y):
         fc = np.asarray(Y.T @ X if not sp.issparse(X) else (sp.csr_matrix(Y.T) @ X).todense())
         self._fit_from_accumulated(np.asarray(fc), None)
@@ -157,11 +173,15 @@ class MultinomialNB(_DiscreteNB):
     def _joint_log_likelihood(self, X):
         check_is_fitted(self, "feature_log_prob_")
         X = check_array(X, accept_sparse=True)
+        self._check_non_negative(X)
         jll = X @ self.feature_log_prob_.T
         return np.asarray(jll) + self.class_log_prior_
 
 
 class ComplementNB(_DiscreteNB):
+    _requires_non_negative = True
+    _estimator_tags = {"requires_positive_X": True}
+
     def _fit_counts(self, X, Y):
         Xd = np.asarray(X.todense()) if sp.issparse(X) else X
         self._fit_from_accumulated(Y.T @ Xd, Y.sum(axis=0))

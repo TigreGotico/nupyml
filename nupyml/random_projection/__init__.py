@@ -32,6 +32,8 @@ class _BaseRandomProjection(BaseEstimator, TransformerMixin):
         self.n_components_ = k
         rng = check_random_state(self.random_state)
         self.components_ = self._make_matrix(d, k, rng)
+        self.n_features_in_ = d
+        self.n_features_out_ = k
         return self
 
     def transform(self, X):

@@ -135,6 +135,15 @@ def mutual_info_regression(X, y, n_neighbors=3):
 # ---------------------------------------------------------------------------
 
 class _SelectorMixin(TransformerMixin):
+    def get_feature_names_out(self, input_features=None):
+        """A selector passes names through: it drops columns, never renames."""
+        check_is_fitted(self, "support_")
+        if input_features is None:
+            input_features = getattr(self, "feature_names_in_", None)
+        if input_features is None:
+            return np.array([f"x{i}" for i in self.get_support(indices=True)])
+        return np.asarray([str(c) for c in input_features])[self.support_]
+
     def get_support(self, indices=False):
         check_is_fitted(self, "support_")
         return np.where(self.support_)[0] if indices else self.support_
@@ -152,12 +161,13 @@ class _SelectorMixin(TransformerMixin):
         return out
 
 
-class VarianceThreshold(BaseEstimator, _SelectorMixin):
+class VarianceThreshold(_SelectorMixin, BaseEstimator):
     def __init__(self, threshold=0.0):
         self.threshold = threshold
 
     def fit(self, X, y=None):
         X = check_array(X)
+        self.n_features_in_ = X.shape[1]
         self.variances_ = X.var(axis=0)
         self.support_ = self.variances_ > self.threshold
         if not self.support_.any():
@@ -165,12 +175,13 @@ class VarianceThreshold(BaseEstimator, _SelectorMixin):
         return self
 
 
-class SelectKBest(BaseEstimator, _SelectorMixin):
+class SelectKBest(_SelectorMixin, BaseEstimator):
     def __init__(self, score_func=f_classif, k=10):
         self.score_func = score_func
         self.k = k
 
     def fit(self, X, y):
+        self.n_features_in_ = np.asarray(X).shape[1]
         out = self.score_func(X, y)
         self.scores_, self.pvalues_ = out if isinstance(out, tuple) else (out, None)
         k = min(self.k, len(self.scores_)) if self.k != "all" else len(self.scores_)
@@ -180,12 +191,13 @@ class SelectKBest(BaseEstimator, _SelectorMixin):
         return self
 
 
-class SelectPercentile(BaseEstimator, _SelectorMixin):
+class SelectPercentile(_SelectorMixin, BaseEstimator):
     def __init__(self, score_func=f_classif, percentile=10):
         self.score_func = score_func
         self.percentile = percentile
 
     def fit(self, X, y):
+        self.n_features_in_ = np.asarray(X).shape[1]
         out = self.score_func(X, y)
         self.scores_, self.pvalues_ = out if isinstance(out, tuple) else (out, None)
         k = max(1, int(np.ceil(len(self.scores_) * self.percentile / 100)))
@@ -195,12 +207,13 @@ class SelectPercentile(BaseEstimator, _SelectorMixin):
         return self
 
 
-class SelectFpr(BaseEstimator, _SelectorMixin):
+class SelectFpr(_SelectorMixin, BaseEstimator):
     def __init__(self, score_func=f_classif, alpha=0.05):
         self.score_func = score_func
         self.alpha = alpha
 
     def fit(self, X, y):
+        self.n_features_in_ = np.asarray(X).shape[1]
         self.scores_, self.pvalues_ = self.score_func(X, y)
         self.support_ = self.pvalues_ < self.alpha
         return self
@@ -215,7 +228,7 @@ def _importances(est):
     raise ValueError("Estimator exposes neither coef_ nor feature_importances_")
 
 
-class SelectFromModel(BaseEstimator, _SelectorMixin):
+class SelectFromModel(_SelectorMixin, BaseEstimator):
     def __init__(self, estimator, threshold=None, max_features=None,
                  prefit=False):
         self.estimator = estimator
@@ -250,7 +263,7 @@ class SelectFromModel(BaseEstimator, _SelectorMixin):
         return self
 
 
-class RFE(BaseEstimator, _SelectorMixin):
+class RFE(_SelectorMixin, BaseEstimator):
     def __init__(self, estimator, n_features_to_select=None, step=1):
         self.estimator = estimator
         self.n_features_to_select = n_features_to_select
@@ -322,7 +335,7 @@ class RFECV(RFE):
         return self
 
 
-class SequentialFeatureSelector(BaseEstimator, _SelectorMixin):
+class SequentialFeatureSelector(_SelectorMixin, BaseEstimator):
     def __init__(self, estimator, n_features_to_select=None, direction="forward",
                  cv=None, scoring=None):
         self.estimator = estimator

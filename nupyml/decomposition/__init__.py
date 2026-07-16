@@ -29,6 +29,8 @@ class PCA(BaseEstimator, TransformerMixin):
         self.explained_variance_ = (S[:k] ** 2) / (n - 1)
         self.explained_variance_ratio_ = (S[:k] ** 2) / (S ** 2).sum()
         self.n_components_ = k
+        self.n_features_in_ = d
+        self.n_features_out_ = k
         return self
 
     def transform(self, X):
@@ -67,6 +69,8 @@ class TruncatedSVD(BaseEstimator, TransformerMixin):
                 Vt[:self.n_components]
         self.components_ = Vt
         self.singular_values_ = S
+        self.n_features_in_ = X.shape[1]
+        self.n_features_out_ = len(Vt)
         return U * S
 
     def transform(self, X):
@@ -77,6 +81,8 @@ class TruncatedSVD(BaseEstimator, TransformerMixin):
 
 class NMF(BaseEstimator, TransformerMixin):
     """Non-negative matrix factorization via multiplicative updates."""
+
+    _estimator_tags = {"requires_positive_X": True}
 
     def __init__(self, n_components=2, max_iter=500, tol=1e-5, random_state=None):
         self.n_components = n_components
@@ -107,6 +113,8 @@ class NMF(BaseEstimator, TransformerMixin):
         self.components_ = H
         self.reconstruction_err_ = float(np.linalg.norm(X - W @ H))
         self.n_iter_ = it + 1
+        self.n_features_in_ = d
+        self.n_features_out_ = k
         return W
 
     def fit(self, X, y=None):
@@ -176,6 +184,8 @@ class FastICA(BaseEstimator, TransformerMixin):
         self.unmixing_ = W
         self.components_ = W @ K
         self.mixing_ = np.linalg.pinv(self.components_)
+        self.n_features_in_ = d
+        self.n_features_out_ = k
         return (self.components_ @ Xc).T
 
     def fit(self, X, y=None):
@@ -218,6 +228,8 @@ class KernelPCA(BaseEstimator, TransformerMixin):
         self.eigenvectors_ = vecs[:, order]
         self._K_fit_rows = K.mean(axis=0)
         self._K_fit_all = K.mean()
+        self.n_features_in_ = X.shape[1]
+        self.n_features_out_ = self.n_components
         return self
 
     def transform(self, X):

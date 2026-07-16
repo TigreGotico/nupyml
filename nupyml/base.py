@@ -60,6 +60,65 @@ class BaseEstimator:
         params = ", ".join(f"{k}={v!r}" for k, v in sorted(self.get_params(deep=False).items()))
         return f"{type(self).__name__}({params})"
 
+    def _repr_html_(self):
+        """Rendered by Jupyter: the class, its parameters, and fitted state."""
+        import html as _html
+        name = type(self).__name__
+        fitted = any(k.endswith("_") and not k.startswith("_")
+                     for k in vars(self))
+        rows = "".join(
+            f"<tr><td style='padding:2px 8px;color:#555'>{_html.escape(k)}</td>"
+            f"<td style='padding:2px 8px'><code>{_html.escape(repr(v))}</code>"
+            f"</td></tr>"
+            for k, v in sorted(self.get_params(deep=False).items()))
+        badge = ("<span style='color:#2b8a3e'>fitted</span>" if fitted
+                 else "<span style='color:#999'>not fitted</span>")
+        doc = (type(self).__doc__ or "").strip().split("\n")[0]
+        return (
+            f"<div style='border:1px solid #ddd;border-radius:4px;"
+            f"padding:8px;display:inline-block;font-family:sans-serif'>"
+            f"<div style='font-weight:600'>{name} &nbsp;{badge}</div>"
+            f"<div style='color:#666;font-size:90%;margin:2px 0 6px'>"
+            f"{_html.escape(doc)}</div>"
+            f"<table style='font-size:90%'>{rows}</table></div>")
+
+    def _check_feature_names(self, X, reset=False):
+        """Remember the column names of a dataframe and flag mismatches."""
+        names = getattr(X, "columns", None)
+        names = None if names is None else np.asarray([str(c) for c in names])
+        if reset:
+            if names is not None:
+                self.feature_names_in_ = names
+            elif hasattr(self, "feature_names_in_"):
+                del self.feature_names_in_
+            return
+        seen = getattr(self, "feature_names_in_", None)
+        if seen is not None and names is not None and not np.array_equal(seen,
+                                                                         names):
+            raise ValueError(
+                f"The feature names should match those seen during fit.\n"
+                f"Fitted with: {list(seen)}\nGot: {list(names)}")
+
+    def get_feature_names_out(self, input_features=None):
+        """Default: a transformer keeps one output column per input column."""
+        n_out = getattr(self, "n_features_out_", None)
+        if input_features is not None:
+            input_features = np.asarray([str(c) for c in input_features])
+        elif hasattr(self, "feature_names_in_"):
+            input_features = self.feature_names_in_
+        if n_out is None and input_features is not None:
+            return input_features
+        n_in = getattr(self, "n_features_in_", None)
+        if n_out is None:
+            n_out = n_in
+        if n_out is None:
+            raise RuntimeError(
+                f"{type(self).__name__} cannot report feature names before fit")
+        if input_features is not None and len(input_features) == n_out:
+            return input_features
+        prefix = type(self).__name__.lower()
+        return np.array([f"{prefix}{i}" for i in range(n_out)])
+
 
 def clone(estimator):
     """Return an unfitted copy of ``estimator`` with the same parameters."""
@@ -106,9 +165,72 @@ class RegressorMixin:
         return r2_score(y, self.predict(X))
 
 
-class TransformerMixin:
+class _SetOutputMixin:
+    """Opt-in pandas output. pandas stays optional: without it, or without
+    set_output, everything remains plain numpy."""
+
+    def set_output(self, transform=None):
+        if transform not in (None, "default", "pandas"):
+            raise ValueError(
+                f"transform must be 'default' or 'pandas', got {transform!r}")
+        if transform is not None:
+            self._output_config = transform
+        return self
+
+    def _wrap_output(self, X_out, X_in):
+        if getattr(self, "_output_config", "default") != "pandas":
+            return X_out
+        try:
+            import pandas as pd
+        except ImportError as exc:
+            raise ImportError(
+                "set_output(transform='pandas') needs pandas installed") from exc
+        if isinstance(X_out, pd.DataFrame):
+            return X_out
+        arr = np.asarray(X_out)
+        try:
+            columns = self.get_feature_names_out()
+        except Exception:
+            columns = None
+        if columns is not None and len(columns) != arr.shape[1]:
+            columns = None
+        index = getattr(X_in, "index", None)
+        return pd.DataFrame(arr, columns=columns, index=index)
+
+
+class TransformerMixin(_SetOutputMixin):
     def fit_transform(self, X, y=None, **fit_params):
         return self.fit(X, y, **fit_params).transform(X)
+
+    def __init_subclass__(cls, **kwargs):
+        """Wrap fit/transform once per subclass so every transformer records
+        dataframe column names and honours set_output without each one having
+        to remember to."""
+        super().__init_subclass__(**kwargs)
+        for meth in ("fit", "transform"):
+            fn = cls.__dict__.get(meth)
+            if fn is None or getattr(fn, "_nupyml_wrapped", False):
+                continue
+            setattr(cls, meth, _wrap_io(fn, meth))
+
+
+def _wrap_io(fn, kind):
+    """Add feature-name tracking and set_output around fit/transform without
+    assuming the wrapped signature: some transformers take no X at all."""
+    import functools
+
+    @functools.wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        X = args[0] if args else kwargs.get("X")
+        if isinstance(self, BaseEstimator) and hasattr(X, "columns"):
+            self._check_feature_names(X, reset=(kind == "fit"))
+        out = fn(self, *args, **kwargs)
+        if kind == "transform" and isinstance(self, _SetOutputMixin):
+            return self._wrap_output(out, X)
+        return out
+
+    wrapper._nupyml_wrapped = True
+    return wrapper
 
 
 class ClusterMixin:

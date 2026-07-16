@@ -79,6 +79,8 @@ class GaussianProcessRegressor(BaseEstimator, RegressorMixin):
 class GaussianProcessClassifier(BaseEstimator, ClassifierMixin):
     """Binary GP classification via Laplace approximation (RBF kernel)."""
 
+    _estimator_tags = {"binary_only": True}
+
     def __init__(self, kernel=None, max_iter=100):
         self.kernel = kernel
         self.max_iter = max_iter

@@ -256,6 +256,7 @@ class PolynomialFeatures(BaseEstimator, TransformerMixin):
         X = check_array(X)
         self.n_features_in_ = X.shape[1]
         self.n_output_features_ = sum(1 for _ in self._combinations(X.shape[1]))
+        self.n_features_out_ = self.n_output_features_
         return self
 
     def transform(self, X):

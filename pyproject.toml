@@ -19,6 +19,7 @@ dependencies = [
 dev = [
     "pytest",
     "scikit-learn",  # test-only: cross-validation of results, never imported at runtime
+    "pandas",        # test-only: exercises the optional set_output integration
 ]
 
 [tool.setuptools.packages.find]

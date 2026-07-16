@@ -216,6 +216,8 @@ class LogisticRegression(BaseEstimator, ClassifierMixin):
 
 
 class Perceptron(BaseEstimator, ClassifierMixin):
+    _estimator_tags = {"binary_only": True}
+
     def __init__(self, max_iter=1000, eta0=1.0, shuffle=True, random_state=None):
         self.max_iter = max_iter
         self.eta0 = eta0

@@ -22,6 +22,8 @@ class RBFSampler(BaseEstimator, TransformerMixin):
         # w ~ N(0, 2*gamma) is the Fourier transform of the RBF kernel
         self.random_weights_ = np.sqrt(2 * self.gamma) * rng.normal(size=(d, self.n_components))
         self.random_offset_ = rng.uniform(0, 2 * np.pi, size=self.n_components)
+        self.n_features_in_ = d
+        self.n_features_out_ = self.n_components
         return self
 
     def transform(self, X):
@@ -99,6 +101,8 @@ class Nystroem(BaseEstimator, TransformerMixin):
         self.normalization_ = vecs / np.sqrt(vals) @ vecs.T
         self.components_ = basis
         self.component_indices_ = idx
+        self.n_features_in_ = X.shape[1]
+        self.n_features_out_ = k
         return self
 
     def transform(self, X):

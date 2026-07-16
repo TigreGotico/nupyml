@@ -190,10 +190,16 @@ class _GLM(BaseEstimator, RegressorMixin):
 
     def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y, y_numeric=True)
-        if (y < 0).any():
-            raise ValueError(f"{type(self).__name__} requires y >= 0")
-        if self._power == 2 and (y <= 0).any():
-            raise ValueError("GammaRegressor requires strictly positive y")
+        p = self._power
+        # the Tweedie family's support depends on the power: normal (p=0)
+        # spans the reals, Poisson/compound-Poisson need y >= 0, and gamma
+        # and beyond need y > 0
+        if 1 <= p < 2 and (y < 0).any():
+            raise ValueError(f"{type(self).__name__} requires y >= 0 for "
+                             f"power={p}")
+        if p >= 2 and (y <= 0).any():
+            raise ValueError(f"{type(self).__name__} requires strictly "
+                             f"positive y for power={p}")
         n, d = X.shape
         w = np.ones(n) if sample_weight is None \
             else np.asarray(sample_weight, dtype=np.float64)
@@ -244,14 +250,20 @@ class _GLM(BaseEstimator, RegressorMixin):
 class PoissonRegressor(_GLM):
     _power = 1.0
     _link = "log"
+    _estimator_tags = {"requires_positive_y": True}
 
 
 class GammaRegressor(_GLM):
     _power = 2.0
     _link = "log"
+    _estimator_tags = {"requires_positive_y": True}
 
 
 class TweedieRegressor(_GLM):
+    @property
+    def _estimator_tags(self):
+        return {"requires_positive_y": self.power >= 1}
+
     def __init__(self, power=0.0, alpha=1.0, link="auto", fit_intercept=True,
                  max_iter=200, tol=1e-8):
         super().__init__(alpha=alpha, fit_intercept=fit_intercept,
