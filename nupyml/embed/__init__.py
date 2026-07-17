@@ -33,5 +33,9 @@ Mikolov et al. (2013); Pennington, Socher & Manning (2014); Sennrich et al. (201
 """
 from .word2vec import Word2Vec, GloVe
 from .tokenizer import BPETokenizer, WordPieceTokenizer
+from .guided import (CategoricalVectorizer, LabelGuidedEmbeddings,
+                     EntityEmbeddingEncoder)
 
-__all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer"]
+__all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
+           "CategoricalVectorizer", "LabelGuidedEmbeddings",
+           "EntityEmbeddingEncoder"]

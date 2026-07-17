@@ -144,6 +144,10 @@ A reasonable path through the library:
     linear programming (simplex), quadratic programming (active-set), proximal
     methods (FISTA, ADMM), conjugate gradient, and derivative-free search
     (Nelder-Mead, simulated annealing, particle swarm).
+42. supervised categorical embeddings in ``embed`` -- a ``CategoricalVectorizer``
+    for feature dicts, ``LabelGuidedEmbeddings`` (a label-trained MLP's hidden
+    layer becomes the embedding), and ``EntityEmbeddingEncoder`` (learned dense
+    vectors per high-cardinality category). Trained with autograd, run in numpy.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
