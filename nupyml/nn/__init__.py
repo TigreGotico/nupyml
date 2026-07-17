@@ -70,6 +70,10 @@ from .metric_losses import (
     InfoNCELoss, CosFaceLoss, ArcFaceLoss, CenterLoss,
 )
 from .ctc import CTCLoss, ctc_greedy_decode
+from ._losses_extra import (
+    ClassBalancedLoss, BalancedSoftmaxLoss, PolyLoss, FocalTverskyLoss,
+    GHMLoss, WingLoss, PoissonNLLLoss, SupConLoss,
+)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -138,4 +142,6 @@ __all__ = [
     "scaled_dot_product_attention", "MultiHeadAttention", "causal_mask",
     "TransformerEncoderLayer", "PositionalEncoding",
     "DataLoader", "MLPClassifier", "MLPRegressor", "init",
+    "ClassBalancedLoss", "BalancedSoftmaxLoss", "PolyLoss", "FocalTverskyLoss",
+    "GHMLoss", "WingLoss", "PoissonNLLLoss", "SupConLoss",
 ]

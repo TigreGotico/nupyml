@@ -133,6 +133,10 @@ A reasonable path through the library:
     schedule with TPE's proposals), greedy ensemble selection (``ensemble``), and
     scalable/vector GPs (``gaussian_process``: inducing-point sparse GP and a
     multi-output GP).
+39. more ``nn`` losses -- the long-tail / imbalance / count / contrastive zoo the
+    base losses missed: class-balanced and balanced-softmax, PolyLoss,
+    focal-Tversky, GHM (gradient-density harmonising), Wing (log-then-linear
+    regression), Poisson NLL for counts, and supervised contrastive.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
