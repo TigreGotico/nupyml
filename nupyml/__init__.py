@@ -80,6 +80,11 @@ A reasonable path through the library:
     descriptors (each invariant to a chosen nuisance), the integral image for
     constant-time box sums, connected-component labelling, binary morphology,
     and the Hough line transform (finding lines by voting in parameter space).
+26. balanced ensembles in ``imbalance`` (BalancedRandomForest, RUSBoost,
+    EasyEnsemble), the conformal expansion in ``inference`` (conformalized
+    quantile regression, Venn-Abers probability intervals, adaptive conformal),
+    neighbourhood recommenders and SVD++ in ``recommend``, and the AutoML-lite
+    searchers in ``model_selection`` (Hyperband, TPE).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

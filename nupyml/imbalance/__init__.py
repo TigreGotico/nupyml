@@ -33,6 +33,8 @@ common imbalance mistake, and no amount of clever synthesis rescues you from it.
 """
 from .resample import (RandomOverSampler, RandomUnderSampler, SMOTE, ADASYN,
                        TomekLinks, NearMiss, BorderlineSMOTE)
+from .ensembles import BalancedRandomForest, RUSBoost, EasyEnsemble
 
 __all__ = ["RandomOverSampler", "RandomUnderSampler", "SMOTE", "ADASYN",
-           "TomekLinks", "NearMiss", "BorderlineSMOTE"]
+           "TomekLinks", "NearMiss", "BorderlineSMOTE",
+           "BalancedRandomForest", "RUSBoost", "EasyEnsemble"]

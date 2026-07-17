@@ -280,9 +280,11 @@ from ._search import (  # noqa: E402
     ParameterSampler, RandomizedSearchCV, HalvingGridSearchCV,
     learning_curve, validation_curve, permutation_importance,
 )
+from ._automl import HyperbandSearchCV, TPESearchCV  # noqa: E402
 from ._scoring import get_scorer, get_scorer_names, check_scoring  # noqa: E402
 
 __all__ = [
+    "HyperbandSearchCV", "TPESearchCV",
     "train_test_split", "KFold", "StratifiedKFold", "LeaveOneOut",
     "cross_val_score", "cross_val_predict", "ParameterGrid", "GridSearchCV",
     "GroupKFold", "StratifiedGroupKFold", "TimeSeriesSplit", "ShuffleSplit",

@@ -20,11 +20,15 @@ worth following through the module.
 """
 from .mcmc import MetropolisHastings, GibbsSampler, HamiltonianMC
 from .conformal import (ConformalRegressor, ConformalClassifier,
-                        MondrianConformalRegressor)
+                        MondrianConformalRegressor,
+                        ConformalizedQuantileRegression, VennAbersCalibrator,
+                        AdaptiveConformalInference)
 from .bayesopt import BayesianOptimization, GaussianProcessRegressor
 
 __all__ = [
     "MetropolisHastings", "GibbsSampler", "HamiltonianMC",
     "ConformalRegressor", "ConformalClassifier", "MondrianConformalRegressor",
+    "ConformalizedQuantileRegression", "VennAbersCalibrator",
+    "AdaptiveConformalInference",
     "BayesianOptimization", "GaussianProcessRegressor",
 ]

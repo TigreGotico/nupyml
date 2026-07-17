@@ -344,4 +344,87 @@ class FactorizationMachine(BaseEstimator):
         return np.column_stack([1 - p, p])
 
 
-__all__ = ["MatrixFactorization", "ALS", "BPR", "FactorizationMachine"]
+class SVDpp(BaseEstimator):
+    """SVD++: factorization that also uses WHICH items a user rated, not just how.
+
+    THE EXTRA SIGNAL
+    ----------------
+    Plain factorization models a user only through the ratings they GAVE. But the
+    mere fact that a user chose to rate a particular set of items is itself
+    informative -- it reveals taste before any score is read. SVD++ adds an
+    IMPLICIT-feedback term: each item carries a second vector ``y_j``, and the
+    user's effective factor becomes their explicit vector plus the (normalised)
+    sum of the ``y_j`` over every item they interacted with::
+
+        p_eff(u) = P[u] + |N(u)|^{-1/2} * sum_{j in N(u)} y_j
+
+    That ``|N(u)|^{-1/2}`` normalisation keeps prolific and sparse users on the
+    same scale. Feeding the rated-item SET back into the user representation is
+    what won SVD++ its edge on the Netflix Prize over plain SVD.
+
+    Koren (2008).
+    """
+
+    def __init__(self, n_factors=10, learning_rate=0.01, reg=0.1, n_epochs=50,
+                 random_state=None):
+        self.n_factors = n_factors
+        self.learning_rate = learning_rate
+        self.reg = reg
+        self.n_epochs = n_epochs
+        self.random_state = random_state
+
+    def fit(self, triples):
+        rng = check_random_state(self.random_state)
+        triples = [(int(u), int(i), float(r)) for u, i, r in triples]
+        n_users = max(u for u, _, _ in triples) + 1
+        n_items = max(i for _, i, _ in triples) + 1
+
+        # the set of items each user interacted with -- the implicit feedback
+        self.N_ = [[] for _ in range(n_users)]
+        for u, i, _ in triples:
+            self.N_[u].append(i)
+        self.N_ = [np.array(sorted(set(items))) for items in self.N_]
+
+        self.global_mean_ = np.mean([r for _, _, r in triples])
+        self.P_ = rng.normal(0, 0.1, size=(n_users, self.n_factors))
+        self.Q_ = rng.normal(0, 0.1, size=(n_items, self.n_factors))
+        self.Y_ = rng.normal(0, 0.1, size=(n_items, self.n_factors))
+        self.user_bias_ = np.zeros(n_users)
+        self.item_bias_ = np.zeros(n_items)
+        self.history_ = []
+
+        lr, reg = self.learning_rate, self.reg
+        for _ in range(self.n_epochs):
+            rng.shuffle(triples)
+            sse = 0.0
+            for u, i, r in triples:
+                Nu = self.N_[u]
+                sqrt_n = 1.0 / np.sqrt(len(Nu)) if len(Nu) else 0.0
+                implicit = sqrt_n * self.Y_[Nu].sum(axis=0)
+                p_eff = self.P_[u] + implicit
+                pred = (self.global_mean_ + self.user_bias_[u]
+                        + self.item_bias_[i] + p_eff @ self.Q_[i])
+                err = r - pred
+                sse += err ** 2
+                self.user_bias_[u] += lr * (err - reg * self.user_bias_[u])
+                self.item_bias_[i] += lr * (err - reg * self.item_bias_[i])
+                qi = self.Q_[i].copy()
+                self.P_[u] += lr * (err * qi - reg * self.P_[u])
+                self.Q_[i] += lr * (err * p_eff - reg * qi)
+                # push the error back onto the implicit item vectors
+                self.Y_[Nu] += lr * (err * sqrt_n * qi - reg * self.Y_[Nu])
+            self.history_.append(np.sqrt(sse / len(triples)))
+        return self
+
+    def _p_eff(self, user):
+        Nu = self.N_[user]
+        sqrt_n = 1.0 / np.sqrt(len(Nu)) if len(Nu) else 0.0
+        return self.P_[user] + sqrt_n * self.Y_[Nu].sum(axis=0)
+
+    def predict(self, user, item):
+        pred = (self.global_mean_ + self.user_bias_[user]
+                + self.item_bias_[item] + self._p_eff(user) @ self.Q_[item])
+        return float(pred)
+
+
+__all__ = ["MatrixFactorization", "ALS", "BPR", "FactorizationMachine", "SVDpp"]

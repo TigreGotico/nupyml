@@ -34,6 +34,9 @@ recommender mistake, and the reason both are here side by side.
 
 Koren, Bell & Volinsky (2009); Rendle et al. (2009, 2010).
 """
-from .factorization import (MatrixFactorization, ALS, BPR, FactorizationMachine)
+from .factorization import (MatrixFactorization, ALS, BPR, FactorizationMachine,
+                            SVDpp)
+from .neighborhood import UserBasedCF, ItemBasedCF, SLIM
 
-__all__ = ["MatrixFactorization", "ALS", "BPR", "FactorizationMachine"]
+__all__ = ["MatrixFactorization", "ALS", "BPR", "FactorizationMachine", "SVDpp",
+           "UserBasedCF", "ItemBasedCF", "SLIM"]
