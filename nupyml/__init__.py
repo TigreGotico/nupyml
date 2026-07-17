@@ -30,6 +30,8 @@ A reasonable path through the library:
    and what each trades away for what.
 8. ``evolutionary`` -- optimization when there is no gradient at all, which
    throws the rest of the library's reliance on one into relief.
+9. ``nonparametric`` -- flexible regression that stays readable: LOESS, GAM,
+   MARS, RuleFit -- the ground between a linear model and a forest.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

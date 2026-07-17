@@ -688,6 +688,9 @@ from ._bayes_glm import (  # noqa: E402
     OrthogonalMatchingPursuit,
 )
 
+from ._lars import (Lars, LassoLars, LinearSVR, RidgeClassifier,
+                    MultiTaskLasso)
+
 __all__ = [
     "LinearRegression", "Ridge", "Lasso", "ElasticNet", "LogisticRegression",
     "Perceptron", "SGDClassifier", "SGDRegressor",
@@ -695,4 +698,5 @@ __all__ = [
     "RANSACRegressor", "BayesianRidge", "ARDRegression", "PoissonRegressor",
     "GammaRegressor", "TweedieRegressor", "RidgeCV", "LassoCV", "ElasticNetCV",
     "LogisticRegressionCV", "OrthogonalMatchingPursuit",
+    "Lars", "LassoLars", "LinearSVR", "RidgeClassifier", "MultiTaskLasso",
 ]
