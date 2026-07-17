@@ -24,6 +24,7 @@ from .conformal import (ConformalRegressor, ConformalClassifier,
                         ConformalizedQuantileRegression, VennAbersCalibrator,
                         AdaptiveConformalInference)
 from .bayesopt import BayesianOptimization, GaussianProcessRegressor
+from ._bayesian import MeanFieldVI, SequentialMonteCarlo, ABC, GPLVM
 
 __all__ = [
     "MetropolisHastings", "GibbsSampler", "HamiltonianMC",
@@ -31,4 +32,5 @@ __all__ = [
     "ConformalizedQuantileRegression", "VennAbersCalibrator",
     "AdaptiveConformalInference",
     "BayesianOptimization", "GaussianProcessRegressor",
+    "MeanFieldVI", "SequentialMonteCarlo", "ABC", "GPLVM",
 ]

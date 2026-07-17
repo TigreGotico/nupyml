@@ -158,6 +158,10 @@ A reasonable path through the library:
     confounding), double ML (orthogonalised ATE with ML nuisances), T-/X-learners
     (heterogeneous effects), difference-in-differences and synthetic control
     (panel data), and NOTEARS (learning a causal DAG by continuous optimization).
+46. approximate Bayesian inference in ``inference`` -- mean-field variational
+    inference (ADVI, posterior by optimization), a sequential Monte Carlo sampler,
+    approximate Bayesian computation (likelihood-free), and the GPLVM (nonlinear
+    probabilistic PCA).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
