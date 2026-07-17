@@ -46,6 +46,9 @@ A reasonable path through the library:
     representations, and learning the distance itself.
 14. ``gnn`` -- graph neural networks: message passing on data that is a graph,
     where connectivity is the signal.
+15. ``covariance``, ``cross_decomposition``, ``dummy`` -- shrinkage covariance
+    estimation, latent structure between two variable blocks, and the baselines
+    every real model must beat.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

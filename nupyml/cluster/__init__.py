@@ -492,4 +492,6 @@ from ._variants import KMedoids, KModes, FuzzyCMeans  # noqa: E402
 __all__ = ["KMeans", "MiniBatchKMeans", "DBSCAN", "AgglomerativeClustering",
            "MeanShift", "SpectralClustering", "Birch", "OPTICS",
            "AffinityPropagation", "HDBSCAN",
-           "KMedoids", "KModes", "FuzzyCMeans"]
+           "KMedoids", "KModes", "FuzzyCMeans",
+           "BisectingKMeans", "FeatureAgglomeration"]
+from ._bisecting import BisectingKMeans, FeatureAgglomeration  # noqa: E402

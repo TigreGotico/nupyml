@@ -225,5 +225,7 @@ class KernelDensity(BaseEstimator, DensityMixin):
                                          size=(n_samples, self._X.shape[1]))
 
 
+from ._centroid import NearestCentroid, RadiusNeighborsClassifier  # noqa: E402
+
 __all__ = ["KNeighborsClassifier", "KNeighborsRegressor", "NearestNeighbors",
-           "KernelDensity"]
+           "KernelDensity", "NearestCentroid", "RadiusNeighborsClassifier"]

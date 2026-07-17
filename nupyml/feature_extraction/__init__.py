@@ -163,4 +163,7 @@ class TfidfVectorizer(CountVectorizer):
         return X.tocsr()
 
 
-__all__ = ["CountVectorizer", "TfidfVectorizer"]
+from ._hashing import FeatureHasher, DictVectorizer, HashingVectorizer  # noqa: E402
+
+__all__ = ["CountVectorizer", "TfidfVectorizer", "FeatureHasher",
+           "DictVectorizer", "HashingVectorizer"]

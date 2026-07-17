@@ -355,4 +355,9 @@ __all__ = [
     "StandardScaler", "MinMaxScaler", "MaxAbsScaler", "RobustScaler",
     "Normalizer", "LabelEncoder", "LabelBinarizer", "OneHotEncoder",
     "OrdinalEncoder", "PolynomialFeatures", "Binarizer", "KBinsDiscretizer",
+    "PowerTransformer", "QuantileTransformer", "TargetEncoder",
+    "FunctionTransformer",
 ]
+
+from ._transformers import (PowerTransformer, QuantileTransformer,  # noqa: E402
+                            TargetEncoder, FunctionTransformer)
