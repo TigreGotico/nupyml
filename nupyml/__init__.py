@@ -93,6 +93,10 @@ A reasonable path through the library:
     group-fairness metrics (demographic parity, equal opportunity, equalized
     odds, predictive parity) and mitigators at each stage (reweighing and
     correlation removal, exponentiated-gradient reduction, threshold optimizing).
+29. the interpretability expansion in ``explain``: the EBM/GA2M glass box (an
+    additive model of plottable per-feature shapes), ALE plots (PDP's unbiased
+    replacement under correlation), the H-statistic (interaction strength), global
+    surrogate trees, anchor rules, and counterfactual explanations.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

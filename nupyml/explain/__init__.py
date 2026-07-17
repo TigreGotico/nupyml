@@ -43,6 +43,13 @@ the model does, never whether what it does is right.
 """
 from .attribution import (permutation_importance, partial_dependence, ice,
                           LIME, KernelSHAP, integrated_gradients)
+from .glassbox import (ExplainableBoostingRegressor,
+                       ExplainableBoostingClassifier)
+from .effects import accumulated_local_effects, h_statistic
+from .local import surrogate_tree, Anchors, counterfactual
 
 __all__ = ["permutation_importance", "partial_dependence", "ice", "LIME",
-           "KernelSHAP", "integrated_gradients"]
+           "KernelSHAP", "integrated_gradients",
+           "ExplainableBoostingRegressor", "ExplainableBoostingClassifier",
+           "accumulated_local_effects", "h_statistic",
+           "surrogate_tree", "Anchors", "counterfactual"]
