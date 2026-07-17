@@ -41,6 +41,9 @@ A reasonable path through the library:
 12. ``search``, ``streaming``, ``patterns``, ``recommend`` -- scale: approximate
     nearest neighbours and sketches, online learners, association-rule mining,
     and matrix-factorization recommenders.
+13. ``explain``, ``imbalance``, ``embed``, ``metric_learning`` -- interpreting a
+    model after the fact, fixing class imbalance, learning word/subword
+    representations, and learning the distance itself.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

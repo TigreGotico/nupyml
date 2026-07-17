@@ -18,19 +18,24 @@ The engine in every case is HASHING. Hashing scatters items uniformly, and the
 mathematics of collisions and extreme values under uniform hashing is what turns
 a tiny array into a calibrated estimator.
 """
+import hashlib
+
 import numpy as np
 
 
 def _hash(item, seed):
     """A seeded, stable hash of any hashable item.
 
-    Python's ``hash`` is salted per process (for security), so it is unstable
-    across runs -- useless for a data structure that must be reproducible.
-    Combining a fixed content hash with the seed gives a deterministic family of
-    hash functions, which is what every sketch below needs.
+    Python's built-in ``hash`` is salted per process (for security), so it is
+    unstable across runs -- and a sketch that answers differently each run is
+    both useless and untestable. ``hashlib`` is unsalted and content-addressed,
+    so keying ``blake2b`` by the seed gives a genuinely deterministic family of
+    hash functions -- identical on every process and machine -- which is what
+    every sketch below relies on.
     """
-    h = hash((seed, repr(item)))
-    return h & 0x7FFFFFFF
+    h = hashlib.blake2b(repr(item).encode(), digest_size=8,
+                        salt=(seed % 65536).to_bytes(2, "little"))
+    return int.from_bytes(h.digest(), "little") & 0x7FFFFFFF
 
 
 class BloomFilter:

@@ -244,6 +244,7 @@ class LocallyLinearEmbedding(BaseEstimator):
 
 
 from ._extra import SpectralEmbedding, TSNEBarnesHut  # noqa: E402
+from ._umap_som import UMAP, SelfOrganizingMap  # noqa: E402
 
 __all__ = ["TSNE", "Isomap", "MDS", "LocallyLinearEmbedding",
-           "SpectralEmbedding", "TSNEBarnesHut"]
+           "SpectralEmbedding", "TSNEBarnesHut", "UMAP", "SelfOrganizingMap"]

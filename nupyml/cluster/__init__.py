@@ -487,7 +487,9 @@ class SpectralClustering(BaseEstimator, ClusterMixin):
 
 
 from ._extra import Birch, OPTICS, AffinityPropagation, HDBSCAN  # noqa: E402
+from ._variants import KMedoids, KModes, FuzzyCMeans  # noqa: E402
 
 __all__ = ["KMeans", "MiniBatchKMeans", "DBSCAN", "AgglomerativeClustering",
            "MeanShift", "SpectralClustering", "Birch", "OPTICS",
-           "AffinityPropagation", "HDBSCAN"]
+           "AffinityPropagation", "HDBSCAN",
+           "KMedoids", "KModes", "FuzzyCMeans"]
