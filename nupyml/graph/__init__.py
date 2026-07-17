@@ -34,8 +34,17 @@ from .algorithms import pagerank, hits, centrality
 from .community import louvain, label_propagation, modularity
 from .embeddings import DeepWalk, Node2Vec
 from .kernels import weisfeiler_lehman_kernel
+from ._advanced import (common_neighbors, jaccard_coefficient,
+                        adamic_adar_index, resource_allocation_index,
+                        preferential_attachment, katz_index,
+                        degree_assortativity, girvan_newman, max_flow, min_cut,
+                        shortest_path_kernel, random_walk_kernel, LINE)
 
 __all__ = [
     "pagerank", "hits", "centrality", "louvain", "label_propagation",
     "modularity", "DeepWalk", "Node2Vec", "weisfeiler_lehman_kernel",
+    "common_neighbors", "jaccard_coefficient", "adamic_adar_index",
+    "resource_allocation_index", "preferential_attachment", "katz_index",
+    "degree_assortativity", "girvan_newman", "max_flow", "min_cut",
+    "shortest_path_kernel", "random_walk_kernel", "LINE",
 ]

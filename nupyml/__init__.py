@@ -109,6 +109,10 @@ A reasonable path through the library:
     histograms), feature bagging (subspace ensemble), half-space trees (mass in
     random splits), Mahalanobis and PCA-reconstruction detectors -- plus automatic
     score thresholding (IQR, MAD, generalized ESD).
+33. more ``graph`` learning -- link prediction (common-neighbours, Jaccard,
+    Adamic-Adar, resource-allocation, preferential-attachment, Katz), degree
+    assortativity, Girvan-Newman communities, max-flow/min-cut, shortest-path and
+    random-walk kernels, and the LINE embedding.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
