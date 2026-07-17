@@ -154,6 +154,10 @@ A reasonable path through the library:
 44. more self-supervision in ``nn`` -- Barlow Twins (redundancy reduction toward
     the identity cross-correlation) and BYOL (an EMA target + predictor, learning
     without negatives), joining the existing SimCLR and masked autoencoder.
+45. the ``causal`` expansion -- instrumental variables (2SLS, for unobserved
+    confounding), double ML (orthogonalised ATE with ML nuisances), T-/X-learners
+    (heterogeneous effects), difference-in-differences and synthetic control
+    (panel data), and NOTEARS (learning a causal DAG by continuous optimization).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
