@@ -49,6 +49,9 @@ A reasonable path through the library:
 15. ``covariance``, ``cross_decomposition``, ``dummy`` -- shrinkage covariance
     estimation, latent structure between two variable blocks, and the baselines
     every real model must beat.
+16. ``stats`` -- inference, not just prediction: standard errors, p-values,
+    confidence intervals, and the diagnostic tests that say whether they are
+    valid.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
