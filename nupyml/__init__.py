@@ -57,6 +57,8 @@ A reasonable path through the library:
 18. ``anomaly`` and ``drift`` -- unsupervised anomaly scoring (histogram, CDF,
     angle, cluster based) and detecting when a data stream's distribution
     changes underneath a deployed model.
+19. ``topic`` -- topic models (LDA, LSA), the BM25 search-ranking function, and
+    document embeddings (Doc2Vec).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
