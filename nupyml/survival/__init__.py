@@ -30,5 +30,7 @@ THE TWO QUESTIONS, AND WHO ANSWERS THEM
 Kaplan-Meier's survival curve.
 """
 from .core import KaplanMeier, NelsonAalen, CoxPH
+from .advanced import concordance_index, RandomSurvivalForest, AFT
 
-__all__ = ["KaplanMeier", "NelsonAalen", "CoxPH"]
+__all__ = ["KaplanMeier", "NelsonAalen", "CoxPH", "concordance_index",
+           "RandomSurvivalForest", "AFT"]

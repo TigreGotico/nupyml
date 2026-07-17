@@ -68,6 +68,9 @@ A reasonable path through the library:
 22. ``graph`` -- learning from connectivity: PageRank/HITS/centrality, community
     detection (Louvain, label propagation), node embeddings (DeepWalk, node2vec),
     and the Weisfeiler-Lehman graph kernel.
+23. ``changepoint`` and ``copula`` -- finding where a signal's behaviour changes,
+    and modelling the SHAPE of dependence between variables separately from their
+    marginals; plus survival extensions (RSF, AFT, concordance).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
