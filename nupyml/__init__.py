@@ -97,6 +97,10 @@ A reasonable path through the library:
     additive model of plottable per-feature shapes), ALE plots (PDP's unbiased
     replacement under correlation), the H-statistic (interaction strength), global
     surrogate trees, anchor rules, and counterfactual explanations.
+30. ``ordinal`` and its relatives -- predicting ORDERED categories
+    (proportional-odds logit, rank-ridge), joint-support multi-output regression
+    (``linear_model.MultiTaskElasticNet``), and conditional-quantile prediction
+    (``ensemble.QuantileForest``) for calibrated intervals from a forest.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

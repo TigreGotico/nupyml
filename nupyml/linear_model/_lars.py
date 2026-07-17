@@ -387,5 +387,68 @@ class MultiTaskLasso(BaseEstimator, RegressorMixin):
         return check_array(X) @ self.coef_.T + self.intercept_
 
 
+class MultiTaskElasticNet(BaseEstimator, RegressorMixin):
+    """MultiTaskLasso with an added ridge term -- shared support, softer selection.
+
+    The group L2,1 penalty of :class:`MultiTaskLasso` selects a feature for all
+    tasks or none, but like any pure-L1 method it is unstable when features are
+    correlated (it picks one of a correlated group arbitrarily) and can be overly
+    aggressive. Adding an L2 term -- the elastic-net idea, lifted to the multi-task
+    setting -- keeps the row-sparse group selection while spreading weight across
+    correlated features and stabilising the solution::
+
+        penalty = alpha*l1_ratio * sum_j ||W[j]||_2
+                + 0.5*alpha*(1-l1_ratio) * ||W||_F^2
+
+    ``l1_ratio=1`` recovers MultiTaskLasso; lower values lean on the ridge part.
+    Fitted by the same block coordinate descent, with the L2 term simply enlarging
+    each block's denominator.
+    """
+
+    def __init__(self, alpha=1.0, l1_ratio=0.5, max_iter=1000, tol=1e-4):
+        self.alpha = alpha
+        self.l1_ratio = l1_ratio
+        self.max_iter = max_iter
+        self.tol = tol
+
+    def fit(self, X, Y):
+        X = check_array(X)
+        Y = check_array(Y)
+        n, p = X.shape
+        self._x_mean = X.mean(axis=0)
+        self._y_mean = Y.mean(axis=0)
+        Xc = X - self._x_mean
+        Yc = Y - self._y_mean
+
+        W = np.zeros((p, Y.shape[1]))
+        col_norm2 = (Xc ** 2).sum(axis=0)
+        col_norm2[col_norm2 == 0] = 1.0
+        l1 = self.alpha * self.l1_ratio
+        l2 = self.alpha * (1 - self.l1_ratio)
+        residual = Yc.copy()
+        for _ in range(self.max_iter):
+            W_old = W.copy()
+            for j in range(p):
+                residual += np.outer(Xc[:, j], W[j])
+                rho = Xc[:, j] @ residual
+                norm = np.linalg.norm(rho)
+                if norm <= l1 * n:
+                    W[j] = 0.0
+                else:
+                    # ridge term enlarges the denominator, shrinking every row
+                    W[j] = (1 - l1 * n / norm) * rho / (col_norm2[j] + l2 * n)
+                residual -= np.outer(Xc[:, j], W[j])
+            if np.max(np.abs(W - W_old)) < self.tol:
+                break
+
+        self.coef_ = W.T
+        self.intercept_ = self._y_mean - self.coef_ @ self._x_mean
+        return self
+
+    def predict(self, X):
+        check_is_fitted(self, "coef_")
+        return check_array(X) @ self.coef_.T + self.intercept_
+
+
 __all__ = ["Lars", "LassoLars", "LinearSVR", "RidgeClassifier",
-           "MultiTaskLasso"]
+           "MultiTaskLasso", "MultiTaskElasticNet"]

@@ -744,8 +744,10 @@ from ._boosting_variants import (
 from ._mixture_of_experts import (
     MixtureOfExpertsClassifier, MixtureOfExpertsRegressor,
 )
+from ._quantile_forest import QuantileForest
 
 __all__ = [
+    "QuantileForest",
     "BaggingClassifier", "BaggingRegressor",
     "RandomForestClassifier", "RandomForestRegressor",
     "ExtraTreesClassifier", "ExtraTreesRegressor",

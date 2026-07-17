@@ -689,7 +689,7 @@ from ._bayes_glm import (  # noqa: E402
 )
 
 from ._lars import (Lars, LassoLars, LinearSVR, RidgeClassifier,
-                    MultiTaskLasso)
+                    MultiTaskLasso, MultiTaskElasticNet)
 
 __all__ = [
     "LinearRegression", "Ridge", "Lasso", "ElasticNet", "LogisticRegression",
@@ -699,4 +699,5 @@ __all__ = [
     "GammaRegressor", "TweedieRegressor", "RidgeCV", "LassoCV", "ElasticNetCV",
     "LogisticRegressionCV", "OrthogonalMatchingPursuit",
     "Lars", "LassoLars", "LinearSVR", "RidgeClassifier", "MultiTaskLasso",
+    "MultiTaskElasticNet",
 ]
