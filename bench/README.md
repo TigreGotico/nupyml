@@ -53,6 +53,10 @@ any that reach outside `nupyml` / `numpy` / `scipy` / the stdlib as an
 | `fraud_imbalanced` | supervised | macro-F1 | rare-class handling |
 | `blobs_clustering` | clustering | adjusted Rand index | unsupervised clustering |
 | `sine_forecast` | forecast | RMSE (lower is better) | time-series forecasting |
+| `ts_classification` | supervised | accuracy | time-series classification (shape at random phase) |
+| `multilabel_emotions` | supervised | macro-F1 | correlated multi-label prediction |
+| `anomaly_detection` | clustering | ROC-AUC | unsupervised outlier ranking |
+| `ratings_recommender` | supervised | RMSE (lower is better) | latent-factor recommendation |
 
 ## How scoring works
 

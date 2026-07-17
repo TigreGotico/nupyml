@@ -6,9 +6,9 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_mlp` | 0.9700 | 1.39 |
-| 2 | `baseline_knn` | 0.9667 | 0.46 |
-| 3 | `baseline_random_forest` | 0.9667 | 1.22 |
-| 4 | `baseline_svc_rbf` | 0.9667 | 0.51 |
+| 1 | `baseline_mlp` | 0.9700 | 1.50 |
+| 2 | `baseline_knn` | 0.9667 | 0.47 |
+| 3 | `baseline_random_forest` | 0.9667 | 1.47 |
+| 4 | `baseline_svc_rbf` | 0.9667 | 0.65 |
 
 _Regenerate with `python bench/harness.py moons_classification`._

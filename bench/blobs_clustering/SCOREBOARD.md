@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_agglomerative` | 1.0000 | 0.43 |
-| 2 | `baseline_gaussian_mixture` | 1.0000 | 0.56 |
-| 3 | `baseline_kmeans` | 1.0000 | 0.53 |
+| 1 | `baseline_agglomerative` | 1.0000 | 0.61 |
+| 2 | `baseline_gaussian_mixture` | 1.0000 | 0.59 |
+| 3 | `baseline_kmeans` | 1.0000 | 0.66 |
 
 _Regenerate with `python bench/harness.py blobs_clustering`._
