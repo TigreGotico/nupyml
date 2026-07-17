@@ -19,69 +19,190 @@ def _kernel_fn(kernel, gamma, degree, coef0):
     raise ValueError(f"Unknown kernel: {kernel!r}")
 
 
-def _smo(K, y, C, tol=1e-3, max_passes=10, max_iter=10000, rng=None):
-    """Simplified SMO (Platt) for binary SVM. y in {-1, +1}. Returns alpha, b.
+def _smo(K, y, C, tol=1e-3, max_iter=-1):
+    """Sequential Minimal Optimization with second-order working-set selection.
 
-    ``C`` may be a scalar or a per-sample array (sample weights scale C).
+    THE PROBLEM
+    -----------
+    Training an SVM means solving this quadratic program over the dual
+    variables ``alpha`` (one per training sample)::
+
+        minimize    0.5 * alpha' Q alpha  -  sum(alpha)
+        subject to  0 <= alpha_i <= C_i          (the "box" constraint)
+                    sum_i alpha_i * y_i = 0      (the "linear" constraint)
+
+    where ``Q_ij = y_i * y_j * K(x_i, x_j)``. Q is dense and n-by-n, so for
+    100k samples it would need 80 GB. Any practical solver therefore has to
+    avoid touching all of Q at once.
+
+    THE IDEA
+    --------
+    SMO optimizes exactly TWO alphas at a time and holds the rest fixed. Two is
+    the smallest number that can move at all: the linear constraint pins the
+    weighted sum, so changing one alpha alone would break it. With only two
+    free variables the subproblem has a closed-form solution -- no inner
+    optimizer is needed.
+
+    Each step therefore asks two questions:
+
+    1. *Which pair should we move?*  (working-set selection, below)
+    2. *How far?*  (the closed-form update, below)
+
+    CHOOSING THE PAIR
+    -----------------
+    The optimum is characterised by the KKT conditions, which here reduce to a
+    simple statement: define ``I_up`` as the samples whose alpha may still
+    increase in the useful direction and ``I_low`` as those that may decrease.
+    At the optimum::
+
+        max_{t in I_up} (-y_t * G_t)  <=  min_{t in I_low} (-y_t * G_t)
+
+    where ``G`` is the gradient of the objective. Any pair that violates this
+    is a "violating pair", and moving it is guaranteed to improve the
+    objective. The gap between those two quantities is the natural stopping
+    criterion.
+
+    Picking ``i`` as the maximal violator is first-order information: it says
+    which direction is steepest, but not how much progress a step will make. A
+    steep direction with a tiny feasible step is worse than a shallow one with
+    a long step. So ``j`` is chosen by second-order information: for each
+    candidate we can predict the exact objective decrease in closed form and
+    take the best. This costs one extra O(n) scan and buys far fewer
+    iterations.
+
+    KEEPING THE GRADIENT CHEAP
+    --------------------------
+    Recomputing G from scratch would be O(n^2) per step and dominate
+    everything. But only two alphas change per step, so::
+
+        G += y * (K[i] * delta_i * y_i  +  K[j] * delta_j * y_j)
+
+    updates it exactly in O(n). This is what makes SMO practical.
+
+    Selection is fully determined by the gradient, so the solver is
+    deterministic -- it takes no random seed.
+
+    Parameters
+    ----------
+    K : (n, n) array
+        Precomputed kernel matrix.
+    y : (n,) array
+        Targets in {-1, +1}.
+    C : float or (n,) array
+        Upper bound on each alpha. Per-sample values implement sample weights.
+    tol : float
+        Stop once the KKT violation falls below this.
+    max_iter : int
+        Cap on pair updates; <= 0 means run to convergence.
+
+    Returns
+    -------
+    (alpha, b, n_iter)
+        The decision value for a new point is ``sum_i alpha_i y_i K(x, x_i) + b``.
+
+    References
+    ----------
+    Platt (1998), "Sequential Minimal Optimization".
+    Fan, Chen & Lin (2005), "Working Set Selection Using Second Order
+    Information for Training SVM", JMLR 6:1889-1918.
     """
-    rng = rng or np.random
     n = len(y)
-    C = np.broadcast_to(np.asarray(C, dtype=np.float64), (n,))
+    C = np.broadcast_to(np.asarray(C, dtype=np.float64), (n,)).astype(np.float64)
     alpha = np.zeros(n)
-    b = 0.0
-    passes = 0
-    it = 0
-    # cached decision errors
-    def f(i):
-        return (alpha * y) @ K[:, i] + b
+    # gradient of the dual objective; at alpha = 0 it is -e
+    G = -np.ones(n)
+    Kdiag = np.diag(K).copy()
+    tau = 1e-12
+    eps = 1e-12
+    cap = max_iter if max_iter and max_iter > 0 else max(10_000_000, 100 * n)
 
-    while passes < max_passes and it < max_iter:
-        num_changed = 0
-        for i in range(n):
-            Ei = f(i) - y[i]
-            if (y[i] * Ei < -tol and alpha[i] < C[i]) or \
-                    (y[i] * Ei > tol and alpha[i] > 0):
-                j = rng.randint(n - 1)
-                if j >= i:
-                    j += 1
-                Ej = f(j) - y[j]
-                ai_old, aj_old = alpha[i], alpha[j]
-                Ci, Cj = C[i], C[j]
-                if y[i] != y[j]:
-                    L, H = max(0, aj_old - ai_old), min(Cj, Ci + aj_old - ai_old)
-                else:
-                    L, H = max(0, ai_old + aj_old - Ci), min(Cj, ai_old + aj_old)
-                if L == H:
-                    continue
-                eta = 2 * K[i, j] - K[i, i] - K[j, j]
-                if eta >= 0:
-                    continue
-                aj = np.clip(aj_old - y[j] * (Ei - Ej) / eta, L, H)
-                if abs(aj - aj_old) < 1e-5:
-                    continue
-                ai = ai_old + y[i] * y[j] * (aj_old - aj)
-                b1 = b - Ei - y[i] * (ai - ai_old) * K[i, i] \
-                    - y[j] * (aj - aj_old) * K[i, j]
-                b2 = b - Ej - y[i] * (ai - ai_old) * K[i, j] \
-                    - y[j] * (aj - aj_old) * K[j, j]
-                alpha[i], alpha[j] = ai, aj
-                if 0 < ai < Ci:
-                    b = b1
-                elif 0 < aj < Cj:
-                    b = b2
-                else:
-                    b = (b1 + b2) / 2
-                num_changed += 1
-        passes = passes + 1 if num_changed == 0 else 0
-        it += 1
-    return alpha, b
+    it = 0
+    for it in range(1, cap + 1):
+        neg_yG = -y * G
+        free_up = alpha < C - eps
+        free_low = alpha > eps
+        # I_up and I_low: the directions each alpha is still free to move in
+        up = (free_up & (y > 0)) | (free_low & (y < 0))
+        low = (free_low & (y > 0)) | (free_up & (y < 0))
+        if not up.any() or not low.any():
+            break
+        i = int(np.where(up, neg_yG, -np.inf).argmax())
+        m_up = neg_yG[i]
+        M_low = np.where(low, neg_yG, np.inf).min()
+        if m_up - M_low < tol:            # KKT satisfied within tolerance
+            break
+
+        # second-order pick of j: the candidate promising the biggest drop in
+        # the objective, not merely the biggest violation
+        b_t = m_up - neg_yG
+        # Q_ii + Q_tt - 2 Q_it collapses to ||phi_i - phi_t||^2, always >= 0
+        a_t = np.maximum(Kdiag[i] + Kdiag - 2.0 * K[i], tau)
+        cand = low & (b_t > 0)
+        if not cand.any():
+            break
+        obj = np.where(cand, -(b_t ** 2) / a_t, np.inf)
+        j = int(obj.argmin())
+
+        quad = max(Kdiag[i] + Kdiag[j] - 2.0 * K[i, j], tau)
+        ai_old, aj_old = alpha[i], alpha[j]
+        if y[i] != y[j]:
+            # the pair moves along a_i - a_j = const
+            delta = (-G[i] - G[j]) / quad
+            diff = ai_old - aj_old
+            ai, aj = ai_old + delta, aj_old + delta
+            if diff > 0:
+                if aj < 0:
+                    aj, ai = 0.0, diff
+            else:
+                if ai < 0:
+                    ai, aj = 0.0, -diff
+            if diff > C[i] - C[j]:
+                if ai > C[i]:
+                    ai, aj = C[i], C[i] - diff
+            else:
+                if aj > C[j]:
+                    aj, ai = C[j], C[j] + diff
+        else:
+            # the pair moves along a_i + a_j = const
+            delta = (G[i] - G[j]) / quad
+            total = ai_old + aj_old
+            ai, aj = ai_old - delta, aj_old + delta
+            if total > C[i]:
+                if ai > C[i]:
+                    ai, aj = C[i], total - C[i]
+            else:
+                if aj < 0:
+                    aj, ai = 0.0, total
+            if total > C[j]:
+                if aj > C[j]:
+                    aj, ai = C[j], total - C[j]
+            else:
+                if ai < 0:
+                    ai, aj = 0.0, total
+        alpha[i], alpha[j] = ai, aj
+        # only coordinates i and j changed, so the gradient updates in O(n)
+        G += y * (K[i] * ((ai - ai_old) * y[i]) + K[j] * ((aj - aj_old) * y[j]))
+
+    # rho from the free support vectors, falling back to the KKT bracket
+    yG = y * G
+    free = (alpha > eps) & (alpha < C - eps)
+    if free.any():
+        rho = float(yG[free].mean())
+    else:
+        at_upper, at_lower = alpha >= C - eps, alpha <= eps
+        ub_mask = (at_upper & (y < 0)) | (at_lower & (y > 0))
+        lb_mask = (at_upper & (y > 0)) | (at_lower & (y < 0))
+        ub = yG[ub_mask].min() if ub_mask.any() else np.inf
+        lb = yG[lb_mask].max() if lb_mask.any() else -np.inf
+        rho = float((ub + lb) / 2) if np.isfinite(ub + lb) else 0.0
+    return alpha, -rho, it
 
 
 class SVC(BaseEstimator, ClassifierMixin):
     """Kernel SVM classifier (one-vs-one for multiclass)."""
 
     def __init__(self, C=1.0, kernel="rbf", gamma="scale", degree=3, coef0=0.0,
-                 tol=1e-3, probability=False, max_iter=10000,
+                 tol=1e-3, probability=False, max_iter=-1,
                  random_state=None):
         self.C = C
         self.kernel = kernel
@@ -102,7 +223,6 @@ class SVC(BaseEstimator, ClassifierMixin):
 
     def fit(self, X, y, sample_weight=None):
         X, y = check_X_y(X, y)
-        rng = check_random_state(self.random_state)
         self._le = LabelEncoder().fit(y)
         self.classes_ = self._le.classes_
         y_idx = self._le.transform(y)
@@ -112,15 +232,17 @@ class SVC(BaseEstimator, ClassifierMixin):
         self._kfn = _kernel_fn(self.kernel, self._gamma, self.degree, self.coef0)
         k = len(self.classes_)
         self._models = {}
+        self.n_iter_ = 0
         for a in range(k):
             for bcls in range(a + 1, k):
                 mask = (y_idx == a) | (y_idx == bcls)
                 Xa = X[mask]
                 ya = np.where(y_idx[mask] == bcls, 1.0, -1.0)
                 K = self._kfn(Xa, Xa)
-                alpha, b = _smo(K, ya, self.C * w[mask], tol=self.tol,
-                                max_iter=self.max_iter, rng=rng)
+                alpha, b, n_it = _smo(K, ya, self.C * w[mask], tol=self.tol,
+                                      max_iter=self.max_iter)
                 sv = alpha > 1e-8
+                self.n_iter_ = max(getattr(self, "n_iter_", 0), n_it)
                 self._models[(a, bcls)] = (Xa[sv], ya[sv] * alpha[sv], b)
         self.support_vectors_ = np.vstack([m[0] for m in self._models.values()]) \
             if self._models else np.empty((0, X.shape[1]))

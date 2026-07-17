@@ -9,28 +9,153 @@ from ..base import BaseEstimator, TransformerMixin, check_is_fitted
 from ..utils import check_array, check_random_state
 
 
+def _deterministic_signs(components):
+    """Fix the arbitrary sign of each component.
+
+    An eigenvector is only defined up to sign: if ``v`` is one, so is ``-v``.
+    Solvers are free to return either, which makes results annoyingly
+    irreproducible across methods. Convention: force the entry of largest
+    magnitude in each component to be positive.
+    """
+    peak = np.argmax(np.abs(components), axis=1)
+    signs = np.sign(components[np.arange(len(components)), peak])
+    signs[signs == 0] = 1.0
+    return components * signs[:, None]
+
+
+def _randomized_svd(X, k, n_oversamples=10, n_iter=4, rng=None):
+    """Approximate the top ``k`` singular triplets (Halko, Martinsson & Tropp).
+
+    An exact SVD costs O(n*d*min(n,d)) -- wasteful when you only want a handful
+    of components. The randomized method works in two stages:
+
+    1. *Find the subspace.* Multiply X by a random matrix with ``k + p``
+       columns. Each product is a random mixture of X's columns, so it lands
+       (mostly) inside the span of X's leading singular directions -- the
+       strong directions dominate any random mixture. That gives a thin basis Q
+       capturing nearly all of X's action.
+    2. *Solve the small problem.* Project X onto Q, giving a tiny
+       ``(k+p) x d`` matrix, and SVD that exactly. Map the result back.
+
+    ``n_oversamples`` grabs a few extra directions so that noise in the random
+    draw does not cost us a real component. ``n_iter`` power iterations
+    (multiplying by ``X X'`` a few times) push the weaker singular values down
+    relative to the strong ones, sharpening the subspace when the spectrum
+    decays slowly.
+    """
+    rng = check_random_state(rng)
+    n, d = X.shape
+    size = min(k + n_oversamples, d)
+    Q = rng.normal(size=(d, size))
+    Q, _ = np.linalg.qr(X @ Q)
+    for _ in range(n_iter):
+        # power iteration, re-orthonormalised each step to fight round-off
+        Q, _ = np.linalg.qr(X.T @ Q)
+        Q, _ = np.linalg.qr(X @ Q)
+    B = Q.T @ X                       # small: (size, d)
+    Ub, S, Vt = np.linalg.svd(B, full_matrices=False)
+    return (Q @ Ub)[:, :k], S[:k], Vt[:k]
+
+
 class PCA(BaseEstimator, TransformerMixin):
-    def __init__(self, n_components=None, whiten=False):
+    """Principal component analysis.
+
+    PCA finds the orthogonal directions along which the data varies most. Every
+    route to them is a different way of diagonalising the same covariance, and
+    they differ only in cost and numerical care:
+
+    ``"full"``
+        SVD of the centred data. The most accurate, and the reference the
+        others are judged against. Costs O(n*d*min(n, d)).
+
+    ``"covariance_eigh"``
+        When there are far more samples than features, forming the ``d x d``
+        covariance ``X'X`` and eigendecomposing *that* is much cheaper: the
+        expensive part becomes O(n*d^2) with a tiny O(d^3) tail, and none of it
+        touches an n-by-d factorisation.
+
+        The catch is precision. Squaring the data squares the condition number,
+        so singular values below roughly ``sqrt(eps)`` times the largest are
+        lost in round-off. For well-conditioned data this is invisible; for
+        nearly-collinear features it is not. That is the trade being made, and
+        why it is not the universal default.
+
+    ``"randomized"``
+        Only the leading ``k`` components, via random projection. Wins when
+        ``k`` is much smaller than the data's dimensions.
+
+    ``"auto"``
+        Picks ``covariance_eigh`` when samples greatly outnumber features (the
+        case where it is both a large win and numerically comfortable),
+        ``randomized`` when only a few components of a large matrix are wanted,
+        and ``full`` otherwise.
+    """
+
+    def __init__(self, n_components=None, whiten=False, svd_solver="auto",
+                 random_state=None):
         self.n_components = n_components
         self.whiten = whiten
+        self.svd_solver = svd_solver
+        self.random_state = random_state
+
+    def _choose_solver(self, n, d, k):
+        if self.svd_solver != "auto":
+            return self.svd_solver
+        if n >= 10 * d and d <= 1000:
+            return "covariance_eigh"
+        if k < 0.8 * min(n, d) and max(n, d) > 500:
+            return "randomized"
+        return "full"
 
     def fit(self, X, y=None):
         X = check_array(X)
         n, d = X.shape
         self.mean_ = X.mean(axis=0)
         Xc = X - self.mean_
-        U, S, Vt = np.linalg.svd(Xc, full_matrices=False)
-        k = self.n_components or min(n, d)
-        if isinstance(k, float):
-            ratios = S ** 2 / (S ** 2).sum()
-            k = int(np.searchsorted(np.cumsum(ratios), k) + 1)
-        self.components_ = Vt[:k]
-        self.singular_values_ = S[:k]
-        self.explained_variance_ = (S[:k] ** 2) / (n - 1)
-        self.explained_variance_ratio_ = (S[:k] ** 2) / (S ** 2).sum()
+        # total variance is the same however we factorise: it is just the
+        # squared Frobenius norm, so a truncated solver can still report ratios
+        total_var = float((Xc ** 2).sum()) / (n - 1)
+
+        k_req = self.n_components
+        if k_req is None:
+            k_req = min(n, d)
+        solver = self._choose_solver(n, d, min(int(k_req) if not
+                                               isinstance(k_req, float)
+                                               else d, min(n, d)))
+
+        if solver == "covariance_eigh":
+            cov = Xc.T @ Xc
+            eigvals, eigvecs = np.linalg.eigh(cov)
+            order = np.argsort(-eigvals)
+            eigvals = np.maximum(eigvals[order], 0.0)
+            components = eigvecs[:, order].T
+            singular = np.sqrt(eigvals)
+        elif solver == "randomized":
+            k_fit = min(int(k_req) if not isinstance(k_req, float) else d,
+                        min(n, d))
+            _, singular, components = _randomized_svd(
+                Xc, k_fit, rng=self.random_state)
+        elif solver == "full":
+            _, singular, components = np.linalg.svd(Xc, full_matrices=False)
+        else:
+            raise ValueError(f"Unknown svd_solver: {self.svd_solver!r}")
+
+        explained = singular ** 2 / (n - 1)
+        if isinstance(k_req, float):
+            # keep the fewest components covering this fraction of variance
+            ratios = explained / total_var
+            k = int(np.searchsorted(np.cumsum(ratios), k_req) + 1)
+        else:
+            k = min(int(k_req), len(singular))
+
+        self.components_ = _deterministic_signs(components[:k])
+        self.singular_values_ = singular[:k]
+        self.explained_variance_ = explained[:k]
+        self.explained_variance_ratio_ = explained[:k] / total_var
         self.n_components_ = k
         self.n_features_in_ = d
         self.n_features_out_ = k
+        self.svd_solver_ = solver
         return self
 
     def transform(self, X):

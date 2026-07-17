@@ -11,12 +11,30 @@ from ..utils import check_array, check_random_state
 
 
 def _kmeans_plusplus(X, k, rng):
+    """Seed centres by D^2 sampling (Arthur & Vassilvitskii, 2007).
+
+    Picking k centres uniformly at random tends to drop several into the same
+    dense region and leave others empty, and Lloyd's algorithm only finds a
+    local optimum, so a bad start stays bad. D^2 sampling instead picks each
+    new centre with probability proportional to its squared distance from the
+    nearest centre already chosen: points in unserved regions are the most
+    likely to be picked, which spreads the seeds out. This is what earns
+    k-means++ its O(log k) approximation guarantee.
+    """
     n = len(X)
     centers = np.empty((k, X.shape[1]))
     centers[0] = X[rng.randint(n)]
     closest_sq = cdist(X, centers[:1]).ravel() ** 2
     for i in range(1, k):
-        probs = closest_sq / closest_sq.sum()
+        total = closest_sq.sum()
+        if total > 0:
+            probs = closest_sq / total
+        else:
+            # every point already sits exactly on a chosen centre (duplicated
+            # rows, or fewer distinct points than k). D^2 sampling has no
+            # signal left to use, so fall back to uniform rather than divide
+            # zero by zero
+            probs = np.full(n, 1.0 / n)
         centers[i] = X[rng.choice(n, p=probs)]
         d = cdist(X, centers[i:i + 1]).ravel() ** 2
         closest_sq = np.minimum(closest_sq, d)
@@ -42,15 +60,26 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         else:
             centers = np.asarray(self.init, dtype=np.float64).copy()
         for _ in range(self.max_iter):
+            # E-step: assign every point to its closest centre
             dist = cdist(X, centers)
             labels = dist.argmin(axis=1)
-            new_centers = np.empty_like(centers)
-            for c in range(k):
-                mask = labels == c
-                if mask.any() and w[mask].sum() > 0:
-                    new_centers[c] = np.average(X[mask], axis=0, weights=w[mask])
-                else:  # dead cluster: reseed at farthest point
-                    new_centers[c] = X[dist.min(axis=1).argmax()]
+            # M-step: recompute each centre as the weighted mean of its members.
+            # Masking per cluster (``X[labels == c]``) would walk the whole
+            # label array k times and allocate a fresh block each time. A
+            # scatter-add visits each sample once instead: bincount sums the
+            # weights landing in each cluster, and one more bincount per
+            # feature sums the weighted coordinates. O(n*d) with no per-cluster
+            # pass, and no temporaries.
+            weight_per_cluster = np.bincount(labels, weights=w, minlength=k)
+            new_centers = np.stack(
+                [np.bincount(labels, weights=w * X[:, j], minlength=k)
+                 for j in range(X.shape[1])], axis=1)
+            alive = weight_per_cluster > 0
+            new_centers[alive] /= weight_per_cluster[alive, None]
+            if not alive.all():
+                # a centre that captured nothing is wasted: restart it at the
+                # point currently worst served, which is where a centre helps most
+                new_centers[~alive] = X[dist.min(axis=1).argmax()]
             shift = np.linalg.norm(new_centers - centers)
             centers = new_centers
             if shift < self.tol:
