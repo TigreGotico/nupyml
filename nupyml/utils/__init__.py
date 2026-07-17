@@ -1,4 +1,31 @@
-"""Validation and random-state utilities."""
+"""Shared validation and numerical helpers.
+
+VALIDATION
+----------
+``check_array`` and ``check_X_y`` normalise input once, at the top of ``fit``,
+so the algorithms below can assume a float64 2-D array and nothing else. Failing
+loudly at the boundary beats a shape error twenty frames deep, or -- worse --
+silently broadcasting into a wrong answer.
+
+``force_all_finite="allow-nan"`` is how the tree estimators opt in to missing
+values, which they route rather than reject. Infinities are still refused: a NaN
+can be handled, an infinity poisons every arithmetic operation downstream.
+
+RANDOM STATE
+------------
+``check_random_state`` accepts ``None``, an int, or an existing
+``RandomState``, and always returns a generator. Passing a generator (rather
+than a seed) through nested calls is what keeps a forest's trees from all being
+identical while the whole fit stays reproducible.
+
+NUMERICAL HELPERS
+-----------------
+``softmax`` and ``sigmoid`` here are the stable versions, and worth reading
+alongside their autograd counterparts. ``sigmoid`` in particular branches on the
+sign of its input: ``1/(1+exp(-x))`` overflows for very negative x, while the
+algebraically identical ``exp(x)/(1+exp(x))`` does not -- and vice versa for
+large positive x. Picking the safe form per element is the whole trick.
+"""
 import numbers
 
 import numpy as np

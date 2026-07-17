@@ -1,4 +1,49 @@
-"""Support vector machines: SMO-trained SVC/SVR, dual coordinate LinearSVC."""
+"""Support vector machines: the widest possible margin.
+
+THE IDEA
+--------
+Many boundaries separate two classes; the perceptron takes whichever it trips
+over first. An SVM asks which is BEST, and answers: the one furthest from both
+classes. Maximising that margin is a bet about generalisation -- a boundary
+squeezed against the training points is one noisy sample away from being wrong.
+
+Only the points ON the margin matter. Everything else could be deleted without
+moving the boundary an inch. Those few are the SUPPORT VECTORS, and they are why
+the model is compact regardless of how much data it was fitted on.
+
+Real data is rarely separable, so "soft margin" allows violations at a price
+``C``: large C means few violations and a narrow margin (risking overfit), small
+C means a wide margin that tolerates errors. That is the bias-variance dial.
+
+THE KERNEL TRICK
+----------------
+The SVM optimization touches the data ONLY through inner products
+``x_i . x_j`` -- never through individual coordinates. So replace every inner
+product with ``k(x_i, x_j)``, and you are implicitly working in whatever space
+that kernel corresponds to. An RBF kernel corresponds to an infinite-dimensional
+space, in which almost any dataset is linearly separable.
+
+Nothing is ever mapped there. That is the trick: infinite dimensions, finite
+work, because the algorithm only asked for inner products in the first place.
+
+WHY THE OPTIMIZER IS THE INTERESTING PART
+-----------------------------------------
+Unlike most models here, an SVM is a genuinely CONSTRAINED optimization -- box
+constraints on every variable plus one equality -- so gradient descent does not
+apply. ``_smo`` implements Sequential Minimal Optimization properly, and is
+worth reading as a worked example of solving such a problem: KKT conditions,
+working-set selection, and an incrementally maintained gradient.
+
+THE COST
+--------
+The kernel matrix is n-by-n, so kernel SVMs are for thousands of samples, not
+millions. Beyond that either use ``LinearSVC`` (which never forms a kernel and
+scales linearly), or approximate the kernel explicitly with
+``nupyml.kernel_approximation`` and feed a linear model.
+
+Note also that the margin is a distance, not a probability -- see
+``probability=True`` and ``nupyml.calibration``.
+"""
 import numpy as np
 from scipy.spatial.distance import cdist
 

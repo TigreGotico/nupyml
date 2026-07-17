@@ -1,4 +1,36 @@
-"""Text feature extraction: CountVectorizer, TfidfVectorizer."""
+"""Turning text into vectors a model can consume.
+
+THE BAG OF WORDS
+----------------
+Represent a document by which words it contains and how often, discarding order
+entirely. "Dog bites man" and "man bites dog" become identical -- an obviously
+lossy model that works remarkably well, because for most classification tasks
+vocabulary carries the signal and syntax is a refinement.
+
+The matrix is enormous (a column per vocabulary word) and almost entirely zeros,
+so it is stored sparse. That sparsity is why ``MultinomialNB`` and ``LinearSVC``
+handle text so comfortably: cost scales with the words actually present, not with
+the vocabulary.
+
+WHY TF-IDF, NOT COUNTS
+----------------------
+Raw counts are dominated by words that are common everywhere -- "the" appears in
+every document and distinguishes nothing. TF-IDF weights each count by how RARE
+the word is across the corpus::
+
+    tfidf = tf * log(n_documents / n_documents_containing_word)
+
+A word in every document gets ``log(1) = 0`` and vanishes. A word in a handful
+gets a large weight. So the representation emphasises exactly the terms that
+discriminate, and the stopword list mostly stops being necessary.
+
+Rows are then L2-normalised, so a long document and a short one on the same
+topic land in the same direction -- which is what makes cosine similarity
+meaningful, and why ``Normalizer``-style row scaling is the default here.
+
+``ngram_range`` buys back a little of the word order that the bag of words threw
+away, at the cost of a much larger vocabulary.
+"""
 import re
 
 import numpy as np

@@ -1,4 +1,48 @@
-"""Manifold learning: t-SNE, Isomap, MDS, LLE."""
+"""Manifold learning: non-linear dimensionality reduction.
+
+THE ASSUMPTION
+--------------
+High-dimensional data usually does not fill its space. Images of a rotating
+object live in a million pixel dimensions but are described by one number -- the
+angle. The data lies on a low-dimensional MANIFOLD curved through the ambient
+space, and the goal is to unroll it.
+
+PCA cannot. It only rotates, so it finds the best flat subspace -- and if the
+manifold is curved, like a swiss roll, no flat projection preserves it: PCA
+flattens the roll and stacks distant sheets on top of each other.
+
+WHAT "DISTANCE" MEANS ON A MANIFOLD
+-----------------------------------
+The key idea in ``Isomap``: two points on opposite sheets of a rolled sheet of
+paper are close in STRAIGHT-LINE distance and far apart ALONG the paper. The
+second is the honest one. Isomap builds a neighbour graph -- trusting straight
+lines only locally, where the curve is negligible -- and takes shortest paths
+through it as geodesic distances, then hands those to classical MDS.
+
+THE FAMILY
+----------
+* ``MDS`` -- place points so pairwise distances are preserved as well as
+  possible. Linear if given euclidean distances; the engine the others build on.
+* ``Isomap`` -- MDS on geodesic distances. Unrolls global structure.
+* ``LocallyLinearEmbedding`` -- never uses global distance at all. Each point is
+  a weighted blend of its neighbours; find a low-dimensional layout keeping the
+  same blends. Local geometry only.
+* ``SpectralEmbedding`` -- Laplacian eigenmaps; see ``nupyml.cluster``'s
+  spectral discussion for why the Laplacian's bottom eigenvectors encode
+  connectivity.
+* ``TSNE`` -- see below.
+
+THE CAVEATS THAT MATTER
+-----------------------
+These are almost all TRANSDUCTIVE: they embed the points you give them and have
+no ``transform`` for new data, because the embedding is defined by the whole
+graph and not by a function. Add a point and you refit.
+
+And the neighbour graph is a decision, not a detail. Too many neighbours
+"short-circuits" the manifold -- an edge across the gap between two sheets makes
+them adjacent and the unrolling collapses. Too few disconnects the graph, and
+geodesic distance becomes infinite.
+"""
 import numpy as np
 import scipy.linalg
 import scipy.sparse as sp

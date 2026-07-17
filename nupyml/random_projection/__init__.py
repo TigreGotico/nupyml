@@ -1,4 +1,36 @@
-"""Random projections (Johnson-Lindenstrauss)."""
+"""Random projection: reduce dimensions by multiplying with random noise.
+
+This sounds like it cannot work, and the Johnson-Lindenstrauss lemma says it
+does: any n points in any number of dimensions can be projected onto
+``O(log n / eps^2)` random dimensions with every pairwise distance preserved to
+within ``1 +/- eps``.
+
+Read that bound again -- the target dimension depends on the NUMBER OF POINTS,
+and not at all on how many dimensions they started in. A million features
+project as easily as a thousand.
+
+WHY IT WORKS
+------------
+In high dimensions, random vectors are almost surely nearly orthogonal. A random
+matrix is therefore close to a rotation onto a random subspace, and a rotation
+preserves distances. Projecting onto a random subspace loses each point's
+component perpendicular to it -- but that loss concentrates tightly around its
+expectation, so every distance shrinks by nearly the same factor, and relative
+distances survive.
+
+WHAT IT COSTS AND BUYS
+----------------------
+PCA finds the BEST subspace, but must look at the data to do it -- O(n*d^2). A
+random projection ignores the data entirely, so it is essentially free, needs no
+fitting pass, and works in a streaming setting. It gives up optimality for cost.
+
+``SparseRandomProjection`` goes further: most entries are exactly zero, so the
+projection is a sparse matmul, and the JL guarantee still holds.
+
+Useful as a preprocessing step for anything distance-based -- kNN, clustering --
+where distances are all that matter and computing them in the original dimension
+is the bottleneck.
+"""
 import numpy as np
 import scipy.sparse as sp
 

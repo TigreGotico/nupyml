@@ -1,4 +1,39 @@
-"""Hidden Markov models: forward-backward, Viterbi, Baum-Welch."""
+"""Hidden Markov models: sequences with unobserved state.
+
+THE MODEL
+---------
+A system moves between STATES you cannot see, and at each step emits an
+observation you can. Speech: the state is the phoneme, the observation is the
+audio. The Markov assumption is that the next state depends only on the current
+one -- the past is summarised entirely by where you are now.
+
+Three parameters: ``startprob_`` (where it begins), ``transmat_`` (how it moves),
+and the emissions (what each state produces).
+
+THREE QUESTIONS, THREE ALGORITHMS
+---------------------------------
+* *How likely is this sequence?* -- the FORWARD algorithm (``score``).
+  Summing over every possible state path is exponential; dynamic programming
+  makes it linear, because all paths through a state at time t share a future.
+  ``_forward`` accumulates that shared work once.
+* *What states did it pass through?* -- VITERBI (``predict``). Identical
+  structure, with max replacing sum: instead of the total probability of
+  reaching a state, keep the best single path to it, and backtrack at the end.
+  Note this returns the best PATH, which is not the same as the sequence of
+  individually-best states -- and only Viterbi's answer is guaranteed to be a
+  legal path.
+* *What are the parameters?* -- BAUM-WELCH (``fit``), which is EM for HMMs. The
+  E-step computes state posteriors with forward-backward, the M-step re-estimates
+  the parameters from them. Same circularity, same fix, same local optimum as the
+  GMM in ``nupyml.mixture``.
+
+WHY EVERYTHING IS IN LOG SPACE
+------------------------------
+The probability of a specific 1000-step path is a product of 1000 numbers below
+1: it underflows to exactly zero long before the sequence ends, and then every
+ratio is 0/0. Logs turn the products into sums, and ``logsumexp`` adds
+probabilities in log space without ever leaving it.
+"""
 import numpy as np
 from scipy.special import logsumexp
 

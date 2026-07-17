@@ -1,4 +1,31 @@
-"""Composition: Pipeline, FeatureUnion, ColumnTransformer."""
+"""Chaining steps so that preprocessing is part of the model.
+
+WHY THIS IS NOT MERELY CONVENIENT
+---------------------------------
+The natural way to write a workflow is::
+
+    X_scaled = StandardScaler().fit_transform(X)      # WRONG
+    scores = cross_val_score(model, X_scaled, y)
+
+That scaler saw the whole dataset, including every fold's test rows. Their mean
+and variance have leaked into training, the reported score is optimistic, and
+nothing warns you.
+
+A ``Pipeline`` is a single estimator. ``cross_val_score(pipe, X, y)`` refits
+every step inside each fold, so the scaler only ever sees that fold's training
+rows -- as it would in production, where tomorrow's data cannot inform today's
+preprocessing.
+
+It also makes the whole workflow one object: one ``fit``, one ``predict``, and
+``GridSearchCV`` can tune preprocessing and model TOGETHER (``pca__n_components``
+alongside ``clf__C``), which is right, because the best number of components
+depends on the classifier that consumes them.
+
+* ``Pipeline`` -- steps in sequence, output feeding input.
+* ``FeatureUnion`` -- steps in parallel, outputs concatenated.
+* ``ColumnTransformer`` -- different steps for different columns, which is what
+  mixed numeric/categorical data needs.
+"""
 import numpy as np
 
 from ..base import BaseEstimator, clone, check_is_fitted

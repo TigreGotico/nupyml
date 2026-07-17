@@ -1,4 +1,32 @@
-"""Meta-estimators that turn binary learners into multiclass/multioutput ones."""
+"""Meta-estimators: making a binary learner solve a harder problem.
+
+Some algorithms are binary by nature -- an SVM finds ONE hyperplane. These
+wrappers decompose a harder problem into binary ones, and the decomposition
+matters:
+
+* ``OneVsRestClassifier`` -- K classifiers, each "class k versus everything
+  else". Cheap (K fits) and interpretable, but each sub-problem is imbalanced by
+  construction, and the K scores are not comparable, so ties are decided by
+  fiat.
+* ``OneVsOneClassifier`` -- K(K-1)/2 classifiers, one per pair, then vote. Many
+  more fits, but each is small (only two classes' data) and balanced, which
+  often makes it faster overall for algorithms that scale superlinearly, like a
+  kernel SVM.
+* ``OutputCodeClassifier`` -- assign each class a random binary codeword, train
+  one classifier per bit, decode by nearest codeword. The redundancy is
+  error-correcting: with well-separated codewords, some bit classifiers can be
+  wrong and the right class still wins.
+
+MULTIOUTPUT IS A DIFFERENT PROBLEM
+----------------------------------
+Multiclass means one label from many options. Multioutput means several labels
+at once, and the question becomes whether they are related.
+
+``MultiOutputClassifier`` fits one model per output, assuming independence.
+``ClassifierChain`` instead feeds each model the previous outputs' predictions,
+so it can learn that "has wheels" makes "is a vehicle" likelier -- at the cost
+of a fixed ordering, and of errors propagating down the chain.
+"""
 import itertools
 
 import numpy as np

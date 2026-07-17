@@ -1,4 +1,40 @@
-"""Outlier and novelty detection."""
+"""Outlier and novelty detection: finding what does not belong.
+
+TWO DIFFERENT QUESTIONS
+-----------------------
+* **Outlier detection** -- the training data itself is contaminated, and the task
+  is to find which rows are the anomalies. Unsupervised.
+* **Novelty detection** -- the training data is clean, and the task is to flag
+  new data that does not resemble it. That is why ``LocalOutlierFactor`` has a
+  ``novelty`` flag: the algorithm is the same, but scoring your own training data
+  and scoring new data are not the same operation.
+
+FOUR ANSWERS TO "WHAT IS NORMAL"
+--------------------------------
+* ``EllipticEnvelope`` -- normal data is one Gaussian blob. Fits a robust
+  covariance (MCD) so the outliers cannot define the shape meant to exclude
+  them, then measures Mahalanobis distance. Strong when the assumption holds,
+  useless when it does not.
+* ``OneClassSVM`` -- learns a boundary enclosing the data, kernelised, so the
+  shape is arbitrary. Flexible, and sensitive to its parameters.
+* ``LocalOutlierFactor`` -- normal means "about as densely surrounded as my
+  neighbours are". The only LOCAL method here, and the only one that can flag a
+  point sitting in a sparse region next to a dense cluster -- which global
+  methods miss entirely.
+* ``IsolationForest`` -- inverts the question. Rather than modelling normality,
+  it notes that anomalies are EASY TO SEPARATE: split on random features at
+  random values, and an outlier gets isolated in a few cuts while a normal point
+  takes many. Anomaly score is average path length. No distance, no density, no
+  distribution -- which is why it stays fast and effective in high dimensions
+  where the others degrade.
+
+THE SHARED CONVENTION
+---------------------
+``predict`` returns **-1 for outliers, +1 for inliers**, and
+``decision_function`` is negative exactly for the outliers. ``contamination``
+sets the threshold -- and it is an assumption you supply, not something learned:
+tell it 10% and it will find 10%, whether or not any exist.
+"""
 import numpy as np
 import scipy.linalg
 import scipy.optimize

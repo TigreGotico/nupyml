@@ -1,4 +1,57 @@
-"""Model selection: splitters, cross-validation, grid search."""
+"""Model selection: estimating how well a model will do on data it has not seen.
+
+THE ONLY REAL RULE
+------------------
+Never evaluate on data you fitted on. A model's training error measures memory,
+not learning -- a 1-nearest-neighbour classifier scores 100% on its own training
+set and may be worthless.
+
+Every tool here is a way of enforcing that rule while wasting as little data as
+possible.
+
+WHY CROSS-VALIDATION
+--------------------
+A single train/test split wastes the test set (never learned from) and gives a
+noisy estimate that depends on which rows landed where. K-fold reuses everything:
+each fold is held out exactly once, and the k scores both average to a better
+estimate and reveal its VARIANCE -- if the folds disagree wildly, no single
+number was ever going to be meaningful.
+
+CHOOSING THE SPLITTER IS A MODELLING DECISION
+---------------------------------------------
+The default assumes rows are independent and interchangeable. When that is
+false, plain KFold LEAKS and reports a score you will never reproduce:
+
+* ``StratifiedKFold`` -- keeps class proportions per fold. With a rare class,
+  random folds may contain none of it at all.
+* ``GroupKFold`` -- keeps a group (patient, user, document) entirely on one
+  side. Otherwise two readings from the same patient land on both sides and the
+  model is scored on near-copies of what it trained on.
+* ``TimeSeriesSplit`` -- always trains on the past and tests on the future.
+  Random folds let a model learn from tomorrow to predict today, which no
+  deployed model can do.
+
+THE SUBTLER LEAK
+----------------
+Scaling or selecting features BEFORE splitting leaks the test set's statistics
+into training. It is invisible and it inflates scores. Use a ``Pipeline`` and
+pass THAT to ``cross_val_score``: every step is then refitted inside each fold,
+which is exactly the point of pipelines.
+
+SEARCHING
+---------
+* ``GridSearchCV`` -- try every combination. Exhaustive, and exponential in the
+  number of parameters.
+* ``RandomizedSearchCV`` -- sample combinations. Usually better for the same
+  budget: most parameters do not matter much, and random sampling tries more
+  distinct values of the ones that do.
+* ``HalvingGridSearchCV`` -- start every candidate on a little data, keep the
+  best, give them more. Spends the budget where it is earning.
+
+Tuning on cross-validation and then reporting that same score is itself
+overfitting -- with enough candidates something wins by luck. A held-out set,
+untouched until the end, is the only honest final number.
+"""
 import itertools
 
 import numpy as np

@@ -1,4 +1,58 @@
-"""Matrix decomposition: PCA, TruncatedSVD, NMF, FastICA, KernelPCA."""
+"""Matrix decomposition: rewriting X as a product of simpler factors.
+
+Every method here factors ``X ~ W @ H`` -- each row of X becomes a combination
+of a few shared components. They differ ONLY in what they demand of the factors,
+and each demand buys a different kind of interpretability:
+
+=================== ==================== =====================================
+method              constraint           what you get
+=================== ==================== =====================================
+``PCA``             orthogonal           uncorrelated directions of max variance
+``TruncatedSVD``    orthogonal, no       same, but works on sparse data
+                    centring
+``NMF``             non-negative         PARTS, because nothing can cancel
+``FastICA``         statistically        independent SOURCES, not just
+                    independent          uncorrelated ones
+``SparsePCA``       few non-zeros        components you can actually read
+``DictionaryLearning``  sparse codes,    an overcomplete basis
+                    overcomplete
+=================== ==================== =====================================
+
+PCA VS ICA: UNCORRELATED IS NOT INDEPENDENT
+-------------------------------------------
+PCA finds directions of maximum variance, and its components are uncorrelated --
+which only constrains SECOND-order statistics. Independence is much stronger.
+Given two people talking over each other, PCA gives the two loudest orthogonal
+directions; ICA gives the two voices. That is why ICA is the tool for blind
+source separation and PCA is not.
+
+WHY NMF GIVES PARTS
+-------------------
+With signs allowed, a component can cancel another, and PCA components typically
+do exactly that: "this pattern, MINUS that one". Useful, and hard to interpret --
+what is negative brightness?
+
+Forbid negatives and cancellation becomes impossible, so the only way to build
+data is by ADDING pieces. Trained on faces, NMF produces noses and eyebrows
+where PCA produces ghostly whole-face templates. The constraint IS the
+interpretability, and it costs you: the problem is no longer convex, so there is
+no unique answer and the initialisation matters.
+
+KERNEL PCA
+----------
+PCA in a feature space you never construct. The kernel trick: PCA can be written
+purely in terms of inner products, so replacing them with ``k(x, x')`` performs
+PCA in whatever (possibly infinite-dimensional) space that kernel corresponds
+to. Non-linear structure becomes linear there.
+
+CHOOSING THE NUMBER OF COMPONENTS
+---------------------------------
+``explained_variance_ratio_`` is the usual guide -- and note that PCA maximises
+variance, which is not the same as usefulness. A low-variance direction can
+carry the entire signal you care about, and PCA will discard it without
+hesitation, because it never looks at the labels. ``LinearDiscriminantAnalysis``
+does.
+"""
 import numpy as np
 import scipy.linalg
 import scipy.sparse as sp

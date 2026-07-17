@@ -1,4 +1,28 @@
-"""Dataset generators and small bundled real datasets."""
+"""Datasets: synthetic generators and a few small real ones.
+
+THE GENERATORS
+--------------
+Each ``make_*`` function produces data with a KNOWN structure, which makes them
+the right tool for understanding an algorithm's assumptions -- you know the
+answer, so you can see exactly how and where a method fails:
+
+* ``make_blobs``     -- gaussian clusters. What KMeans assumes.
+* ``make_moons``     -- two interleaving crescents. Not linearly separable, and
+  not what KMeans assumes: it will cut them in half. DBSCAN and spectral
+  clustering handle them.
+* ``make_circles``   -- concentric rings. Defeats every centroid method; the
+  standard demonstration of why the kernel trick and spectral methods exist.
+* ``make_classification`` / ``make_regression`` -- controllable numbers of
+  informative and noise features, for studying regularisation and selection.
+* ``make_spiral``    -- non-linear and non-convex; a small hard problem.
+
+THE BUNDLED DATA
+----------------
+``load_iris``, ``load_wine``, ``load_breast_cancer``, ``load_digits``,
+``load_diabetes`` and ``load_linnerud`` are the classic small UCI sets, stored
+in the package so nothing is downloaded and no extra dependency is needed. They
+are small enough to experiment on instantly and real enough to be interesting.
+"""
 import os
 
 import numpy as np

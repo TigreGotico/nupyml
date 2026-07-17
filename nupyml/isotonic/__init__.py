@@ -1,4 +1,29 @@
-"""Isotonic (monotone) regression via pool-adjacent-violators."""
+"""Isotonic regression: the best monotone fit, with no functional form assumed.
+
+Sometimes you know a relationship only INCREASES -- dose and response, score and
+probability -- but nothing about its shape. Linear regression assumes a line;
+isotonic regression assumes only monotonicity and finds the closest
+non-decreasing function to the data.
+
+THE ALGORITHM
+-------------
+Pool Adjacent Violators. Walk left to right; whenever a value is smaller than
+the one before it -- a violation -- merge the two into one block holding their
+weighted mean. Merging may create a new violation with the block before, so
+merge again, cascading backwards.
+
+It is exact and O(n), which is remarkable for what looks like a constrained
+optimization over n variables. The output is a step function, since every
+merged block is flat.
+
+WHERE IT IS USED
+----------------
+Mainly as a calibrator (``nupyml.calibration``): a model's scores rank well but
+are not probabilities, and the mapping to probability is monotone but of unknown
+shape. Isotonic learns it from the data. Its flexibility is also its risk --
+with few samples it will fit noise into its steps, which is why Platt scaling's
+two parameters are often the safer choice.
+"""
 import numpy as np
 
 from ..base import BaseEstimator, RegressorMixin, TransformerMixin, check_is_fitted

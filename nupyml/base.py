@@ -1,4 +1,28 @@
-"""Base classes and estimator utilities (sklearn-compatible conventions)."""
+"""The estimator contract that everything in this library obeys.
+
+One set of conventions is what lets a ``Pipeline`` hold any transformer, a
+``GridSearchCV`` tune any model, and ``clone`` copy any estimator without
+knowing what it is:
+
+* **Parameters go in ``__init__``, and are stored unchanged.** No validation, no
+  coercion, no computation. ``clone`` reconstructs an estimator by reading
+  ``get_params`` and calling ``__init__`` with them, so anything ``__init__``
+  alters is silently re-altered on every clone -- which is why the rule is
+  strict, and why ``check_estimator`` tests it.
+* **Learning happens in ``fit``, and only in ``fit``.**
+* **Learned attributes end in an underscore** (``coef_``, ``labels_``). That
+  trailing underscore is how ``check_is_fitted`` can tell a fitted estimator
+  from a fresh one without either being told.
+* **``fit`` returns self**, so ``Model().fit(X, y).predict(X)`` chains.
+
+The mixins supply behaviour that follows from those conventions:
+``ClassifierMixin`` and ``RegressorMixin`` give a default ``score``,
+``TransformerMixin`` gives ``fit_transform``, and ``_SetOutputMixin`` provides
+the optional pandas integration.
+
+``utils.estimator_checks.check_estimator`` verifies all of it, and is worth
+reading as an executable statement of the contract.
+"""
 import copy
 import inspect
 

@@ -1,4 +1,30 @@
-"""Missing-value imputation."""
+"""Imputation: filling in missing values.
+
+There is no way to invent information that is not there, so every method is a
+guess with a different bias. The question is which distortion you prefer.
+
+* ``SimpleImputer`` (mean/median) -- fills the column's centre. Fast and always
+  available, but it SHRINKS the variance and weakens correlations: every filled
+  row is dragged to the middle, so the more you impute, the more the data looks
+  like its own average.
+* ``KNNImputer`` -- averages the k most similar rows, using whatever features
+  they share. Respects local structure, and costs a neighbour search per gap.
+* ``IterativeImputer`` -- models each column as a regression on the others, in
+  a round-robin until things settle. Uses correlations properly, which is why
+  it wins when features genuinely predict each other -- and it can only help if
+  they do.
+
+WHY MISSINGNESS ITSELF IS DATA
+------------------------------
+Values are often missing for a REASON: an unanswered question, a test not
+ordered. That fact can be more predictive than the value would have been.
+Imputing quietly destroys it -- which is why ``MissingIndicator`` exists, to
+keep the pattern as explicit features alongside the filled values.
+
+Better still, do not impute at all where you do not have to: the trees in
+``nupyml.tree`` and ``nupyml.ensemble`` route NaN down whichever branch fits
+better, learning the pattern instead of erasing it.
+"""
 import numpy as np
 
 from ..base import BaseEstimator, TransformerMixin, check_is_fitted, clone

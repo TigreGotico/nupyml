@@ -1,4 +1,37 @@
-"""Explicit feature maps that approximate kernels, so linear models scale."""
+"""Kernel approximation: the kernel trick's power at a linear model's price.
+
+THE PROBLEM
+-----------
+A kernel SVM must form an n-by-n kernel matrix: quadratic memory, cubic-ish
+time. Wonderful at 10,000 samples, impossible at 1,000,000. Meanwhile a linear
+model handles millions easily but only draws flat boundaries.
+
+THE FIX
+-------
+A kernel is an inner product in some feature space: ``k(x, y) = <phi(x), phi(y)>``,
+where ``phi`` is usually infinite-dimensional and never constructed. But if we
+can find a FINITE ``z(x)`` with::
+
+    z(x) . z(y)  ~  k(x, y)
+
+then running a plain linear model on ``z(X)`` approximates the kernel model --
+with the linear model's cost and scaling. The non-linearity moves out of the
+algorithm and into the features.
+
+TWO WAYS TO FIND z
+------------------
+* ``RBFSampler`` -- random Fourier features. Bochner's theorem says any shift-
+  invariant kernel is the Fourier transform of a probability distribution, so
+  sampling frequencies from that distribution and taking cosines gives, in
+  expectation, exactly the kernel. Data-independent: ``fit`` only draws random
+  numbers.
+* ``Nystroem`` -- pick a subset of the data as a basis and project onto the
+  kernel evaluated against it. Data-DEPENDENT, so it usually needs far fewer
+  components for the same accuracy -- it adapts to where the data actually is.
+
+The trade against a true kernel is accuracy for scale, and ``n_components`` is
+the dial.
+"""
 import numpy as np
 import scipy.linalg
 from scipy.spatial.distance import cdist

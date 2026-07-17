@@ -1,4 +1,44 @@
-"""Gaussian process regression and classification."""
+"""Gaussian processes: a distribution over functions.
+
+THE IDEA
+--------
+Rather than fitting parameters of one function, put a prior over ALL functions
+and condition it on the data. A GP says: any finite set of function values is
+jointly Gaussian, with covariance given by a kernel::
+
+    cov(f(x), f(x')) = k(x, x')
+
+The kernel is the entire model. It says what "similar inputs" means, and
+therefore what kind of function this is -- ``RBF`` for smooth, ``Matern`` for
+rougher, ``ExpSineSquared`` for periodic. Choosing the kernel replaces choosing
+an architecture, and kernels compose with ``+`` and ``*``, so "smooth trend plus
+periodic seasonality plus noise" is written literally as a sum.
+
+WHAT YOU GET FOR IT
+-------------------
+Predictions come with honest UNCERTAINTY, not as an add-on but from the same
+Gaussian conditioning that produces the mean. And the uncertainty behaves
+correctly: near the data it is small, far away it grows back to the prior. That
+is what makes GPs the tool for Bayesian optimization -- you can ask where the
+model does not know.
+
+WHAT IT COSTS
+-------------
+Conditioning needs the inverse of an n-by-n covariance: O(n^3) time and O(n^2)
+memory. Perfectly comfortable at a thousand points, hopeless at a million. GPs
+are for small data where each observation is expensive -- which is exactly when
+uncertainty matters most.
+
+Hyperparameters (length scales, noise) are chosen by maximising the MARGINAL
+likelihood, which automatically balances fit against complexity -- an Occam's
+razor that falls out of the mathematics rather than being imposed.
+
+Implementation-wise: nothing is ever inverted. Cholesky factorisation gives both
+the solve and the log-determinant stably and in half the arithmetic.
+``GaussianProcessClassifier`` needs one more approximation, since a Gaussian
+prior through a sigmoid link has no closed-form posterior -- it uses Laplace's
+method, fitting a Gaussian at the posterior mode.
+"""
 import numpy as np
 import scipy.linalg
 import scipy.optimize

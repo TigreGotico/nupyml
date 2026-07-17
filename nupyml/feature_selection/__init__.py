@@ -1,4 +1,38 @@
-"""Feature selection: filters, wrappers, and model-based selection."""
+"""Feature selection: dropping columns that do not earn their place.
+
+Fewer features means less overfitting (fewer chances to fit noise), faster
+fitting, and a model a human can read. In high dimensions it can be the
+difference between working and not -- see the curse of dimensionality in
+``nupyml.neighbors``.
+
+THREE STRATEGIES, TRADING COST FOR QUALITY
+------------------------------------------
+* **Filters** (``SelectKBest``, ``VarianceThreshold``) score each feature on its
+  own, before any model. Cheap and model-agnostic. Blind in one important way:
+  a feature useless alone may be essential in combination (neither of XOR's
+  inputs correlates with the output at all), and two features may be individually
+  excellent and jointly redundant.
+* **Embedded** (``SelectFromModel``) reads importances out of a model that
+  already computed them -- lasso coefficients, tree importances. Nearly free,
+  and it sees interactions, but it inherits that model's biases.
+* **Wrappers** (``RFE``, ``SequentialFeatureSelector``) refit the model over and
+  over on different subsets. They directly optimise what you care about, and
+  cost many fits.
+
+CHOOSING A SCORE
+----------------
+``f_classif`` and ``f_regression`` measure LINEAR association only -- they will
+rate a perfect ``y = x^2`` relationship at zero. ``mutual_info_*`` catches any
+dependence, at the cost of a k-nearest-neighbour estimate. ``chi2`` is for
+non-negative counts against class labels.
+
+THE LEAK
+--------
+Selecting features on the whole dataset and then cross-validating is a
+notorious way to manufacture a great score from pure noise: the selector already
+saw the test folds' labels. Selection must happen INSIDE the fold -- put it in a
+``Pipeline``.
+"""
 import numpy as np
 import scipy.stats
 

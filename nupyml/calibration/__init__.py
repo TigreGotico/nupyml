@@ -1,4 +1,41 @@
-"""Probability calibration: Platt scaling and isotonic calibration."""
+"""Calibration: making predicted probabilities mean what they say.
+
+A model can rank perfectly and still lie about probabilities. If you take every
+case it called "70% likely" and only 40% of them happen, the ranking may be
+flawless (AUC 1.0) while the number is useless for any decision that depends on
+the actual risk -- pricing, triage, expected cost.
+
+WHO NEEDS IT
+------------
+* **Naive Bayes** -- badly overconfident by construction. Its independence
+  assumption double-counts correlated evidence, driving probabilities toward 0
+  and 1.
+* **SVM** -- a margin is a distance, not a probability, and has no
+  probabilistic meaning at all.
+* **Boosted trees** -- pushed toward extremes by the loss.
+* **Bagged trees / random forests** -- pulled toward the middle by averaging.
+* Logistic regression is generally fine already: it optimises log-loss, which
+  IS a proper scoring rule, so calibration is what it was fitted for.
+
+THE TWO METHODS
+---------------
+* **sigmoid** (Platt scaling) fits a 1-D logistic to the scores. Two parameters,
+  so it works on little data, but it can only apply an S-shaped correction -- if
+  the miscalibration has another shape, it cannot help.
+* **isotonic** fits any monotone function. Strictly more flexible, and it will
+  happily overfit on small data; it needs a few thousand samples to behave.
+
+THE ESSENTIAL POINT
+-------------------
+Calibration must be fitted on data the model did not train on. A model's scores
+on its own training data are already overconfident, so a calibrator fitted there
+learns to correct a distortion that does not exist on new data -- and makes
+things worse. That is why ``CalibratedClassifierCV`` cross-validates, and why
+``cv="prefit"`` requires you to hand it a genuinely held-out set.
+
+Calibration never changes the ranking (both maps are monotone), so AUC is
+unchanged. Log loss and Brier score improve.
+"""
 import numpy as np
 import scipy.optimize
 

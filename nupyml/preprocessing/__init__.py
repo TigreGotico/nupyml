@@ -1,4 +1,46 @@
-"""Data preprocessing: scalers, encoders, feature expansion."""
+"""Preprocessing: putting data into a form a model can use.
+
+WHY SCALING MATTERS (AND WHEN IT DOES NOT)
+------------------------------------------
+Any model that measures DISTANCE or penalises COEFFICIENTS is at the mercy of
+units. If one feature is in metres and another in kilometres, the first dominates
+every distance and the ridge penalty punishes the second's larger coefficients
+for no reason but its units. So kNN, SVM, KMeans, PCA and every penalised linear
+model need scaled input.
+
+Trees do not. They only compare a feature to a threshold, so any monotone
+rescaling leaves the tree identical. Scaling before a random forest is harmless
+and pointless.
+
+WHICH SCALER
+------------
+* ``StandardScaler`` -- subtract mean, divide by std. The default. Assumes
+  roughly symmetric data; a single wild outlier distorts both statistics.
+* ``RobustScaler`` -- uses median and IQR, which outliers cannot move. Use it
+  when they exist and are real.
+* ``MinMaxScaler`` -- squashes into [0, 1]. Preserves the shape exactly, but a
+  single extreme value compresses everything else into a sliver.
+* ``Normalizer`` -- scales each ROW to unit norm, not each column. A different
+  operation for a different purpose: it makes direction matter and magnitude
+  not, which is what text similarity usually wants.
+
+ENCODING CATEGORIES
+-------------------
+``OrdinalEncoder`` maps categories to 0, 1, 2... which INVENTS an order: a model
+will conclude that "blue" (2) is greater than "red" (1), and halfway between it
+and "green" (3). Fine for a tree, actively wrong for anything linear or
+distance-based.
+
+``OneHotEncoder`` gives each category its own column, asserting no order. The
+cost is width, and correlated columns (they sum to 1).
+
+FIT ON TRAIN, TRANSFORM ON BOTH
+-------------------------------
+Every transformer here learns from data: a mean, a range, a category list. Those
+must be learned from the TRAINING data only and applied unchanged to test data.
+Fitting a scaler on everything leaks test statistics into training. This is why
+``fit`` and ``transform`` are separate, and why ``Pipeline`` exists.
+"""
 import itertools
 
 import numpy as np

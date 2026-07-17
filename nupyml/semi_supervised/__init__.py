@@ -1,4 +1,34 @@
-"""Semi-supervised learning: graph label propagation and self-training."""
+"""Semi-supervised learning: many unlabelled points, few labelled ones.
+
+Labels are expensive (an expert must read every scan) while raw data is nearly
+free. Semi-supervised methods use the unlabelled points too -- but only pay off
+if the data satisfies an assumption:
+
+* **Cluster assumption** -- points in the same dense region share a label, so the
+  decision boundary should pass through sparse space, not through a crowd.
+* **Manifold assumption** -- the data lies on a lower-dimensional surface, and
+  labels vary smoothly ALONG it. Two points may be far apart in space yet
+  adjacent along the surface.
+
+If neither holds, the unlabelled data is noise and these methods do worse than
+ignoring it.
+
+THE TWO FAMILIES
+----------------
+* ``LabelPropagation`` / ``LabelSpreading`` build a graph connecting nearby
+  points and let labels diffuse along the edges, like heat spreading through a
+  network. Labels flow easily within a dense cluster and barely cross the sparse
+  gaps between clusters, which is the cluster assumption made mechanical. They
+  differ in whether the given labels are held FIXED (propagation) or may be
+  overridden (spreading -- useful when some labels are wrong).
+* ``SelfTrainingClassifier`` wraps any classifier: train on what is labelled,
+  predict the rest, promote the most confident predictions to labels, repeat.
+  Simple and works with any model -- and its failure mode is confirmation bias.
+  A confident early mistake becomes a training label and the model trains itself
+  deeper into the error, with no mechanism to notice.
+
+Unlabelled points are marked ``-1`` in ``y``.
+"""
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import cdist
