@@ -54,6 +54,9 @@ A reasonable path through the library:
     valid.
 17. ``pgm`` -- probabilistic graphical models: Bayesian networks, Markov random
     fields, and exact inference by factor elimination.
+18. ``anomaly`` and ``drift`` -- unsupervised anomaly scoring (histogram, CDF,
+    angle, cluster based) and detecting when a data stream's distribution
+    changes underneath a deployed model.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
