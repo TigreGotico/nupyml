@@ -1,4 +1,38 @@
-"""Nearest-neighbor estimators built on scipy cKDTree."""
+"""Nearest neighbours: predict by looking up similar examples.
+
+THE LAZIEST POSSIBLE MODEL
+--------------------------
+There is no training. ``fit`` stores the data; all the work happens at predict
+time, when the k closest training points vote (classification) or average
+(regression). The "model" IS the dataset.
+
+That makes it non-parametric in the strict sense: the decision boundary can be
+arbitrarily complicated, because it is never summarised into parameters. With
+k=1 the training error is exactly zero -- every point is its own neighbour --
+which tells you nothing about generalisation. k controls the smoothing: small k
+is a jagged, low-bias, high-variance boundary; large k averages over a wide
+neighbourhood and eventually predicts the global majority.
+
+WHAT IT COSTS
+-------------
+* Prediction is O(n) per query in the worst case; a KD-tree cuts that to
+  O(log n) in low dimensions, which is why ``cKDTree`` is used here.
+* The whole training set must be kept.
+* Distance is meaningless unless features are scaled. A feature measured in
+  metres will dominate one measured in kilometres, purely through units.
+
+THE CURSE OF DIMENSIONALITY
+---------------------------
+This is the real limit, and it is worse than it sounds. As dimensions grow,
+volume grows exponentially, so any fixed number of samples becomes hopelessly
+sparse -- and the distances between points CONCENTRATE: the nearest and
+farthest neighbours end up almost equidistant. Once that happens "nearest"
+carries no information, and kNN degrades to guessing while looking like it is
+working. KD-trees degrade to brute force at the same time, for the same reason.
+
+Reducing the dimension first (``nupyml.decomposition``) is often what makes kNN
+viable at all.
+"""
 import numpy as np
 import scipy.sparse as sp
 from scipy.spatial import cKDTree
@@ -51,6 +85,15 @@ class _KNeighborsBase(BaseEstimator):
 
 
 class KNeighborsClassifier(_KNeighborsBase, ClassifierMixin):
+    """Classify by majority vote among the k nearest training points.
+
+    ``weights="uniform"`` gives every neighbour an equal vote.
+    ``weights="distance"`` weights by ``1/d``, so closer neighbours count more
+    -- which also means an exact match dominates completely (its weight is
+    infinite, handled explicitly), and is why distance weighting reproduces the
+    training labels perfectly.
+    """
+
     def fit(self, X, y):
         X, y = check_X_y(X, y, accept_sparse=True)
         X = _densify(X)
@@ -122,7 +165,22 @@ class NearestNeighbors(BaseEstimator):
 
 
 class KernelDensity(BaseEstimator, DensityMixin):
-    """Gaussian / tophat kernel density estimation."""
+    """Estimate a probability density without assuming its shape.
+
+    A histogram estimates a density but is blocky and depends on where the bin
+    edges happen to fall. Kernel density estimation fixes both by putting a
+    small smooth bump (the kernel) on top of EVERY data point and adding them
+    up. The result is smooth and shift-invariant.
+
+    ``bandwidth`` is the whole game -- far more important than which kernel is
+    used. Too small and the estimate is a spike per sample (fitting noise); too
+    large and every feature of the distribution is smoothed into one blob. It is
+    the same bias-variance dial as k in kNN, and the same as ``bandwidth`` in
+    MeanShift, which is really this density's modes.
+
+    Being a density estimate rather than a classifier, it supports ``sample``:
+    pick a training point at random, then jitter it by the kernel.
+    """
 
     def __init__(self, bandwidth=1.0, kernel="gaussian"):
         self.bandwidth = bandwidth

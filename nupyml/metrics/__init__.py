@@ -1,4 +1,75 @@
-"""Model evaluation metrics."""
+"""Metrics: turning predictions into a number that means something.
+
+Choosing the metric is a modelling decision, not a reporting one -- it declares
+what counts as a mistake. Optimise the wrong one and you will get exactly what
+you asked for.
+
+CLASSIFICATION
+--------------
+Everything derives from the confusion matrix: true/false positives/negatives.
+
+* **accuracy** -- the fraction correct. Nearly useless under imbalance: on data
+  that is 99% negative, predicting "negative" forever scores 99%. Reach for
+  ``balanced_accuracy_score`` (which averages per-class recall) instead.
+* **precision** -- of the ones flagged, how many were right? Answers "can I
+  trust an alarm?"
+* **recall** -- of the real positives, how many were found? Answers "how many
+  did I miss?"
+* **f1** -- their harmonic mean. Harmonic, not arithmetic, because it refuses
+  to be fooled: predicting everything positive gives recall 1.0 and an
+  arithmetic mean near 0.5, while the harmonic mean stays near precision.
+
+Precision and recall trade off through the decision threshold, and you cannot
+have both. Which one matters is a question about consequences, not statistics:
+a spam filter wants precision (deleting real mail is unforgivable), cancer
+screening wants recall (a missed case is fatal, a false alarm is a second
+test).
+
+Averaging over classes hides another decision. ``macro`` gives every class
+equal say, so a rare class counts as much as a common one. ``micro`` gives
+every SAMPLE equal say, so the common classes dominate. ``weighted`` averages
+by support.
+
+RANKING, NOT THRESHOLDING
+-------------------------
+``roc_auc_score`` and ``average_precision_score`` judge the ranking, ignoring
+where the threshold sits: AUC is the probability that a random positive is
+scored above a random negative. Choose between them by imbalance -- ROC uses
+the false-positive RATE, which barely moves when negatives are plentiful, so
+it flatters a model on skewed data. Average precision uses precision, which
+does move, and is the honest choice there.
+
+PROBABILITIES, NOT DECISIONS
+----------------------------
+``log_loss`` and ``brier_score_loss`` score the probabilities themselves. Log
+loss punishes confident errors without bound (predicting 0.0 for a true class
+is infinitely bad); Brier is a squared error and treats them more gently. A
+model can rank perfectly (AUC 1.0) and still be badly calibrated -- see
+``nupyml.calibration``.
+
+REGRESSION
+----------
+* **mean_squared_error** -- squares the errors, so one big miss outweighs many
+  small ones. Use it when large errors are disproportionately bad; avoid it if
+  outliers are noise rather than signal.
+* **mean_absolute_error** -- linear in the error, so it is robust and reads in
+  the units of y.
+* **r2_score** -- fraction of variance explained; 0 means "no better than
+  predicting the mean" and negative is worse than that.
+* **mean_pinball_loss** -- the loss a quantile regressor minimises, asymmetric
+  on purpose.
+
+CLUSTERING
+----------
+Split by whether ground truth exists. With labels: ``adjusted_rand_score`` (the
+"adjusted" part matters -- it corrects for agreement expected by chance, so
+random labellings score ~0 rather than something misleadingly positive) and the
+information-theoretic ``normalized_mutual_info_score``. Without labels:
+``silhouette_score``, ``calinski_harabasz_score``, ``davies_bouldin_score``,
+which measure whether clusters are tight and separated -- and therefore quietly
+assume the compact, spherical clusters that KMeans likes, and will report that
+a correct DBSCAN clustering of two rings is poor.
+"""
 import numpy as np
 
 from ..utils import column_or_1d, check_consistent_length
@@ -111,6 +182,16 @@ def log_loss(y_true, y_proba, labels=None, eps=1e-15, sample_weight=None):
 
 
 def roc_curve(y_true, y_score):
+    """True-positive rate against false-positive rate, at every threshold.
+
+    Sweep the threshold from "flag everything" to "flag nothing" and trace the
+    two rates. The implementation never loops over thresholds: sort by score
+    once, and a cumulative sum gives the true positives above every possible
+    cut. The candidate thresholds are exactly the distinct scores -- moving a
+    threshold between two identical scores changes nothing.
+
+    A diagonal line is chance; the top-left corner is perfection.
+    """
     y_true = column_or_1d(y_true)
     y_score = column_or_1d(y_score).astype(np.float64)
     classes = np.unique(y_true)
@@ -189,6 +270,17 @@ def mean_absolute_error(y_true, y_pred, sample_weight=None):
 
 
 def r2_score(y_true, y_pred, sample_weight=None):
+    """Coefficient of determination: 1 - (residual SS) / (total SS).
+
+    Reads as "what fraction of the variance did the model explain", by
+    comparing it to the dumbest reasonable baseline -- always predicting the
+    mean. 1.0 is perfect, 0.0 means you matched the baseline, and NEGATIVE
+    means you did worse than it, which is entirely possible and worth knowing.
+
+    Note that it is scale-free, which makes it comparable across problems but
+    also means a high R2 says nothing about whether the errors are small enough
+    to be useful.
+    """
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
     w = np.ones(len(y_true)) if sample_weight is None \
@@ -205,6 +297,23 @@ def r2_score(y_true, y_pred, sample_weight=None):
 # --------------------------------------------------------------------------
 
 def silhouette_score(X, labels):
+    """How well each point sits in its cluster, with no ground truth needed.
+
+    For each point, compare ``a`` (mean distance to its own cluster) with ``b``
+    (mean distance to the nearest OTHER cluster)::
+
+        s = (b - a) / max(a, b)
+
+    Near +1: much closer to its own cluster than any other. Near 0: on the
+    boundary. Negative: it is closer to a different cluster, and probably
+    mislabelled. Averaging over points gives a score that can be swept over k
+    to choose it.
+
+    The caveat is the same one that afflicts every internal index: it rewards
+    compact, well-separated clusters, so it agrees with KMeans' assumptions by
+    construction and will mark a perfectly correct density-based clustering of
+    elongated shapes as poor.
+    """
     from scipy.spatial.distance import squareform, pdist
     X = np.asarray(X, dtype=np.float64)
     labels = column_or_1d(labels)

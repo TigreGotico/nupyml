@@ -1,4 +1,39 @@
-"""Recurrent layers: vanilla RNN, GRU, LSTM."""
+"""Recurrent layers: carrying state along a sequence.
+
+THE IDEA
+--------
+Process a sequence one step at a time, keeping a hidden state that summarises
+everything seen so far::
+
+    h_t = f(x_t, h_{t-1})
+
+The SAME weights are applied at every step -- the recurrent analogue of a
+convolution's weight sharing across space. So an RNN handles any sequence
+length with a fixed parameter count.
+
+THE VANISHING GRADIENT, AND WHY GATES EXIST
+-------------------------------------------
+Backpropagating through T steps multiplies by the recurrent matrix T times. Any
+repeated multiplication is exponential: factors below 1 vanish, above 1 explode.
+A plain ``RNN`` therefore cannot learn dependencies more than ~10 steps apart --
+the gradient from step 100 reaches step 1 as approximately zero. Exploding
+gradients are the loud failure and are fixed by ``clip_grad_norm``; vanishing
+gradients are the silent one, and no clipping helps.
+
+``LSTM`` and ``GRU`` solve it by making the state's default behaviour PERSIST
+rather than transform. The LSTM's cell state is updated by ADDITION, not
+multiplication by a weight matrix, so there is a path along which the gradient
+flows unchanged -- exactly the trick a residual connection uses. Gates then
+learn when to write to that path, when to erase it, and when to read from it.
+
+WHEN TO USE THESE AT ALL
+------------------------
+Attention (``nupyml.nn.attention``) connects distant positions in one hop and
+parallelises across the sequence, which is why transformers replaced RNNs for
+most tasks. RNNs keep two advantages: cost linear rather than quadratic in
+length, and O(1) state for streaming -- a transformer must re-read its whole
+context.
+"""
 import numpy as np
 
 from ..autograd import Tensor
@@ -24,6 +59,17 @@ class _RecurrentBase(Module):
 
 
 class RNN(_RecurrentBase):
+    """The plain recurrent layer: ``h = tanh(x @ W_ih + h @ W_hh + b)``.
+
+    The simplest thing that could work, and instructive precisely because of how
+    it fails. The state is REPLACED at every step by a matrix product squashed
+    through tanh, so information must survive repeated multiplication to persist
+    -- and tanh's derivative is at most 1, usually much less, which makes the
+    decay through time essentially inevitable.
+
+    Fine for short sequences. For anything longer, use ``GRU`` or ``LSTM``.
+    """
+
     def __init__(self, input_size, hidden_size, rng=None):
         super().__init__(input_size, hidden_size, n_gates=1, rng=rng)
 
@@ -39,6 +85,20 @@ class RNN(_RecurrentBase):
 
 
 class GRU(_RecurrentBase):
+    """Gated Recurrent Unit: the LSTM's idea with two gates instead of three.
+
+    * **update gate** ``z`` -- how much of the old state to keep versus replace.
+      This is the key one: the new state is ``(1-z)*candidate + z*h_old``, an
+      interpolation. With ``z`` near 1 the state is copied through unchanged and
+      the gradient passes intact, which is how long-range memory survives.
+    * **reset gate** ``r`` -- how much of the old state the candidate is even
+      allowed to see, letting the unit drop context that has become irrelevant.
+
+    No separate cell state: the GRU keeps one vector where the LSTM keeps two,
+    so it has fewer parameters and trains faster. In practice the two perform
+    comparably, and which wins is task-dependent.
+    """
+
     def __init__(self, input_size, hidden_size, rng=None):
         super().__init__(input_size, hidden_size, n_gates=3, rng=rng)
 
@@ -60,6 +120,30 @@ class GRU(_RecurrentBase):
 
 
 class LSTM(_RecurrentBase):
+    """Long Short-Term Memory: a protected cell state, controlled by gates.
+
+    Two states are carried, and the split is the whole design:
+
+    * ``c`` -- the CELL state, long-term memory. Updated only by
+      ``c = f*c + i*g``: scaling and addition, never a matrix multiply. That
+      makes it a near-uninterrupted highway along which gradients flow without
+      the repeated multiplication that kills a plain RNN.
+    * ``h`` -- the HIDDEN state, what the outside world sees, read out of ``c``
+      through a gate.
+
+    Three gates decide the traffic on that highway, each a sigmoid in [0, 1]:
+
+    * **forget** ``f`` -- how much of the cell to erase. With ``f`` near 1 a
+      memory persists indefinitely; near 0 it is wiped.
+    * **input** ``i`` -- how much of the new candidate to write.
+    * **output** ``o`` -- how much of the cell to expose as ``h``. The cell can
+      hold something without acting on it yet.
+
+    All four gate pre-activations are computed in ONE matmul and then sliced,
+    which is why ``n_gates=4`` sizes the weights: one large matrix product is far
+    faster than four small ones.
+    """
+
     def __init__(self, input_size, hidden_size, rng=None):
         super().__init__(input_size, hidden_size, n_gates=4, rng=rng)
 

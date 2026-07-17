@@ -1,4 +1,31 @@
-"""Linear and quadratic discriminant analysis."""
+"""Discriminant analysis: model each class as a Gaussian, then apply Bayes.
+
+Like ``GaussianNB``, these are generative: model ``P(x | class)`` per class and
+turn it around with Bayes' rule. Unlike naive Bayes, they estimate the FULL
+covariance, so they see correlations between features rather than assuming they
+do not exist.
+
+The only difference between the two is one question: do the classes share a
+covariance?
+
+* ``LinearDiscriminantAnalysis`` says yes. Every class has its own mean but
+  one pooled covariance. In the Bayes rule, the quadratic terms then CANCEL
+  between classes and the boundary comes out LINEAR -- that is where the name
+  comes from, and it is a consequence, not a design choice.
+* ``QuadraticDiscriminantAnalysis`` says no. Each class keeps its own
+  covariance, nothing cancels, and the boundaries are quadratic -- ellipses and
+  parabolas. More flexible, but it estimates a full covariance per class, which
+  needs enough samples in every class to be non-singular.
+
+That is a bias-variance choice in the open: LDA is more constrained and more
+stable on little data; QDA fits more shapes and needs more data to do it.
+
+LDA also doubles as a supervised dimensionality reduction. Where PCA finds
+directions of maximum variance -- ignoring labels entirely -- LDA finds
+directions maximising BETWEEN-class scatter relative to WITHIN-class scatter:
+directions that pull classes apart. It yields at most ``n_classes - 1`` of them,
+since that is the dimension the class means span.
+"""
 import numpy as np
 from scipy.special import logsumexp
 

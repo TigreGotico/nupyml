@@ -1,4 +1,28 @@
-"""Weight initialization schemes."""
+"""Weight initialization: why the starting point decides whether training works.
+
+Initialise every weight to zero and every unit in a layer computes the same
+thing, receives the same gradient, and stays identical forever -- the layer has
+one effective unit no matter how wide it is. Symmetry must be broken randomly.
+
+But the SCALE of that randomness decides everything. Each layer multiplies the
+signal's variance by roughly ``fan_in * var(w)``. If that factor is below 1, the
+signal shrinks geometrically with depth until it vanishes; above 1, it explodes.
+Gradients suffer the same fate on the way back. This is why deep networks were
+considered untrainable before the schemes below.
+
+The fix is to choose ``var(w)`` so the factor is ~1:
+
+* ``xavier_*`` (Glorot) targets ``2 / (fan_in + fan_out)`` -- a compromise
+  keeping variance stable in both directions. Derived for symmetric activations
+  like tanh.
+* ``kaiming_*`` (He) targets ``2 / fan_in``. The extra factor of 2 accounts for
+  ReLU zeroing half its inputs and therefore halving the variance. Use this with
+  ReLU.
+
+``fan_in`` is the number of inputs feeding a unit; ``fan_out`` the number it
+feeds. For a conv layer both include the receptive field, since each output
+draws from ``in_channels * kh * kw`` values.
+"""
 import numpy as np
 
 from ..utils import check_random_state

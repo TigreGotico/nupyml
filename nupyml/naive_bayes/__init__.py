@@ -1,4 +1,60 @@
-"""Naive Bayes classifiers."""
+"""Naive Bayes: Bayes' rule plus one wildly false assumption.
+
+THE DERIVATION
+--------------
+We want ``P(class | features)``. Bayes' rule turns it around into things we can
+estimate by counting::
+
+    P(c | x) = P(x | c) * P(c) / P(x)
+
+``P(x)`` is the same for every class, so it cannot change which class wins and
+is dropped. ``P(c)`` is just how often each class occurs. That leaves
+``P(x | c)`` -- the joint distribution of all d features within a class -- which
+is hopeless to estimate: with d binary features it has 2^d entries, and no
+dataset covers them.
+
+THE "NAIVE" ASSUMPTION
+----------------------
+Pretend the features are independent GIVEN the class::
+
+    P(x | c) = prod_j P(x_j | c)
+
+Now each feature is estimated on its own, from a single column. The parameter
+count drops from exponential to linear, and fitting becomes counting -- one
+pass, no iteration, no optimizer.
+
+The assumption is essentially always false. "New" and "York" are not
+independent given "the article is about travel". So why does it work?
+
+Because classification only needs the ARGMAX to be right, not the
+probabilities. Dependence between features causes the same evidence to be
+counted repeatedly, which makes the winning class's probability far too
+extreme -- but usually leaves it winning. Naive Bayes is therefore a decent
+classifier and a terrible probability estimator: it reports 0.9999 when it
+means 0.7. If the probabilities matter, calibrate them
+(``nupyml.calibration``).
+
+WHICH VARIANT
+-------------
+The variants differ only in what ``P(x_j | c)`` is assumed to be:
+
+* ``GaussianNB``    -- continuous features: a Gaussian per feature per class.
+* ``MultinomialNB`` -- counts (word frequencies): a multinomial. The text
+  workhorse.
+* ``BernoulliNB``   -- binary presence/absence. Unlike Multinomial, it
+  explicitly penalises features that are ABSENT.
+* ``ComplementNB``  -- Multinomial's correction for imbalanced classes.
+* ``CategoricalNB`` -- unordered categories, each with its own distribution.
+
+SMOOTHING IS NOT OPTIONAL
+-------------------------
+A product of probabilities is annihilated by a single zero. If a word never
+appeared in class c in training, ``P(word | c) = 0`` and the entire class is
+ruled out forever, on one unseen word. ``alpha`` (Laplace/Lidstone smoothing)
+adds a pseudo-count so nothing is impossible, merely unlikely. Everything is
+also summed in LOG space rather than multiplied, since a product of hundreds of
+small probabilities underflows to zero regardless.
+"""
 import numpy as np
 import scipy.sparse as sp
 
@@ -24,6 +80,21 @@ class _BaseNB(BaseEstimator, ClassifierMixin):
 
 
 class GaussianNB(_BaseNB):
+    """Naive Bayes for continuous features.
+
+    Each feature within each class is modelled by a 1-D Gaussian, fitted by the
+    obvious thing: its mean and variance. Because features are assumed
+    independent, only the DIAGONAL of each class's covariance is estimated --
+    which is exactly what makes this cheap, and what distinguishes it from
+    ``QuadraticDiscriminantAnalysis``, which estimates the full covariance and
+    so can see correlations.
+
+    ``var_smoothing`` adds a small share of the overall variance to every
+    variance estimate. Without it, a feature that happens to be constant within
+    a class has zero variance, giving an infinitely peaked density and a
+    division by zero.
+    """
+
     def __init__(self, var_smoothing=1e-9):
         self.var_smoothing = var_smoothing
 
@@ -159,6 +230,19 @@ class _DiscreteNB(_BaseNB):
 
 
 class MultinomialNB(_DiscreteNB):
+    """Naive Bayes for count features. The classic text classifier.
+
+    Models a document as draws from a per-class die with one face per word:
+    ``P(word | c)`` is that word's share of all the words in class c. A
+    document's log-probability is then just its word counts dotted with those
+    log-probabilities -- which is why ``_joint_log_likelihood`` is a single
+    matrix product, and why this trains in one pass over a sparse matrix.
+
+    It works on tf-idf as well as raw counts, even though tf-idf weights are
+    not really counts -- another instance of the model being more useful than
+    its assumptions deserve.
+    """
+
     _requires_non_negative = True
     _estimator_tags = {"requires_positive_X": True}
 
@@ -179,6 +263,17 @@ class MultinomialNB(_DiscreteNB):
 
 
 class ComplementNB(_DiscreteNB):
+    """Multinomial NB corrected for imbalanced classes.
+
+    Under class imbalance, plain Multinomial NB estimates the rare class's word
+    distribution from very little text, so those estimates are noisy and the
+    common class tends to win by default. Complement NB instead estimates, for
+    each class, how often a word appears in every OTHER class -- statistics
+    computed from lots of data -- and then picks the class whose complement
+    matches the document WORST. Trading a direct estimate from little data for
+    an indirect one from plenty is what makes it steadier on skewed corpora.
+    """
+
     _requires_non_negative = True
     _estimator_tags = {"requires_positive_X": True}
 
@@ -198,6 +293,18 @@ class ComplementNB(_DiscreteNB):
 
 
 class BernoulliNB(_DiscreteNB):
+    """Naive Bayes for binary features: presence/absence, not counts.
+
+    The difference from Multinomial is easy to miss and matters: Bernoulli
+    explicitly models ABSENCE. Its likelihood includes a ``(1 - p)`` factor for
+    every vocabulary word the document does NOT contain, so a missing word is
+    evidence. Multinomial simply never mentions absent words.
+
+    That makes Bernoulli better on short texts, where absence is informative and
+    counts carry little signal, and worse on long ones, where the absence terms
+    swamp everything.
+    """
+
     def __init__(self, alpha=1.0, binarize=0.0):
         super().__init__(alpha=alpha)
         self.binarize = binarize

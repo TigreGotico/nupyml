@@ -16,6 +16,14 @@ def balanced_accuracy_score(y_true, y_pred):
 
 
 def matthews_corrcoef(y_true, y_pred):
+    """Correlation between predictions and truth, in [-1, +1].
+
+    The most honest single number for imbalanced binary problems, because it
+    uses all four cells of the confusion matrix. Accuracy and F1 can both look
+    excellent while a whole class is ignored; MCC cannot -- it is only high when
+    the model does well on both classes. 0 is chance, negative is
+    anti-correlated.
+    """
     from . import confusion_matrix
     C = confusion_matrix(y_true, y_pred).astype(np.float64)
     t = C.sum(axis=1)   # true counts
@@ -38,6 +46,13 @@ def cohen_kappa_score(y1, y2):
 
 
 def brier_score_loss(y_true, y_proba, pos_label=None):
+    """Mean squared error of predicted probabilities. LOWER is better.
+
+    Unlike log loss, it is bounded and forgiving of confident mistakes -- a
+    prediction of 0.0 for a true positive costs 1.0, not infinity. That makes it
+    the more stable choice for comparing calibration, and it decomposes neatly
+    into calibration and refinement terms.
+    """
     y_true = column_or_1d(y_true)
     y_proba = column_or_1d(y_proba).astype(np.float64)
     classes = np.unique(y_true)
@@ -77,12 +92,37 @@ def precision_recall_curve(y_true, y_score):
 
 
 def average_precision_score(y_true, y_score):
+    """Area under the precision-recall curve. The right AUC under imbalance.
+
+    ROC-AUC uses the false-positive rate, whose denominator is the number of
+    negatives. When negatives vastly outnumber positives, even a large number of
+    false alarms barely moves that rate, so ROC-AUC stays high while the model
+    is unusable in practice. Precision's denominator is the number of things
+    FLAGGED, which reacts immediately -- so this metric tells the truth on the
+    rare-positive problems where it matters.
+
+    Computed as a step-wise sum rather than trapezoid: interpolating a PR curve
+    is over-optimistic, because the curve is not linear between operating
+    points.
+    """
     precision, recall, _ = precision_recall_curve(y_true, y_score)
     # step-wise integral: sum (R_n - R_{n+1}) * P_n  (recall is decreasing here)
     return float(-np.sum(np.diff(recall) * precision[:-1]))
 
 
 def calibration_curve(y_true, y_proba, n_bins=5, strategy="uniform"):
+    """Are the predicted probabilities honest?
+
+    Bin the predictions, and in each bin compare the mean predicted probability
+    with the observed frequency. A perfectly calibrated model lies on the
+    diagonal: of the cases it called 70% likely, 70% happen.
+
+    Deviations have a shape worth recognising. An S-curve below the diagonal at
+    the top means overconfidence -- the classic naive Bayes or boosted-tree
+    signature. ``strategy="quantile"`` puts equal COUNTS in each bin rather than
+    equal widths, which avoids near-empty bins when predictions cluster at the
+    extremes.
+    """
     y_true = column_or_1d(y_true).astype(np.float64)
     y_proba = column_or_1d(y_proba).astype(np.float64)
     if strategy == "uniform":
@@ -214,6 +254,16 @@ def mutual_info_score(labels_true, labels_pred):
 
 
 def normalized_mutual_info_score(labels_true, labels_pred):
+    """Shared information between two labellings, scaled to [0, 1].
+
+    Mutual information asks how much knowing one labelling tells you about the
+    other. It is invariant to permutations of the label names -- which is what
+    you want when comparing clusterings, where "cluster 0" is arbitrary.
+
+    Raw MI grows with the number of clusters, so normalising by the entropies
+    makes it comparable. It does NOT correct for chance, though; for that see
+    ``adjusted_rand_score``.
+    """
     mi = mutual_info_score(labels_true, labels_pred)
     C = _contingency(labels_true, labels_pred)
     h1, h2 = _entropy(C.sum(axis=1)), _entropy(C.sum(axis=0))
