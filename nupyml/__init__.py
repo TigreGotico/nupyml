@@ -105,6 +105,10 @@ A reasonable path through the library:
     (SpectralCoclustering), density-peak clustering (centres as dense points far
     from denser ones), and consensus clustering (a stable partition from many
     runs via a co-association matrix).
+32. more ``anomaly`` detectors -- LODA (ensemble of random 1-D projection
+    histograms), feature bagging (subspace ensemble), half-space trees (mass in
+    random splits), Mahalanobis and PCA-reconstruction detectors -- plus automatic
+    score thresholding (IQR, MAD, generalized ESD).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
