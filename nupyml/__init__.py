@@ -101,6 +101,10 @@ A reasonable path through the library:
     (proportional-odds logit, rank-ridge), joint-support multi-output regression
     (``linear_model.MultiTaskElasticNet``), and conditional-quantile prediction
     (``ensemble.QuantileForest``) for calibrated intervals from a forest.
+31. more ``cluster`` methods -- co-clustering rows and columns jointly
+    (SpectralCoclustering), density-peak clustering (centres as dense points far
+    from denser ones), and consensus clustering (a stable partition from many
+    runs via a co-association matrix).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
