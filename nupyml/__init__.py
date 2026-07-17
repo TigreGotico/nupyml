@@ -35,6 +35,9 @@ A reasonable path through the library:
 10. ``timeseries`` and ``sequence`` -- when ORDER is the signal: state-space
     filters, ARIMA, exponential smoothing, and the dynamic programs behind
     sequence labelling and sequence distance.
+11. ``rl``, ``inference``, ``survival``, ``causal`` -- learning from
+    consequences, sampling and honest uncertainty, time-to-event with censoring,
+    and the effect of DOING rather than seeing.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
