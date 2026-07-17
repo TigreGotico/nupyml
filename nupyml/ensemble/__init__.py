@@ -50,6 +50,35 @@ a meta-model is trained on the members' predictions. The subtlety is that
 those predictions must be out-of-fold -- a member's opinion about data it
 trained on is far too optimistic, and a meta-model fed such predictions learns
 to trust the biggest overfitter.
+
+MIXTURE OF EXPERTS: A THIRD WAY
+-------------------------------
+``MixtureOfExpertsRegressor`` does not average and does not sequence. A learned
+GATE routes each input to whichever member specialises in it, so the members are
+not interchangeable -- averaging them would be actively wrong. Use it when the
+data is genuinely a union of regimes. It is also the idea behind sparse MoE
+layers in large language models.
+
+  bagging:  deep trees, in parallel, independent   -> cuts variance
+  boosting: shallow trees, in sequence, dependent  -> cuts bias
+  stacking: learn how to combine                   -> cuts both, carefully
+  mixture:  learn who to ASK                       -> fits piecewise structure
+
+THE FAMOUS VARIANTS (``_boosting_variants.py``)
+----------------------------------------------
+XGBoost, LightGBM and CatBoost are this same gradient boosting plus one or two
+specific ideas each, and the ideas are smaller than the branding suggests:
+
+* ``GOSSRegressor`` -- LightGBM's sampling: keep the big gradients, sample the
+  rest, reweight the survivors. Trains on ~30% of the data for ~the same score.
+* ``exclusive_feature_bundles`` -- LightGBM's other half: pack mutually
+  exclusive (one-hot) features into a single column, losing nothing.
+* ``ordered_target_statistic`` -- CatBoost's fix for a target leak that hides
+  inside a preprocessing step everyone thought was innocent. Worth reading even
+  if you never use CatBoost.
+* ``DARTRegressor`` -- dropout for trees, so the late ones still matter.
+* ``NGBoostRegressor`` -- predicts a DISTRIBUTION, and demonstrates why learned
+  uncertainty is only as honest as the mean model's generalisation.
 """
 import numpy as np
 
@@ -706,13 +735,28 @@ class VotingRegressor(BaseEstimator, RegressorMixin):
         return np.average(preds, axis=1, weights=self.weights)
 
 
+from ._extra import AdaBoostRegressor, RandomTreesEmbedding
+from ._boosting_variants import (
+    GOSSRegressor, OrderedBoostingRegressor, DARTRegressor, NGBoostRegressor,
+    goss_sample, exclusive_feature_bundles, bundle_features,
+    ordered_target_statistic,
+)
+from ._mixture_of_experts import (
+    MixtureOfExpertsClassifier, MixtureOfExpertsRegressor,
+)
+
 __all__ = [
     "BaggingClassifier", "BaggingRegressor",
     "RandomForestClassifier", "RandomForestRegressor",
     "ExtraTreesClassifier", "ExtraTreesRegressor",
-    "AdaBoostClassifier",
+    "AdaBoostClassifier", "AdaBoostRegressor",
     "GradientBoostingClassifier", "GradientBoostingRegressor",
     "HistGradientBoostingClassifier", "HistGradientBoostingRegressor",
     "VotingClassifier", "VotingRegressor",
     "StackingClassifier", "StackingRegressor",
+    "RandomTreesEmbedding",
+    "GOSSRegressor", "OrderedBoostingRegressor", "DARTRegressor",
+    "NGBoostRegressor", "goss_sample", "exclusive_feature_bundles",
+    "bundle_features", "ordered_target_statistic",
+    "MixtureOfExpertsClassifier", "MixtureOfExpertsRegressor",
 ]
