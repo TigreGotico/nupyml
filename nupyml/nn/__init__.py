@@ -26,6 +26,22 @@ THE PIECES
   becomes a generative one.
 * ``gan.py``       -- adversarial training, why the obvious generator loss
   saturates, and what the Wasserstein critic fixes.
+* ``vqvae.py``     -- a DISCRETE latent, and the straight-through estimator that
+  gets a gradient through an argmin.
+* ``flows.py``     -- RealNVP: an EXACT likelihood, bought by making the map
+  invertible and its Jacobian triangular.
+* ``diffusion.py`` -- DDPM: destroy the data gradually, learn to undo one step.
+* ``autoregressive.py`` -- MADE: an exact likelihood from the chain rule, and
+  masks that make the ordering structural rather than a convention.
+* ``rbm.py``       -- an energy-based model, and contrastive divergence: what to
+  do when the normalising constant cannot be computed.
+* ``self_supervised.py`` -- SimCLR and masked autoencoding: inventing labels from
+  the data, and why the pretext task is the method.
+
+The generative modules are best read in that order. Each one gives up something
+the previous kept -- a tractable likelihood, a continuous latent, a single-shot
+decoder -- and gets something back for it. Comparing what each trades away is
+more instructive than any of them alone.
 * ``optim.py``     -- SGD through Adam, as a progression of ideas.
 * ``mlp.py``       -- ``MLPClassifier``/``MLPRegressor``, sklearn-style wrappers
   for when you want a network without writing a training loop.
@@ -61,6 +77,17 @@ from .autoencoder import (
 from .gan import (
     Generator, Discriminator, GANLoss, NonSaturatingGANLoss, WGANLoss, GAN,
 )
+from .vqvae import VectorQuantizer, VQVAE
+from .flows import AffineCoupling, RealNVP
+from .diffusion import (
+    DDPM, NoisePredictor, linear_beta_schedule, cosine_beta_schedule,
+    timestep_embedding,
+)
+from .rbm import BernoulliRBM
+from .autoregressive import MADE, MaskedLinear
+from .self_supervised import (
+    SimCLR, MaskedAutoEncoder, GaussianNoiseAugment, MaskingAugment,
+)
 from .optim import (
     SGD, Adam, AdamW, RMSprop, clip_grad_norm, StepLR, CosineAnnealingLR,
     WarmupLR,
@@ -91,6 +118,10 @@ __all__ = [
     "ConditionalVAE", "VAELoss", "kl_divergence_normal",
     "Generator", "Discriminator", "GANLoss", "NonSaturatingGANLoss",
     "WGANLoss", "GAN",
+    "VectorQuantizer", "VQVAE", "AffineCoupling", "RealNVP",
+    "DDPM", "NoisePredictor", "linear_beta_schedule", "cosine_beta_schedule",
+    "timestep_embedding", "BernoulliRBM", "MADE", "MaskedLinear",
+    "SimCLR", "MaskedAutoEncoder", "GaussianNoiseAugment", "MaskingAugment",
     "SGD", "Adam", "AdamW", "RMSprop", "clip_grad_norm",
     "StepLR", "CosineAnnealingLR", "WarmupLR",
     "RNN", "GRU", "LSTM",
