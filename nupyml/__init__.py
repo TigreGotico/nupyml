@@ -121,6 +121,10 @@ A reasonable path through the library:
     forbids), competing risks (Aalen-Johansen cumulative incidence), the
     parametric Weibull AFT, and time-dependent evaluation (IPCW Brier score,
     integrated Brier, time-dependent AUC).
+36. ``signal`` -- 1-D signal processing (the counterpart to ``image``): the
+    discrete wavelet transform and denoising, STFT/spectrogram/mel/MFCC audio
+    features, empirical mode decomposition, and detection tools (peaks, Hilbert
+    envelope, zero-crossing rate).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
