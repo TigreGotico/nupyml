@@ -38,6 +38,9 @@ A reasonable path through the library:
 11. ``rl``, ``inference``, ``survival``, ``causal`` -- learning from
     consequences, sampling and honest uncertainty, time-to-event with censoring,
     and the effect of DOING rather than seeing.
+12. ``search``, ``streaming``, ``patterns``, ``recommend`` -- scale: approximate
+    nearest neighbours and sketches, online learners, association-rule mining,
+    and matrix-factorization recommenders.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
