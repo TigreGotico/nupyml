@@ -32,6 +32,9 @@ A reasonable path through the library:
    throws the rest of the library's reliance on one into relief.
 9. ``nonparametric`` -- flexible regression that stays readable: LOESS, GAM,
    MARS, RuleFit -- the ground between a linear model and a forest.
+10. ``timeseries`` and ``sequence`` -- when ORDER is the signal: state-space
+    filters, ARIMA, exponential smoothing, and the dynamic programs behind
+    sequence labelling and sequence distance.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
