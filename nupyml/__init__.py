@@ -71,6 +71,11 @@ A reasonable path through the library:
 23. ``changepoint`` and ``copula`` -- finding where a signal's behaviour changes,
     and modelling the SHAPE of dependence between variables separately from their
     marginals; plus survival extensions (RSF, AFT, concordance).
+24. ``encoders`` and the advanced selectors in ``feature_selection`` -- turning
+    messy categoricals into numbers without leaking the target (WOE, James-Stein
+    and other shrinkage encoders, leave-one-out), taming outliers/rare-levels/
+    cycles, and all-relevant/redundancy-aware/stable feature selection (Boruta,
+    mRMR, ReliefF, stability selection).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
