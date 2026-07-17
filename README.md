@@ -143,6 +143,25 @@ pip install -e ".[dev]"
 pytest test/
 ```
 
+## Benchmarks
+
+`bench/` is a small benchmark suite with a strict rule: solutions may use **only
+nupyml** (plus numpy/scipy/stdlib). Each task is a folder with a goal, a dataset,
+and a metric; every submission is a single script exposing a `solve(...)`
+function. We ship baselines and an auto-ranked scoreboard, and the community can
+add entries.
+
+```bash
+python bench/harness.py                    # run every task, refresh the boards
+python bench/harness.py digits_classification   # a single task
+```
+
+Submissions run in isolated subprocesses with a timeout and a static import
+check, so a crashing or rule-breaking entry cannot affect the run. The suite
+also **doubles as end-to-end QA** — `test/test_bench.py` fails the build if any
+baseline drops below its task's floor. See [`bench/README.md`](bench/README.md)
+and [`bench/CONTRIBUTING.md`](bench/CONTRIBUTING.md).
+
 ## Performance
 
 Being readable does not mean being slow. Fit time against scikit-learn on
