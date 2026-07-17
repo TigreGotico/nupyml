@@ -89,6 +89,10 @@ A reasonable path through the library:
     shape): ROCKET random convolutional kernels, shapelet transform, BOSS
     symbolic bag-of-words, DTW k-NN, a tsfresh-style feature bank, and the matrix
     profile for motif/discord discovery.
+28. ``fairness`` -- measuring and mitigating group bias: the conflicting
+    group-fairness metrics (demographic parity, equal opportunity, equalized
+    odds, predictive parity) and mitigators at each stage (reweighing and
+    correlation removal, exponentiated-gradient reduction, threshold optimizing).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
