@@ -148,6 +148,9 @@ A reasonable path through the library:
     for feature dicts, ``LabelGuidedEmbeddings`` (a label-trained MLP's hidden
     layer becomes the embedding), and ``EntityEmbeddingEncoder`` (learned dense
     vectors per high-cardinality category). Trained with autograd, run in numpy.
+43. more ``nn`` architectures -- residual blocks, a transformer DECODER +
+    GPT-style causal language model, a mixture density network (predict a
+    multimodal distribution, not a point), and a weight-sharing Siamese network.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

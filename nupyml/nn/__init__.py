@@ -78,6 +78,10 @@ from ._optim_extra import (
     Adadelta, AMSGrad, LAMB, SAM, SWA, EMA,
     ExponentialLR, PolynomialLR, CyclicalLR, OneCycleLR,
 )
+from ._architectures import (
+    ResidualBlock, TransformerDecoderLayer, CausalLanguageModel,
+    MixtureDensityNetwork, SiameseNetwork,
+)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -150,4 +154,6 @@ __all__ = [
     "GHMLoss", "WingLoss", "PoissonNLLLoss", "SupConLoss",
     "Adadelta", "AMSGrad", "LAMB", "SAM", "SWA", "EMA",
     "ExponentialLR", "PolynomialLR", "CyclicalLR", "OneCycleLR",
+    "ResidualBlock", "TransformerDecoderLayer", "CausalLanguageModel",
+    "MixtureDensityNetwork", "SiameseNetwork",
 ]
