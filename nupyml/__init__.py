@@ -65,6 +65,9 @@ A reasonable path through the library:
 21. ``optimal_transport`` -- the earth-mover's distance and its Sinkhorn solver,
     barycenters, domain adaptation, and the MMD/energy two-sample distances;
     plus ITML/LFDA/RCA in ``metric_learning``.
+22. ``graph`` -- learning from connectivity: PageRank/HITS/centrality, community
+    detection (Louvain, label propagation), node embeddings (DeepWalk, node2vec),
+    and the Weisfeiler-Lehman graph kernel.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
