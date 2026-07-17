@@ -59,6 +59,9 @@ A reasonable path through the library:
     changes underneath a deployed model.
 19. ``topic`` -- topic models (LDA, LSA), the BM25 search-ranking function, and
     document embeddings (Doc2Vec).
+20. ``multilabel`` and ``active`` -- predicting a SET of labels per example
+    (exploiting label correlations), and choosing which few examples are worth
+    the cost of labelling.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
