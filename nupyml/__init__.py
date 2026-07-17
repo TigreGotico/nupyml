@@ -113,6 +113,10 @@ A reasonable path through the library:
     Adamic-Adar, resource-allocation, preferential-attachment, Katz), degree
     assortativity, Girvan-Newman communities, max-flow/min-cut, shortest-path and
     random-walk kernels, and the LINE embedding.
+34. the ``optimal_transport`` expansion -- unbalanced OT (mass-relaxed, robust to
+    outliers), sliced Wasserstein (cheap high-dim via random 1-D projections),
+    Gromov-Wasserstein (aligning distributions in DIFFERENT spaces), and the
+    barycentric OT mapping for domain adaptation.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

@@ -39,6 +39,10 @@ Peyre & Cuturi, *Computational Optimal Transport* (2019); Cuturi (2013).
 """
 from .core import (sinkhorn, wasserstein_distance, barycenter,
                    ot_domain_adaptation, mmd, energy_distance)
+from ._advanced import (sinkhorn_unbalanced, sliced_wasserstein,
+                        gromov_wasserstein, ot_mapping)
 
 __all__ = ["sinkhorn", "wasserstein_distance", "barycenter",
-           "ot_domain_adaptation", "mmd", "energy_distance"]
+           "ot_domain_adaptation", "mmd", "energy_distance",
+           "sinkhorn_unbalanced", "sliced_wasserstein", "gromov_wasserstein",
+           "ot_mapping"]
