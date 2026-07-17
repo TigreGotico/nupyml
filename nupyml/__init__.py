@@ -125,6 +125,10 @@ A reasonable path through the library:
     discrete wavelet transform and denoising, STFT/spectrogram/mel/MFCC audio
     features, empirical mode decomposition, and detection tools (peaks, Hilbert
     envelope, zero-crossing rate).
+37. ``ranking`` and more ``recommend`` -- learning to rank (RankNet's pairwise
+    cross-entropy, LambdaMART's NDCG-scaled lambda gradients) with the ranking
+    metrics that judge an order (NDCG, MAP, MRR, hit-rate), plus Slope One and
+    co-clustering collaborative filtering.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

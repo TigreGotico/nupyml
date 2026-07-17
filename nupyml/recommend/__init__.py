@@ -37,6 +37,7 @@ Koren, Bell & Volinsky (2009); Rendle et al. (2009, 2010).
 from .factorization import (MatrixFactorization, ALS, BPR, FactorizationMachine,
                             SVDpp)
 from .neighborhood import UserBasedCF, ItemBasedCF, SLIM
+from ._neighborhood2 import SlopeOne, CoClusteringCF
 
 __all__ = ["MatrixFactorization", "ALS", "BPR", "FactorizationMachine", "SVDpp",
-           "UserBasedCF", "ItemBasedCF", "SLIM"]
+           "UserBasedCF", "ItemBasedCF", "SLIM", "SlopeOne", "CoClusteringCF"]
