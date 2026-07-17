@@ -20,6 +20,9 @@ pip install numpy scipy
 pip install -e .
 ```
 
+Full documentation lives in [`docs/`](docs/index.md): a getting-started guide,
+a tour of every package, and a reading guide to the parts most worth studying.
+
 ## What's inside
 
 ### Neural networks (`nupyml.nn`, `nupyml.autograd`)
@@ -74,6 +77,36 @@ naive Bayes, SVC, KMeans and the metrics. **`partial_fit`** (out-of-core) is
 available on SGD\*, the naive Bayes family, the scalers and MiniBatchKMeans;
 **`warm_start`** on forests, gradient boosting and MLPs.
 
+### Beyond the core
+
+The library also reaches into the scikit-learn-*adjacent* ecosystem — the
+families sklearn itself leaves to statsmodels, pyod, gensim, POT, networkx and
+friends. Each is documented in [`docs/`](docs/index.md).
+
+| Package | What it adds |
+|---|---|
+| `stats` | Statistical **inference**, not just point estimates: OLS/WLS/GLM/Logit/Probit/Poisson with a `.summary()` (SEs, t/z, p-values, CIs, R²/AIC/BIC, HC robust SEs), ANOVA, and diagnostics (Durbin-Watson, Ljung-Box, Breusch-Pagan, White, Jarque-Bera, ADF, KPSS, Granger) |
+| `inference` | MCMC (Metropolis/Gibbs/HMC), Bayesian optimization, and **conformal prediction** — split/Mondrian intervals, conformalized quantile regression, Venn-Abers probability intervals, adaptive conformal for drifting streams |
+| `pgm` | Discrete **Bayesian networks**: factor algebra, variable elimination, belief propagation, Chow-Liu / BIC-hill-climb structure learning, ancestral sampling |
+| `anomaly` / `drift` | HBOS, ECOD, COPOD, KNN, CBLOF, ABOD outlier detectors; ADWIN, DDM, EDDM, Page-Hinkley, KSWIN **concept-drift** detectors |
+| `topic` | LDA (collapsed Gibbs), LSA, BM25 ranking, Doc2Vec, UMass coherence |
+| `multilabel` / `active` | Binary relevance → classifier chains → label powerset → RAkEL → MLkNN; uncertainty/margin/entropy/QBC/expected-model-change/core-set **active learning** |
+| `optimal_transport` / `metric_learning` | Sinkhorn, Wasserstein, barycenters, OT domain adaptation, MMD/energy distance; ITML, LFDA, RCA |
+| `graph` | PageRank, HITS, centralities, Louvain and label-propagation communities, DeepWalk/node2vec, Weisfeiler-Lehman kernel |
+| `changepoint` / `copula` / `survival` | PELT, BinSeg, CUSUM, BOCPD; Gaussian/t/Clayton/Gumbel/Frank copulas; Kaplan-Meier, Cox, random survival forest, AFT, concordance |
+| `encoders` | Target encoders that bound leak — WOE, James-Stein, M-estimate, leave-one-out — plus binary/count encoders, winsorizer, rare-label, cyclical |
+| `image` | HOG, LBP, GLCM/Haralick, Gabor descriptors; integral image, connected components, morphology, Hough transform |
+| `imbalance` | SMOTE/ADASYN/Borderline/Tomek/NearMiss resampling **and** balanced ensembles (BalancedRandomForest, RUSBoost, EasyEnsemble) |
+| `recommend` | Matrix factorization, ALS, BPR, factorization machines, SVD++, and neighborhood CF (user/item KNN, SLIM) |
+| `timeseries` / `sequence` | Kalman/EKF/UKF/particle filters, ARIMA, Holt-Winters, STL; DTW and edit distances |
+| `causal` / `explain` | IPW/doubly-robust effect estimation; SHAP, LIME, PDP, integrated gradients |
+| `embed` / `gnn` | word2vec, GloVe, BPE, WordPiece; GCN, GraphSAGE, GAT |
+| `rl` / `evolutionary` | Bandits and tabular RL; CMA-ES and evolution strategies |
+| `search` / `streaming` / `patterns` | LSH/IVF/PQ + Bloom/CMS/HLL/t-digest; FTRL/Hedge/Hoeffding; Apriori/FP-Growth/ECLAT |
+
+`model_selection` also carries the AutoML-lite searchers **Hyperband** and
+**TPE** alongside grid/random/halving search.
+
 ## Quick start
 
 ```python
@@ -124,7 +157,7 @@ StandardScaler().set_output(transform="pandas").fit_transform(df)
 ## Checking your own estimators
 
 `check_estimator` runs the API contract against any estimator — the same suite
-all 78 built-in estimators pass:
+all 80 built-in estimators pass:
 
 ```python
 from nupyml.utils.estimator_checks import check_estimator
