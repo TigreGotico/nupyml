@@ -117,6 +117,10 @@ A reasonable path through the library:
     outliers), sliced Wasserstein (cheap high-dim via random 1-D projections),
     Gromov-Wasserstein (aligning distributions in DIFFERENT spaces), and the
     barycentric OT mapping for domain adaptation.
+35. the ``survival`` expansion -- additive hazards (time-varying effects Cox
+    forbids), competing risks (Aalen-Johansen cumulative incidence), the
+    parametric Weibull AFT, and time-dependent evaluation (IPCW Brier score,
+    integrated Brier, time-dependent AUC).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

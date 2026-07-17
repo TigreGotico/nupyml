@@ -31,6 +31,10 @@ Kaplan-Meier's survival curve.
 """
 from .core import KaplanMeier, NelsonAalen, CoxPH
 from .advanced import concordance_index, RandomSurvivalForest, AFT
+from ._advanced import (AalenAdditiveHazards, AalenJohansen, WeibullAFT,
+                        brier_score, integrated_brier_score, time_dependent_auc)
 
 __all__ = ["KaplanMeier", "NelsonAalen", "CoxPH", "concordance_index",
-           "RandomSurvivalForest", "AFT"]
+           "RandomSurvivalForest", "AFT",
+           "AalenAdditiveHazards", "AalenJohansen", "WeibullAFT",
+           "brier_score", "integrated_brier_score", "time_dependent_auc"]
