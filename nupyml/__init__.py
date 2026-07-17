@@ -62,6 +62,9 @@ A reasonable path through the library:
 20. ``multilabel`` and ``active`` -- predicting a SET of labels per example
     (exploiting label correlations), and choosing which few examples are worth
     the cost of labelling.
+21. ``optimal_transport`` -- the earth-mover's distance and its Sinkhorn solver,
+    barycenters, domain adaptation, and the MMD/energy two-sample distances;
+    plus ITML/LFDA/RCA in ``metric_learning``.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

@@ -30,5 +30,6 @@ The learned transform is then handed to an ordinary kNN, which suddenly works fa
 better because it is finally measuring the right thing.
 """
 from .core import NCA, LMNN
+from .advanced import ITML, LFDA, RCA
 
-__all__ = ["NCA", "LMNN"]
+__all__ = ["NCA", "LMNN", "ITML", "LFDA", "RCA"]
