@@ -140,6 +140,10 @@ A reasonable path through the library:
 40. more ``nn`` optimizers & schedules -- Adadelta, AMSGrad, LAMB, and the
     wrappers SAM (flat minima), SWA and weight EMA; plus one-cycle, cyclical,
     polynomial, and exponential learning-rate schedules.
+41. ``optimize`` -- from-scratch mathematical optimization under the estimators:
+    linear programming (simplex), quadratic programming (active-set), proximal
+    methods (FISTA, ADMM), conjugate gradient, and derivative-free search
+    (Nelder-Mead, simulated annealing, particle swarm).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
