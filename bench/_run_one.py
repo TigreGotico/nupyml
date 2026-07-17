@@ -40,6 +40,13 @@ def main():
         y_pred = module.solve(data["X"])
     elif kind == "forecast":
         y_pred = module.solve(data["y_history"], int(data["horizon"]))
+    elif kind == "ranking":
+        y_pred = module.solve(data["X_train"], data["y_train"],
+                              data["groups_train"], data["X_test"],
+                              data["groups_test"])
+    elif kind == "survival":
+        y_pred = module.solve(data["X_train"], data["durations_train"],
+                              data["events_train"], data["X_test"])
     else:
         raise ValueError(f"unknown KIND {kind!r}")
 

@@ -6,9 +6,9 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_isolation_forest` | 1.0000 | 5.53 |
-| 2 | `baseline_knn` | 1.0000 | 1.10 |
-| 3 | `baseline_hbos` | 1.0000 | 1.00 |
-| 4 | `baseline_ecod` | 0.9841 | 1.08 |
+| 1 | `baseline_isolation_forest` | 1.0000 | 2.62 |
+| 2 | `baseline_knn` | 1.0000 | 0.57 |
+| 3 | `baseline_hbos` | 1.0000 | 0.56 |
+| 4 | `baseline_ecod` | 0.9841 | 0.52 |
 
 _Regenerate with `python bench/harness.py anomaly_detection`._

@@ -57,6 +57,19 @@ any that reach outside `nupyml` / `numpy` / `scipy` / the stdlib as an
 | `multilabel_emotions` | supervised | macro-F1 | correlated multi-label prediction |
 | `anomaly_detection` | clustering | ROC-AUC | unsupervised outlier ranking |
 | `ratings_recommender` | supervised | RMSE (lower is better) | latent-factor recommendation |
+| `text_classification` | supervised | accuracy | text pipelines (tf-idf/bag-of-words + classifier) |
+| `image_feature_classification` | supervised | accuracy | hand-crafted image features (HOG/LBP) |
+| `learning_to_rank` | ranking | NDCG@10 | query-grouped learning to rank |
+| `survival_risk` | survival | concordance index | risk ranking under censoring |
+
+Two KINDs beyond `supervised`/`clustering`/`forecast`:
+
+- **`ranking`** — `solve(X_train, y_train, groups_train, X_test, groups_test) ->
+  scores`. `groups_*` list the size of each contiguous query block; the metric
+  scores per query (NDCG). Relevances (`y_test`) stay held out.
+- **`survival`** — `solve(X_train, durations_train, events_train, X_test) ->
+  risk_scores` (higher = fails sooner). `events=0` means censored; the held-out
+  `(durations_test, events_test)` feed the concordance index.
 
 ## How scoring works
 

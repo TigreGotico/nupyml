@@ -110,15 +110,40 @@ def run_submission(task_dir, submission_path, timeout=TIMEOUT_SECONDS):
         tmp = Path(tmp)
         in_npz, out_npz = tmp / "in.npz", tmp / "out.npz"
         kind = task.KIND
+        # `n_expected` is the length y_pred must match; `call_metric(y_pred)`
+        # scores it against the held-out answers that never leave this process.
         if kind == "supervised":
             X_train, y_train, X_test, y_test = data
             np.savez(in_npz, X_train=X_train, y_train=y_train, X_test=X_test)
+            n_expected = len(y_test)
+            def call_metric(yp): return task.metric(y_test, yp)
         elif kind == "clustering":
             X, y_test = data
             np.savez(in_npz, X=X)
+            n_expected = len(y_test)
+            def call_metric(yp): return task.metric(y_test, yp)
         elif kind == "forecast":
             y_history, y_test = data
             np.savez(in_npz, y_history=y_history, horizon=len(y_test))
+            n_expected = len(y_test)
+            def call_metric(yp): return task.metric(y_test, yp)
+        elif kind == "ranking":
+            # query-grouped: predict a score per test item; metric needs the
+            # test groups to compute NDCG per query
+            (X_train, y_train, groups_train, X_test, y_test, groups_test) = data
+            np.savez(in_npz, X_train=X_train, y_train=y_train,
+                     groups_train=np.asarray(groups_train), X_test=X_test,
+                     groups_test=np.asarray(groups_test))
+            n_expected = len(y_test)
+            def call_metric(yp): return task.metric(y_test, yp, groups_test)
+        elif kind == "survival":
+            # censored data: predict a risk score per test subject; metric is the
+            # concordance index against the held-out (durations, events)
+            (X_train, dur_train, evt_train, X_test, dur_test, evt_test) = data
+            np.savez(in_npz, X_train=X_train, durations_train=dur_train,
+                     events_train=evt_train, X_test=X_test)
+            n_expected = len(dur_test)
+            def call_metric(yp): return task.metric(dur_test, evt_test, yp)
         else:
             return None, 0.0, f"error(unknown KIND {kind!r})"
 
@@ -137,11 +162,11 @@ def run_submission(task_dir, submission_path, timeout=TIMEOUT_SECONDS):
             return None, runtime, f"error({msg[:80]})"
 
         y_pred = np.load(out_npz)["y_pred"]
-        if len(y_pred) != len(y_test):
+        if len(y_pred) != n_expected:
             return None, runtime, "invalid_output(length mismatch)"
 
     try:
-        score = float(task.metric(y_test, y_pred))
+        score = float(call_metric(y_pred))
     except Exception as exc:  # a metric that chokes on the prediction shape/type
         return None, runtime, f"invalid_output({str(exc)[:60]})"
     return score, runtime, "ok"

@@ -6,9 +6,9 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_gradient_boosting` | 0.7645 | 5.24 |
-| 2 | `baseline_random_forest` | 0.7291 | 6.38 |
-| 3 | `baseline_smote_logistic` | 0.7264 | 0.72 |
-| 4 | `baseline_logistic_plain` | 0.7231 | 0.69 |
+| 1 | `baseline_gradient_boosting` | 0.7645 | 2.76 |
+| 2 | `baseline_random_forest` | 0.7291 | 3.62 |
+| 3 | `baseline_smote_logistic` | 0.7264 | 0.39 |
+| 4 | `baseline_logistic_plain` | 0.7231 | 0.38 |
 
 _Regenerate with `python bench/harness.py fraud_imbalanced`._
