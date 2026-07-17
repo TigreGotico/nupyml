@@ -151,6 +151,9 @@ A reasonable path through the library:
 43. more ``nn`` architectures -- residual blocks, a transformer DECODER +
     GPT-style causal language model, a mixture density network (predict a
     multimodal distribution, not a point), and a weight-sharing Siamese network.
+44. more self-supervision in ``nn`` -- Barlow Twins (redundancy reduction toward
+    the identity cross-correlation) and BYOL (an EMA target + predictor, learning
+    without negatives), joining the existing SimCLR and masked autoencoder.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

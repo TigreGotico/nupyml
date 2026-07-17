@@ -82,6 +82,7 @@ from ._architectures import (
     ResidualBlock, TransformerDecoderLayer, CausalLanguageModel,
     MixtureDensityNetwork, SiameseNetwork,
 )
+from ._self_sup_extra import BarlowTwins, BYOL
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -156,4 +157,5 @@ __all__ = [
     "ExponentialLR", "PolynomialLR", "CyclicalLR", "OneCycleLR",
     "ResidualBlock", "TransformerDecoderLayer", "CausalLanguageModel",
     "MixtureDensityNetwork", "SiameseNetwork",
+    "BarlowTwins", "BYOL",
 ]
