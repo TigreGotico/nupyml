@@ -76,6 +76,10 @@ A reasonable path through the library:
     and other shrinkage encoders, leave-one-out), taming outliers/rare-levels/
     cycles, and all-relevant/redundancy-aware/stable feature selection (Boruta,
     mRMR, ReliefF, stability selection).
+25. ``image`` -- the pre-deep-learning vision toolkit: HOG/LBP/GLCM/Gabor
+    descriptors (each invariant to a chosen nuisance), the integral image for
+    constant-time box sums, connected-component labelling, binary morphology,
+    and the Hough line transform (finding lines by voting in parameter space).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
