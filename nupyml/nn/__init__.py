@@ -74,6 +74,10 @@ from ._losses_extra import (
     ClassBalancedLoss, BalancedSoftmaxLoss, PolyLoss, FocalTverskyLoss,
     GHMLoss, WingLoss, PoissonNLLLoss, SupConLoss,
 )
+from ._optim_extra import (
+    Adadelta, AMSGrad, LAMB, SAM, SWA, EMA,
+    ExponentialLR, PolynomialLR, CyclicalLR, OneCycleLR,
+)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -144,4 +148,6 @@ __all__ = [
     "DataLoader", "MLPClassifier", "MLPRegressor", "init",
     "ClassBalancedLoss", "BalancedSoftmaxLoss", "PolyLoss", "FocalTverskyLoss",
     "GHMLoss", "WingLoss", "PoissonNLLLoss", "SupConLoss",
+    "Adadelta", "AMSGrad", "LAMB", "SAM", "SWA", "EMA",
+    "ExponentialLR", "PolynomialLR", "CyclicalLR", "OneCycleLR",
 ]

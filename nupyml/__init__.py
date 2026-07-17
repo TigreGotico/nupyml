@@ -137,6 +137,9 @@ A reasonable path through the library:
     base losses missed: class-balanced and balanced-softmax, PolyLoss,
     focal-Tversky, GHM (gradient-density harmonising), Wing (log-then-linear
     regression), Poisson NLL for counts, and supervised contrastive.
+40. more ``nn`` optimizers & schedules -- Adadelta, AMSGrad, LAMB, and the
+    wrappers SAM (flat minima), SWA and weight EMA; plus one-cycle, cyclical,
+    polynomial, and exponential learning-rate schedules.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
