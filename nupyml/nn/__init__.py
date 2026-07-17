@@ -15,7 +15,12 @@ THE PIECES
   exist to solve.
 * ``attention.py`` -- attention and transformer blocks.
 * ``losses.py``    -- what "wrong" means, and why the classification losses take
-  logits rather than probabilities.
+  logits rather than probabilities. Focal, label smoothing, Dice/Tversky,
+  distillation, Wasserstein.
+* ``metric_losses.py`` -- losses that shape an EMBEDDING rather than a boundary:
+  contrastive, triplet, InfoNCE, ArcFace. How self-supervised learning works.
+* ``ctc.py``       -- training a sequence model with no alignment, by summing
+  over all of them.
 * ``optim.py``     -- SGD through Adam, as a progression of ideas.
 * ``mlp.py``       -- ``MLPClassifier``/``MLPRegressor``, sklearn-style wrappers
   for when you want a network without writing a training loop.
@@ -34,8 +39,16 @@ from .layers import (
 )
 from .losses import (
     MSELoss, MAELoss, HuberLoss, CrossEntropyLoss, NLLLoss, BCELoss,
-    BCEWithLogitsLoss,
+    BCEWithLogitsLoss, FocalLoss, LabelSmoothingCrossEntropy, KLDivLoss,
+    DistillationLoss, HingeEmbeddingLoss, MarginRankingLoss, DiceLoss,
+    TverskyLoss, IoULoss, LogCoshLoss, SmoothL1Loss, QuantileLoss,
+    TweedieLoss, WassersteinLoss, gradient_penalty,
 )
+from .metric_losses import (
+    ContrastiveLoss, TripletLoss, BatchHardTripletLoss, NPairsLoss,
+    InfoNCELoss, CosFaceLoss, ArcFaceLoss, CenterLoss,
+)
+from .ctc import CTCLoss, ctc_greedy_decode
 from .optim import (
     SGD, Adam, AdamW, RMSprop, clip_grad_norm, StepLR, CosineAnnealingLR,
     WarmupLR,
@@ -55,7 +68,13 @@ __all__ = [
     "Flatten", "Dropout", "Embedding", "Conv2d", "MaxPool2d", "AvgPool2d",
     "BatchNorm1d", "BatchNorm2d", "LayerNorm",
     "MSELoss", "MAELoss", "HuberLoss", "CrossEntropyLoss", "NLLLoss",
-    "BCELoss", "BCEWithLogitsLoss",
+    "BCELoss", "BCEWithLogitsLoss", "FocalLoss", "LabelSmoothingCrossEntropy",
+    "KLDivLoss", "DistillationLoss", "HingeEmbeddingLoss", "MarginRankingLoss",
+    "DiceLoss", "TverskyLoss", "IoULoss", "LogCoshLoss", "SmoothL1Loss",
+    "QuantileLoss", "TweedieLoss", "WassersteinLoss", "gradient_penalty",
+    "ContrastiveLoss", "TripletLoss", "BatchHardTripletLoss", "NPairsLoss",
+    "InfoNCELoss", "CosFaceLoss", "ArcFaceLoss", "CenterLoss",
+    "CTCLoss", "ctc_greedy_decode",
     "SGD", "Adam", "AdamW", "RMSprop", "clip_grad_norm",
     "StepLR", "CosineAnnealingLR", "WarmupLR",
     "RNN", "GRU", "LSTM",
