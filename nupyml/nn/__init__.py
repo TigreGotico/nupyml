@@ -92,6 +92,11 @@ from .optim import (
     SGD, Adam, AdamW, RMSprop, clip_grad_norm, StepLR, CosineAnnealingLR,
     WarmupLR,
 )
+from .activations import SiLU, Mish, ELU, SELU, Softplus, GLU, SwiGLU
+from .normalization import RMSNorm, GroupNorm, InstanceNorm
+from .optim_extra import Adagrad, Nadam, RAdam, Lion, Lookahead
+from .positional import RotaryPositionalEmbedding, ALiBi
+from .regularization import mixup, cutmix, StochasticDepth, drop_path
 from .recurrent import RNN, GRU, LSTM
 from .attention import (
     scaled_dot_product_attention, MultiHeadAttention, causal_mask,
@@ -124,6 +129,11 @@ __all__ = [
     "SimCLR", "MaskedAutoEncoder", "GaussianNoiseAugment", "MaskingAugment",
     "SGD", "Adam", "AdamW", "RMSprop", "clip_grad_norm",
     "StepLR", "CosineAnnealingLR", "WarmupLR",
+    "SiLU", "Mish", "ELU", "SELU", "Softplus", "GLU", "SwiGLU",
+    "RMSNorm", "GroupNorm", "InstanceNorm",
+    "Adagrad", "Nadam", "RAdam", "Lion", "Lookahead",
+    "RotaryPositionalEmbedding", "ALiBi",
+    "mixup", "cutmix", "StochasticDepth", "drop_path",
     "RNN", "GRU", "LSTM",
     "scaled_dot_product_attention", "MultiHeadAttention", "causal_mask",
     "TransformerEncoderLayer", "PositionalEncoding",

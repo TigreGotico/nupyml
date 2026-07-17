@@ -44,6 +44,8 @@ A reasonable path through the library:
 13. ``explain``, ``imbalance``, ``embed``, ``metric_learning`` -- interpreting a
     model after the fact, fixing class imbalance, learning word/subword
     representations, and learning the distance itself.
+14. ``gnn`` -- graph neural networks: message passing on data that is a graph,
+    where connectivity is the signal.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
