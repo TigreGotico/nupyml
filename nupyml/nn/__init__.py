@@ -21,6 +21,11 @@ THE PIECES
   contrastive, triplet, InfoNCE, ArcFace. How self-supervised learning works.
 * ``ctc.py``       -- training a sequence model with no alignment, by summing
   over all of them.
+* ``autoencoder.py`` -- AE, denoising, sparse, and the **VAE**: the
+  reparameterization trick and the ELBO, which is where a compression model
+  becomes a generative one.
+* ``gan.py``       -- adversarial training, why the obvious generator loss
+  saturates, and what the Wasserstein critic fixes.
 * ``optim.py``     -- SGD through Adam, as a progression of ideas.
 * ``mlp.py``       -- ``MLPClassifier``/``MLPRegressor``, sklearn-style wrappers
   for when you want a network without writing a training loop.
@@ -49,6 +54,13 @@ from .metric_losses import (
     InfoNCELoss, CosFaceLoss, ArcFaceLoss, CenterLoss,
 )
 from .ctc import CTCLoss, ctc_greedy_decode
+from .autoencoder import (
+    AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
+    VAELoss, kl_divergence_normal,
+)
+from .gan import (
+    Generator, Discriminator, GANLoss, NonSaturatingGANLoss, WGANLoss, GAN,
+)
 from .optim import (
     SGD, Adam, AdamW, RMSprop, clip_grad_norm, StepLR, CosineAnnealingLR,
     WarmupLR,
@@ -75,6 +87,10 @@ __all__ = [
     "ContrastiveLoss", "TripletLoss", "BatchHardTripletLoss", "NPairsLoss",
     "InfoNCELoss", "CosFaceLoss", "ArcFaceLoss", "CenterLoss",
     "CTCLoss", "ctc_greedy_decode",
+    "AutoEncoder", "DenoisingAutoEncoder", "SparseAutoEncoder", "VAE",
+    "ConditionalVAE", "VAELoss", "kl_divergence_normal",
+    "Generator", "Discriminator", "GANLoss", "NonSaturatingGANLoss",
+    "WGANLoss", "GAN",
     "SGD", "Adam", "AdamW", "RMSprop", "clip_grad_norm",
     "StepLR", "CosineAnnealingLR", "WarmupLR",
     "RNN", "GRU", "LSTM",
