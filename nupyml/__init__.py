@@ -52,6 +52,8 @@ A reasonable path through the library:
 16. ``stats`` -- inference, not just prediction: standard errors, p-values,
     confidence intervals, and the diagnostic tests that say whether they are
     valid.
+17. ``pgm`` -- probabilistic graphical models: Bayesian networks, Markov random
+    fields, and exact inference by factor elimination.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
