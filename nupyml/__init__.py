@@ -26,7 +26,10 @@ A reasonable path through the library:
 6. ``svm``           -- margins, the kernel trick, and a real constrained
    optimizer worked through.
 7. ``autograd`` then ``nn`` -- backpropagation from first principles, then the
-   layers built on it.
+   layers built on it, up to the generative models (VAE, GAN, diffusion, flows)
+   and what each trades away for what.
+8. ``evolutionary`` -- optimization when there is no gradient at all, which
+   throws the rest of the library's reliance on one into relief.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
@@ -38,6 +41,10 @@ WHERE THE INTERESTING IMPLEMENTATION IS
   what each trades.
 * ``autograd/functional.py`` -- convolution as a matmul; numerical stability of
   softmax and log-softmax.
+* ``nn/vqvae.py``            -- the straight-through estimator: a deliberate lie
+  about a derivative, and why it is the honest choice.
+* ``evolutionary/strategies.py`` -- CMA-ES: a derivative-free quasi-Newton
+  method, learning the landscape's shape into a covariance matrix.
 
 CONVENTIONS
 -----------
