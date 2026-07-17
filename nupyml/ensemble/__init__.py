@@ -1,4 +1,56 @@
-"""Ensemble methods: bagging, random forests, boosting."""
+"""Ensembles: many weak models beating one strong one.
+
+Every method here combines trees. They divide into two families that attack
+opposite halves of the error, and knowing which is which is most of the
+intuition.
+
+BAGGING: ATTACK THE VARIANCE
+----------------------------
+A deep tree has low bias and high variance -- it captures the true shape but
+a slightly different training set gives a visibly different tree. Averaging
+independent estimates cancels that noise: k independent estimates of the same
+quantity have 1/k the variance.
+
+But we only have one dataset. Bagging manufactures diversity by resampling it
+with replacement (``bootstrap``), so each tree sees a different ~63% of the
+data. The trees are correlated, not independent, so the variance reduction is
+partial -- and that ceiling is exactly what ``RandomForestClassifier``
+attacks, by also hiding features at each split so the trees cannot all seize
+on the same dominant one.
+
+Bagging deep trees is therefore the rule: you want each member overfit and
+noisy, because averaging is what fixes it. Bias is untouched -- the average of
+many unbiased trees is still unbiased.
+
+BOOSTING: ATTACK THE BIAS
+-------------------------
+Boosting fits members SEQUENTIALLY, each one targeting what the ensemble so
+far got wrong.
+
+* ``AdaBoostClassifier`` reweights the data: misclassified samples get heavier,
+  so the next learner concentrates where the ensemble is failing.
+* ``GradientBoostingRegressor`` and ``HistGradientBoosting*`` fit the next
+  tree to the RESIDUAL -- more precisely, to the negative gradient of the loss.
+  Gradient descent, but taking steps in function space rather than parameter
+  space: each tree is one step, and ``learning_rate`` is the step size.
+
+Boosting members must be WEAK (shallow trees, often depth 1-3). A strong
+learner would fit the residual perfectly on the first step, leaving nothing to
+correct and reproducing a single overfit model. Reducing bias by construction,
+boosting can and does overfit, which is what ``learning_rate``, ``subsample``
+and early stopping are for.
+
+  bagging:  deep trees, in parallel, independent   -> cuts variance
+  boosting: shallow trees, in sequence, dependent  -> cuts bias
+
+STACKING
+--------
+``StackingClassifier`` learns HOW to combine rather than assuming an average:
+a meta-model is trained on the members' predictions. The subtlety is that
+those predictions must be out-of-fold -- a member's opinion about data it
+trained on is far too optimistic, and a meta-model fed such predictions learns
+to trust the biggest overfitter.
+"""
 import numpy as np
 
 from ..base import (BaseEstimator, ClassifierMixin, RegressorMixin, clone,
@@ -10,6 +62,15 @@ from ._hist_gb import HistGradientBoostingClassifier, HistGradientBoostingRegres
 
 
 class _BaseBagging(BaseEstimator):
+    """Bootstrap AGGregatING: fit members on resamples, then average.
+
+    Sampling n items from n with replacement leaves each member roughly 63% of
+    the distinct samples -- the chance of a given sample never being drawn is
+    ``(1 - 1/n)^n``, which tends to ``1/e ~ 0.368``. The ~37% left out are that
+    tree's "out-of-bag" set: data it never saw, and therefore a free validation
+    set requiring no holdout at all. That is what ``oob_score`` uses.
+    """
+
     def __init__(self, estimator=None, n_estimators=10, max_samples=1.0,
                  bootstrap=True, random_state=None):
         self.estimator = estimator
@@ -75,6 +136,31 @@ class BaggingRegressor(_BaseBagging, RegressorMixin):
 
 
 class _BaseForest(BaseEstimator):
+    """Bagging plus feature subsampling at every split.
+
+    WHY THE EXTRA RANDOMNESS HELPS
+    ------------------------------
+    Averaging k estimators with pairwise correlation ``rho`` leaves variance::
+
+        rho * sigma^2  +  (1 - rho) * sigma^2 / k
+
+    The second term vanishes as trees are added. The first does not -- it is a
+    floor set by how alike the trees are. Adding trees past that point buys
+    nothing.
+
+    Bootstrapping alone leaves the trees quite correlated: one dominant feature
+    gets picked at the root of nearly every tree. So a forest also hides a
+    random subset of features at EACH split (``max_features``). Now the
+    dominant feature is unavailable much of the time, other structure gets
+    used, and ``rho`` falls -- lowering the floor itself.
+
+    Each tree is individually WORSE for being denied its best feature. The
+    ensemble is better. That trade is the whole idea.
+
+    ``sqrt(d)`` features is the usual default for classification, ``d`` for
+    regression, where there is typically less to gain.
+    """
+
     def __init__(self, n_estimators=100, criterion=None, max_depth=None,
                  min_samples_split=2, min_samples_leaf=1, max_features="sqrt",
                  bootstrap=True, ccp_alpha=0.0, monotonic_cst=None,
@@ -205,7 +291,14 @@ class RandomForestRegressor(_BaseForest, RegressorMixin):
 
 
 class ExtraTreesClassifier(RandomForestClassifier):
-    """Forest without bootstrap (extra randomness comes from max_features)."""
+    """Extremely randomised trees: no bootstrap, more randomness per split.
+
+    Pushes the decorrelation argument further. Each tree sees all the data --
+    no bootstrap -- but randomness at the splits keeps them diverse. Trading
+    even more individual accuracy for even less correlation, this often matches
+    a random forest while fitting faster, since less effort goes into choosing
+    thresholds carefully.
+    """
     _bootstrap_samples = False
 
 
@@ -214,7 +307,28 @@ class ExtraTreesRegressor(RandomForestRegressor):
 
 
 class AdaBoostClassifier(BaseEstimator, ClassifierMixin):
-    """SAMME AdaBoost over decision stumps (or a given base estimator)."""
+    """Adaptive boosting: reweight the data toward what the ensemble gets wrong.
+
+    Each round fits a weak learner on weighted data, then:
+
+    1. measures its weighted error ``err``;
+    2. gives it a vote ``alpha = log((1-err)/err) + log(K-1)`` -- large when the
+       learner is accurate, zero at chance, and NEGATIVE if it is worse than
+       chance (in which case believing its opposite is informative);
+    3. multiplies the weight of every misclassified sample by ``exp(alpha)``,
+       so the next learner is forced to attend to them.
+
+    Points that are easy get quietly ignored; the ensemble's attention
+    concentrates on the boundary. The ``log(K-1)`` term is what makes this SAMME
+    rather than the original binary AdaBoost: with K classes, chance is 1/K, not
+    1/2, so the bar a learner must clear to earn a positive vote is lower.
+
+    AdaBoost is exactly forward stagewise additive modelling under EXPONENTIAL
+    loss, which explains its one real weakness: ``exp`` punishes a badly
+    misclassified point enormously, so a mislabelled sample can capture the
+    whole ensemble's attention. Gradient boosting with a gentler loss is the
+    usual answer.
+    """
 
     def __init__(self, estimator=None, n_estimators=50, learning_rate=1.0,
                  random_state=None):
@@ -283,6 +397,39 @@ class AdaBoostClassifier(BaseEstimator, ClassifierMixin):
 
 
 class GradientBoostingRegressor(BaseEstimator, RegressorMixin):
+    """Gradient descent in function space, one tree per step.
+
+    THE IDEA
+    --------
+    To minimise a loss over a FUNCTION rather than a parameter vector, ask what
+    gradient descent would say. The derivative of squared loss with respect to
+    the current prediction is ``pred - y``, so the negative gradient is
+    ``y - pred``: the residual. Fitting a tree to the residuals and adding a
+    small multiple of it is one step of gradient descent, where the "parameter"
+    being updated is the whole prediction function::
+
+        F_{m+1}(x) = F_m(x) + learning_rate * tree_m(x)
+
+    Squared loss makes the negative gradient literally the residual, which is
+    why it is usually introduced as "fit the next tree to the errors". For
+    other losses the target is the gradient rather than the residual -- the
+    algorithm is unchanged, which is the point of the framing.
+
+    THE KNOBS ARE ALL THE SAME KNOB
+    -------------------------------
+    ``learning_rate`` shrinks each step. Small steps mean more trees to reach
+    the same fit, but a smoother path and better generalisation -- the standard
+    trade is a low rate and many trees. It interacts with ``n_estimators``
+    directly: halving one roughly wants doubling the other.
+
+    ``subsample`` < 1 fits each tree on a random portion of the data
+    ("stochastic gradient boosting"), which both decorrelates the trees and
+    speeds things up.
+
+    ``max_depth`` caps interaction order: depth 1 (a stump) is an additive
+    model with no interactions at all, depth 2 allows pairwise, and so on.
+    """
+
     def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=3,
                  min_samples_leaf=1, subsample=1.0, warm_start=False,
                  random_state=None):
@@ -335,7 +482,21 @@ class GradientBoostingRegressor(BaseEstimator, RegressorMixin):
 
 
 class GradientBoostingClassifier(BaseEstimator, ClassifierMixin):
-    """Gradient boosting with multinomial deviance (one tree per class/round)."""
+    """Gradient boosting for classification: K trees per round, one per class.
+
+    Trees output numbers, not probabilities, so the ensemble builds a SCORE per
+    class and softmax turns the scores into probabilities at the end -- exactly
+    the arrangement in ``LogisticRegression``, but with the linear score
+    replaced by a sum of trees.
+
+    Under multinomial deviance the negative gradient for class k is::
+
+        y_k - p_k
+
+    the same "observed minus predicted" as logistic regression, so each round
+    fits one tree per class to that residual. K trees per round is the cost of
+    letting classes have independent score functions.
+    """
 
     def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=3,
                  min_samples_leaf=1, subsample=1.0, random_state=None):

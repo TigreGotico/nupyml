@@ -1,10 +1,55 @@
-"""Higher-level differentiable functions: softmax, conv2d, pooling, embedding."""
+"""Differentiable functions built on the Tensor primitives.
+
+These could all be written in terms of ``+``, ``*`` and friends and let the
+tape figure out the gradient. They are hand-written instead for two reasons
+that recur throughout numerical computing:
+
+*Numerical stability.* ``softmax`` written naively overflows on inputs a
+human would call unremarkable. Composing stable pieces does not automatically
+give a stable whole.
+
+*Efficiency.* A convolution expressed as a Python loop over pixels would
+record thousands of tiny graph nodes. Reshaping it into one matmul records
+one, and hands the arithmetic to BLAS.
+"""
 import numpy as np
 
 from .tensor import Tensor
 
 
 def softmax(x, axis=-1):
+    """Turn arbitrary scores into a probability distribution.
+
+    WHY THE SHIFT
+    -------------
+    The definition is ``exp(x_i) / sum_j exp(x_j)``. Computed literally, a score
+    of 1000 overflows to ``inf`` and the result is ``nan`` -- and 1000 is not an
+    exotic logit.
+
+    Subtracting the row maximum first fixes it exactly, with no approximation.
+    Multiply numerator and denominator by ``exp(-max)``::
+
+        exp(x_i - max) / sum_j exp(x_j - max)
+
+    Identical value, but now the largest exponent is ``exp(0) == 1``, so nothing
+    can overflow, and underflow to zero only happens for terms that were
+    negligible anyway. This shift-invariance is a property of softmax itself:
+    adding a constant to every score changes nothing.
+
+    THE GRADIENT
+    ------------
+    The true Jacobian is dense -- every output depends on every input, since
+    they share a denominator::
+
+        ds_i/dx_j = s_i * (delta_ij - s_j)
+
+    Materialising that per row would cost O(k^2). But the VJP collapses to::
+
+        dL/dx = s * (g - sum(g * s))
+
+    which is O(k). The subtracted term is the "competition" between classes:
+    pushing one probability up necessarily pushes the others down.
+    """
     x = Tensor._wrap(x)
     shifted = x.data - x.data.max(axis=axis, keepdims=True)
     e = np.exp(shifted)
@@ -18,6 +63,23 @@ def softmax(x, axis=-1):
 
 
 def log_softmax(x, axis=-1):
+    """``log(softmax(x))``, computed as one stable operation.
+
+    Never as ``softmax(x).log()``. Softmax outputs underflow to exactly 0.0 for
+    confidently-wrong classes, and ``log(0)`` is ``-inf``, which poisons the
+    loss and every gradient downstream. Keeping it in log space avoids ever
+    forming the small number: the log of a sum of exponentials is evaluated
+    directly, so a tiny probability becomes a large negative number -- which is
+    perfectly representable -- instead of zero.
+
+    The gradient is also strikingly simpler than softmax's::
+
+        dL/dx = g - softmax(x) * sum(g)
+
+    This is why cross-entropy is implemented as log_softmax followed by a
+    lookup: the notorious ``p - y`` gradient of the pair falls out of that
+    expression, and neither stage ever handles a raw probability.
+    """
     x = Tensor._wrap(x)
     shifted = x.data - x.data.max(axis=axis, keepdims=True)
     logsumexp = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
@@ -40,7 +102,16 @@ def leaky_relu(x, negative_slope=0.01):
 
 
 def gelu(x):
-    """Gaussian Error Linear Unit (tanh approximation)."""
+    """Gaussian Error Linear Unit, the transformer's activation.
+
+    Where ReLU makes a hard decision -- keep it or kill it -- GELU weights the
+    input by the probability that a standard normal falls below it:
+    ``x * Phi(x)``. Small inputs are damped rather than deleted, giving a
+    smooth curve with a gradient everywhere and no dead region.
+
+    ``Phi`` has no elementary closed form, so the standard tanh approximation
+    is used; it is accurate to a few decimals and much cheaper than ``erf``.
+    """
     x = Tensor._wrap(x)
     c = np.sqrt(2.0 / np.pi)
     inner = c * (x.data + 0.044715 * x.data ** 3)
@@ -59,6 +130,12 @@ def gelu(x):
 # ---------------------------------------------------------------------------
 
 def _im2col_indices(x_shape, kh, kw, stride, padding):
+    """Precompute where each patch element lives in the padded image.
+
+    Builds three broadcast index arrays -- channel, row, column -- such that
+    ``x_padded[:, k, i, j]`` gathers every patch at once. Fancy indexing does
+    the copying in C; the alternative is a Python loop per output pixel.
+    """
     n, c, h, w = x_shape
     out_h = (h + 2 * padding - kh) // stride + 1
     out_w = (w + 2 * padding - kw) // stride + 1
@@ -82,6 +159,13 @@ def _im2col(x, kh, kw, stride, padding):
 
 
 def _col2im(cols, x_shape, kh, kw, stride, padding):
+    """Scatter patch gradients back onto the image (the adjoint of im2col).
+
+    ``np.add.at`` rather than plain indexed assignment is essential here:
+    patches overlap, so the same pixel appears at several places in the index
+    arrays. Assignment would keep only the last write; ``add.at`` accumulates
+    every contribution, which is what the chain rule requires.
+    """
     n, c, h, w = x_shape
     p = padding
     x_pad = np.zeros((n, c, h + 2 * p, w + 2 * p))
@@ -91,7 +175,47 @@ def _col2im(cols, x_shape, kh, kw, stride, padding):
 
 
 def conv2d(x, weight, bias=None, stride=1, padding=0):
-    """2D convolution. x: (N,C,H,W), weight: (F,C,KH,KW), bias: (F,)."""
+    """2D convolution, as a single matrix multiply.
+
+    THE IDEA: CONVOLUTION IS ALREADY A MATMUL IN DISGUISE
+    -----------------------------------------------------
+    At each output position, a conv computes a dot product between a filter and
+    the patch of input under it. Doing this with four nested loops (positions x
+    filters) is correct and unbearably slow in Python.
+
+    ``im2col`` makes the matmul explicit. Copy every patch out into a column of
+    a big matrix::
+
+        cols:  (N, C*KH*KW, L)      L = number of output positions
+        w_row: (F, C*KH*KW)         each filter flattened to a row
+
+    Then the entire convolution -- every filter against every position -- is one
+    product, dispatched to BLAS.
+
+    THE COST
+    --------
+    ``cols`` duplicates data: with a 3x3 kernel, each input pixel is copied into
+    up to 9 patches, so memory grows ~9x. This is a deliberate trade of memory
+    for speed, and it is what essentially every framework did before hand-tuned
+    kernels. Being able to see the trade is the point of writing it this way.
+
+    THE GRADIENT
+    ------------
+    Because the forward pass is a matmul, the gradients are the matmul VJPs::
+
+        dL/dw    = dL/dout @ cols'
+        dL/dcols = w' @ dL/dout
+
+    The only new piece is ``col2im``: scattering ``dL/dcols`` back to pixels.
+    Each input pixel appeared in several patches, so it accumulates a
+    contribution from each -- the same "reuse means sum" rule as broadcasting.
+
+    Parameters
+    ----------
+    x : Tensor (N, C, H, W)
+    weight : Tensor (F, C, KH, KW)
+    bias : Tensor (F,), optional
+    """
     x, weight = Tensor._wrap(x), Tensor._wrap(weight)
     n, c, h, w = x.data.shape
     f, _, kh, kw = weight.data.shape
@@ -120,6 +244,19 @@ def conv2d(x, weight, bias=None, stride=1, padding=0):
 
 
 def max_pool2d(x, kernel_size=2, stride=None):
+    """Downsample by keeping the strongest activation in each window.
+
+    The forward pass uses a strided view -- ``as_strided`` re-describes the
+    existing buffer with new shape and strides, materialising the sliding
+    windows with zero copying. It is the sharpest tool in numpy: the strides
+    are taken on trust, and wrong ones read out of bounds silently. Here they
+    are derived directly from the array's own strides, so the windows are
+    guaranteed to lie inside it.
+
+    Backward is a scatter. Pooling selects, so the gradient goes entirely to
+    the argmax of each window and zero everywhere else -- which is why the
+    argmax is saved on the forward pass rather than recomputed.
+    """
     x = Tensor._wrap(x)
     k = kernel_size
     s = stride or k
@@ -182,7 +319,18 @@ def avg_pool2d(x, kernel_size=2, stride=None):
 
 
 def embedding(indices, weight):
-    """Lookup rows of ``weight`` (V, D) by integer ``indices``."""
+    """Look up rows of a table by integer index.
+
+    An embedding layer is exactly a one-hot vector times a weight matrix -- but
+    that product is almost entirely multiplication by zero, so it is done as a
+    row lookup instead.
+
+    Backward is where the equivalence shows: the gradient is scattered back to
+    the rows that were used, and ``np.add.at`` is required because a token
+    appearing multiple times in a batch must accumulate a contribution per
+    occurrence. Rows never looked up receive nothing and stay unchanged -- which
+    is why embedding gradients are naturally sparse.
+    """
     weight = Tensor._wrap(weight)
     idx = np.asarray(indices, dtype=np.int64)
     def backward(g):
@@ -194,6 +342,25 @@ def embedding(indices, weight):
 
 
 def dropout(x, p=0.5, training=True, rng=None):
+    """Randomly zero activations during training.
+
+    Dropout stops units from co-adapting: a unit cannot rely on a specific
+    partner being present, so the network is pushed toward redundant,
+    independently-useful features. It is loosely an ensemble over the
+    exponentially many sub-networks obtainable by deleting units.
+
+    THE 1/(1-p) SCALING
+    -------------------
+    Kept activations are divided by ``1 - p`` ("inverted dropout"). Without it,
+    a layer's expected input magnitude would drop by a factor of ``1 - p``
+    during training but not at test time, and the shift would compound through
+    depth. Scaling up during training keeps the expectation matched, so test
+    time needs no adjustment at all -- ``eval()`` simply returns the input
+    untouched.
+
+    The mask is a plain constant as far as the tape is concerned, so backward
+    applies the same mask: gradients flow only through units that participated.
+    """
     x = Tensor._wrap(x)
     if not training or p == 0.0:
         return x

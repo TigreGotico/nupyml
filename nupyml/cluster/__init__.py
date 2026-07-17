@@ -1,4 +1,36 @@
-"""Clustering algorithms."""
+"""Clustering: finding structure without labels.
+
+There is no single right answer to "what are the clusters", because there is no
+ground truth to check against -- only whatever notion of similarity the
+algorithm assumes. The methods here disagree about that assumption, and the
+disagreement IS the taxonomy:
+
+============================ ==========================================
+assumption                   algorithms
+============================ ==========================================
+clusters are round and       KMeans, MiniBatchKMeans
+of similar size
+clusters are dense regions   DBSCAN, OPTICS, HDBSCAN
+of any shape
+clusters form a hierarchy    AgglomerativeClustering, Birch
+clusters are modes of a      MeanShift
+density
+clusters are connected in a  SpectralClustering
+graph, not compact in space
+every point is an exemplar   AffinityPropagation
+candidate
+============================ ==========================================
+
+Choosing wrongly does not produce an error; it produces confident nonsense.
+KMeans will happily cut a pair of concentric rings into two half-moons, because
+its assumption -- clusters are blobs around a centre -- is false there.
+SpectralClustering solves that case exactly, by clustering connectivity rather
+than position.
+
+The other axis is whether the number of clusters must be known. KMeans demands
+k up front. DBSCAN and MeanShift discover it, but demand a scale instead
+(``eps``, ``bandwidth``) -- the question does not disappear, it changes form.
+"""
 import numpy as np
 import scipy.cluster.hierarchy as sch
 import scipy.sparse as sp
@@ -42,6 +74,48 @@ def _kmeans_plusplus(X, k, rng):
 
 
 class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
+    """Partition points into k clusters by minimising within-cluster variance.
+
+    THE OBJECTIVE
+    -------------
+    Minimise the total squared distance from each point to its cluster's
+    centre (the "inertia")::
+
+        sum_i ||x_i - centre(assignment_i)||^2
+
+    Finding the true optimum is NP-hard. Lloyd's algorithm settles for a local
+    one by alternating two steps, each of which is trivial given the other:
+
+    * **E-step**: assign every point to its nearest centre (centres fixed).
+    * **M-step**: move each centre to the mean of its members (assignments fixed).
+
+    Neither step can ever increase the objective, and there are finitely many
+    assignments, so it must terminate. It terminates at a LOCAL minimum, which
+    is why ``n_init`` runs the whole thing several times from different seeds
+    and keeps the best -- the single most important defence against a bad
+    outcome here.
+
+    WHY THE MEAN, SPECIFICALLY
+    --------------------------
+    The mean is the point minimising SQUARED distance to a set. That is not a
+    convention, it is why the M-step is "take the mean" -- change the objective
+    to absolute distance and the optimal centre becomes the median (k-medians).
+    Squared distance is also what makes KMeans sensitive to outliers: a single
+    far-away point can drag a centre across the space.
+
+    THE ASSUMPTIONS, MADE EXPLICIT
+    ------------------------------
+    Because a point goes to the nearest centre, the boundaries are perpendicular
+    bisectors -- straight lines. KMeans can therefore only produce convex,
+    roughly spherical, roughly equal-sized clusters. Elongated, nested or
+    varying-density structure is out of reach no matter how good the
+    optimisation is. That is a property of the objective, not a bug.
+
+    It also uses raw Euclidean distance, so features must be scaled first, or
+    whichever feature happens to have the largest units will define the
+    clusters by itself.
+    """
+
     def __init__(self, n_clusters=8, init="k-means++", n_init=10, max_iter=300,
                  tol=1e-4, random_state=None):
         self.n_clusters = n_clusters
@@ -121,6 +195,23 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
 
 class MiniBatchKMeans(BaseEstimator, ClusterMixin):
+    """KMeans on random mini-batches: much faster, slightly worse.
+
+    Lloyd's E-step touches every point every iteration. Mini-batch KMeans
+    updates from a random subset instead, moving each centre a little way
+    toward its members in the batch::
+
+        centre <- (1 - eta) * centre + eta * batch_mean,   eta = 1/count
+
+    The learning rate falls as ``1/count`` because that makes the centre the
+    running MEAN of everything it has ever been assigned -- an online average.
+    Early batches move a centre a lot, later ones refine it, and the updates
+    settle rather than oscillate.
+
+    The result is typically a slightly worse inertia for a large constant-factor
+    speedup, and it supports ``partial_fit`` for data that never fits in memory.
+    """
+
     def __init__(self, n_clusters=8, batch_size=256, max_iter=100,
                  random_state=None):
         self.n_clusters = n_clusters
@@ -170,6 +261,43 @@ class MiniBatchKMeans(BaseEstimator, ClusterMixin):
 
 
 class DBSCAN(BaseEstimator, ClusterMixin):
+    """Density-Based Spatial Clustering of Applications with Noise.
+
+    THE IDEA
+    --------
+    A cluster is a region where points are packed closely together, separated
+    from other such regions by sparseness. No centres, no shapes assumed -- just
+    density. Two parameters define "dense": a radius ``eps`` and a count
+    ``min_samples``.
+
+    Every point is then one of three things:
+
+    * **core**: has at least ``min_samples`` neighbours within ``eps``. It sits
+      in the interior of a dense region.
+    * **border**: within ``eps`` of a core point, but not dense itself. The
+      fringe of a cluster.
+    * **noise**: neither. Labelled ``-1`` and belonging to NO cluster.
+
+    Clusters grow by chaining core points: if two core points are neighbours,
+    they are in the same cluster, transitively. That chaining is what lets
+    DBSCAN trace an arbitrarily long, curved, or nested shape -- something no
+    centroid method can do.
+
+    WHAT IT BUYS AND COSTS
+    ----------------------
+    * k is discovered, not specified.
+    * Outliers are identified rather than forced into a cluster. Almost alone
+      among clustering methods, DBSCAN is allowed to say "this point is not in
+      any cluster".
+    * But density is assumed UNIFORM: one global ``eps`` must fit every
+      cluster. Given a tight cluster and a diffuse one, no single eps works --
+      the tight one absorbs its neighbours or the diffuse one dissolves into
+      noise. ``HDBSCAN`` exists precisely to remove this constraint, by
+      considering all eps at once.
+    * Border points are assigned to whichever core reached them first, so their
+      labels can depend on iteration order.
+    """
+
     def __init__(self, eps=0.5, min_samples=5):
         self.eps = eps
         self.min_samples = min_samples
@@ -201,6 +329,30 @@ class DBSCAN(BaseEstimator, ClusterMixin):
 
 
 class AgglomerativeClustering(BaseEstimator, ClusterMixin):
+    """Bottom-up hierarchical clustering: start with n clusters, merge to k.
+
+    Begin with every point its own cluster, then repeatedly merge the two
+    closest ones. The result is a whole tree of nestings (a dendrogram), not a
+    single partition -- ``n_clusters`` just says where to cut it. That is the
+    real appeal: the structure at every scale is available at once.
+
+    "Closest" needs defining for SETS of points, and the choice changes the
+    outcome more than anything else here:
+
+    * ``ward`` -- merge whichever pair increases within-cluster variance least.
+      Tends toward compact, equal-sized clusters (KMeans-like preferences,
+      hierarchically arranged).
+    * ``complete`` -- distance between the two FURTHEST members. Compact,
+      outlier-sensitive.
+    * ``average`` -- mean pairwise distance. A middle ground.
+    * ``single`` -- distance between the two NEAREST members. Can follow long
+      chains, so it traces non-convex shapes but suffers "chaining": a thin
+      bridge of points fuses two real clusters.
+
+    Cost is at least quadratic in n, which is what limits this to modest data --
+    and what ``Birch`` addresses, by summarising the data first.
+    """
+
     def __init__(self, n_clusters=2, linkage="ward"):
         self.n_clusters = n_clusters
         self.linkage = linkage
@@ -214,6 +366,19 @@ class AgglomerativeClustering(BaseEstimator, ClusterMixin):
 
 
 class MeanShift(BaseEstimator, ClusterMixin):
+    """Move every point uphill to a mode of the density; modes become clusters.
+
+    Treat the data as samples from some density. Each point repeatedly hops to
+    the mean of its neighbours within ``bandwidth`` -- a step that always points
+    uphill, so it is gradient ascent on the density without ever computing a
+    gradient. Points converging to the same peak form a cluster.
+
+    So k is not chosen; it emerges as the number of modes. But ``bandwidth``
+    controls that number completely: wide smooths everything into one mode,
+    narrow finds a mode per point. The question "how many clusters?" has become
+    "at what scale?", which is sometimes easier to answer and never disappears.
+    """
+
     def __init__(self, bandwidth=None, max_iter=300, tol=1e-3):
         self.bandwidth = bandwidth
         self.max_iter = max_iter
@@ -252,7 +417,35 @@ class MeanShift(BaseEstimator, ClusterMixin):
 
 
 class SpectralClustering(BaseEstimator, ClusterMixin):
-    """Normalized-cuts spectral clustering with an RBF or kNN affinity."""
+    """Cluster a graph, not a cloud: connectivity instead of compactness.
+
+    THE IDEA
+    --------
+    Build a graph whose edges say how similar points are, then look for a way
+    to cut it into pieces with few edges crossing. Points that are far apart in
+    space but joined by a chain of neighbours stay together -- which is why this
+    separates concentric circles, and KMeans cannot.
+
+    Cutting a graph optimally is NP-hard. The spectral relaxation gets around it
+    with a striking fact about the graph Laplacian ``L = D - W``:
+
+    * ``x' L x = sum over edges of w_ij*(x_i - x_j)^2``, so the Laplacian
+      MEASURES how much a labelling disagrees across edges.
+    * Its smallest eigenvalue is always 0. The number of eigenvalues equal to 0
+      is exactly the number of connected components -- so the bottom of the
+      spectrum encodes the component structure exactly.
+    * For a graph that is nearly disconnected, the smallest nonzero eigenvectors
+      are nearly constant within each near-component. Embedding points using
+      those eigenvectors places each near-component at its own spot.
+
+    So: embed with the bottom eigenvectors, then run KMeans in that space, where
+    the clusters ARE now compact blobs. The hard geometry has been moved into a
+    space where the easy algorithm is correct.
+
+    The affinity choice matters most. ``nearest_neighbors`` builds a sparse graph
+    that follows the data's shape; ``rbf`` connects everything with decaying
+    weight, and its ``gamma`` decides what "near" means.
+    """
 
     def __init__(self, n_clusters=8, affinity="rbf", gamma=1.0, n_neighbors=10,
                  random_state=None):

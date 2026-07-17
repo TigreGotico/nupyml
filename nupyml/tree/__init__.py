@@ -1,4 +1,55 @@
-"""Decision trees (CART) with vectorized split search."""
+"""Decision trees: CART (Classification And Regression Trees).
+
+THE MODEL
+---------
+A tree asks a sequence of yes/no questions about single features
+(``is x[3] <= 2.7?``) and reads a constant off the leaf you land in. That is
+all a tree is: a piecewise-constant function whose pieces are axis-aligned
+boxes.
+
+Its properties follow directly from that shape:
+
+* No scaling needed. Only the ORDER of a feature's values matters, so any
+  monotone transform of a feature -- log, standardise, anything -- leaves the
+  tree unchanged. Almost no other model can say that.
+* Interactions come free. A split inside a split is a conjunction, so trees
+  express "if A and B" without being told to look for it.
+* Diagonal boundaries are awkward. A 45-degree line has to be approximated by
+  a staircase of axis-aligned cuts.
+* Left alone, a tree fits the training data perfectly and generalises poorly:
+  keep splitting and every leaf ends up holding one sample. Everything in
+  ``max_depth``, ``min_samples_leaf`` and ``ccp_alpha`` exists to stop that,
+  and the ensembles in ``nupyml.ensemble`` exist because averaging many trees
+  works even better.
+
+HOW IT IS BUILT
+---------------
+Finding the optimal tree is NP-complete, so CART is greedy: at each node take
+the single best split available now, and never reconsider. That is a real
+compromise -- a split that looks poor alone may be excellent in combination --
+but it is what makes fitting fast, and in practice it works.
+
+"Best" means the split that most reduces IMPURITY -- a measure of how mixed a
+node's labels are:
+
+* Gini ``1 - sum(p_k^2)``: the chance of misclassifying a sample labelled by
+  drawing from the node's own class distribution.
+* Entropy ``-sum(p_k log p_k)``: expected bits needed to encode a label.
+* For regression, variance.
+
+Gini and entropy rarely disagree; Gini avoids a logarithm.
+
+WHY THE SPLIT SEARCH IS FAST
+----------------------------
+Naively, scoring one threshold means partitioning the node and summing each
+side: O(n) per threshold, O(n^2) per feature. The trick is that thresholds are
+NESTED -- sort by the feature, and moving the threshold right by one position
+just moves one sample from right to left. So a single cumulative sum over the
+sorted labels gives the class counts of the left side at EVERY threshold at
+once, and the right side is the total minus the left. One sort, one cumsum,
+and all n-1 candidate splits are scored: O(n log n) per feature, dominated by
+the sort.
+"""
 import numpy as np
 
 from ..base import (BaseEstimator, ClassifierMixin, RegressorMixin, clone,
@@ -8,6 +59,13 @@ from ..utils import check_X_y, check_array, check_random_state
 
 
 class _Node:
+    """One node. Leaves have ``left is None`` and carry a prediction in ``value``.
+
+    ``impurity``, ``n_samples`` and ``weight`` are kept after fitting because
+    pruning and feature importances need to re-examine the tree without the
+    training data.
+    """
+
     __slots__ = ("feature", "threshold", "left", "right", "value", "impurity",
                  "n_samples", "weight", "missing_left")
 
@@ -29,11 +87,32 @@ class _Node:
 
 def _best_split_classification(X, y_onehot, w, feature_indices, criterion,
                                min_leaf, monotonic_cst=None):
-    """Vectorized best split with sample weights: sort each feature once and
-    score every threshold via cumulative weighted class counts.
+    """Find the split that most reduces impurity.
 
-    NaNs are sent whichever way scores better, which is how a tree learns a
-    missingness pattern instead of needing it imputed away.
+    THE CUMSUM TRICK
+    ----------------
+    Labels are one-hot, so a cumulative sum down the sorted rows gives, at row
+    i, the class counts of everything at or left of i -- that is, the left
+    child's class distribution for the threshold sitting there. Every
+    threshold, in one vectorised pass. The right child needs no work at all:
+    it is the node total minus the left.
+
+    Only positions where the feature VALUE changes are real candidates: you
+    cannot separate two samples that agree on the feature, so ``np.diff``
+    filters the rest out. The threshold is placed midway between the two
+    values, which is the standard convention -- any point between them
+    separates the same samples, and the midpoint is the most defensible choice
+    for unseen data.
+
+    MISSING VALUES
+    --------------
+    NaNs are not imputed. Both destinations are scored and the better one is
+    kept, so if missingness is informative the tree exploits it, and if it is
+    not, the NaNs simply follow the bulk. That decision is stored on the node
+    so prediction routes new NaNs the same way.
+
+    Returns ``(feature, threshold, gain, send_missing_left)``; feature is -1
+    when no admissible split exists.
     """
     n, k = y_onehot.shape
     wy = y_onehot * w[:, None]
@@ -108,6 +187,21 @@ def _best_split_classification(X, y_onehot, w, feature_indices, criterion,
 
 def _best_split_regression(X, y, w, feature_indices, min_leaf,
                            monotonic_cst=None):
+    """The same scan, with variance as the impurity.
+
+    Variance needs the mean of each side at every threshold, which would seem
+    to need a second pass. It does not: use the identity::
+
+        var = E[y^2] - E[y]^2
+
+    Running sums of ``y`` and ``y^2`` are both cumsums, so both moments are
+    available at every threshold from a single pass -- the same structure as
+    the classification case, with two accumulators instead of k.
+
+    (This identity is numerically delicate in general: when the mean is huge
+    relative to the spread, it subtracts two nearly-equal numbers. Within a
+    node of a tree the range is bounded and it is not a problem in practice.)
+    """
     n = len(y)
     total_w = w.sum()
     total_sum = (w * y).sum()
@@ -209,6 +303,16 @@ class _BaseDecisionTree(BaseEstimator):
 
     def _grow(self, X, y_enc, w, depth, rng, is_classification,
               bounds=(-np.inf, np.inf)):
+        """Recursively split, returning the subtree rooted here.
+
+        ``bounds`` carries monotonic constraints down the tree. Checking a
+        split's own two children is not enough: a descendant could still
+        double back and break monotonicity globally. So a constrained split
+        divides the allowed value range at the midpoint of its children, and
+        each child inherits a narrower interval it can never escape. Leaf
+        values are clipped into it -- which is what makes the guarantee hold
+        for the whole tree rather than one split at a time.
+        """
         n, d = X.shape
         wsum = w.sum()
         lower, upper = bounds
@@ -304,6 +408,19 @@ class _BaseDecisionTree(BaseEstimator):
 
     @property
     def feature_importances_(self):
+        """How much each feature reduced impurity, normalised to sum to 1.
+
+        Each split is credited with its impurity drop, weighted by how many
+        samples reached it -- a split near the root affects everything and
+        counts accordingly.
+
+        This measure is biased and worth distrusting: it favours
+        high-cardinality features, because a feature with many distinct values
+        offers more thresholds and so more chances to fit noise. It also
+        arbitrarily splits credit between correlated features. It is computed
+        from the training data alone, so it says what the tree USED, not what
+        actually predicts. ``permutation_importance`` measures the latter.
+        """
         check_is_fitted(self, "tree_")
         imp = np.zeros(self.n_features_in_)
 
@@ -322,9 +439,36 @@ class _BaseDecisionTree(BaseEstimator):
         return imp / total if total > 0 else imp
 
     def _prune_ccp(self, ccp_alpha):
-        """Minimal cost-complexity pruning: repeatedly collapse the weakest
-        link (the subtree whose per-leaf impurity gain is smallest) until no
-        subtree is worth less than ccp_alpha."""
+        """Cost-complexity pruning: grow greedily, then cut back.
+
+        WHY PRUNE INSTEAD OF STOPPING EARLY
+        -----------------------------------
+        Stopping when a split looks unhelpful is short-sighted: a weak split
+        can enable an excellent one beneath it, and early stopping never finds
+        out. So CART grows the tree out fully and then removes what did not
+        earn its keep -- a decision made with the whole subtree visible.
+
+        THE CRITERION
+        -------------
+        Score a tree by error plus a charge per leaf::
+
+            R_alpha(T) = R(T) + alpha * |leaves(T)|
+
+        ``alpha`` is the price of a leaf. At alpha = 0 the full tree wins. As
+        alpha rises, subtrees that bought little accuracy stop being worth
+        their leaves, and collapse.
+
+        For each internal node, the alpha at which its subtree stops paying for
+        itself is::
+
+            alpha_eff = (error if collapsed - error of subtree) / (leaves - 1)
+
+        The "weakest link" is the node with the smallest such value. Collapse
+        it, repeat, and stop once every remaining alpha_eff exceeds
+        ``ccp_alpha``. This yields a nested sequence of trees, which is what
+        makes ``cost_complexity_pruning_path`` a well-defined object to
+        cross-validate over.
+        """
         def subtree_stats(node):
             """(total weighted impurity of leaves, leaf count) below node."""
             if node.is_leaf:
@@ -412,6 +556,15 @@ class _BaseDecisionTree(BaseEstimator):
 
 
 class DecisionTreeClassifier(_BaseDecisionTree, ClassifierMixin):
+    """A classification tree. Leaves store class counts; ``predict_proba``
+    normalises them into frequencies.
+
+    Those probabilities are honest only in the crudest sense: a pure leaf
+    reports 1.0 regardless of whether it holds two samples or two hundred.
+    Trees are famously badly calibrated for this reason -- see
+    ``nupyml.calibration``.
+    """
+
     def __init__(self, criterion="gini", max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, max_features=None,
                  min_impurity_decrease=0.0, ccp_alpha=0.0, monotonic_cst=None,
@@ -449,6 +602,14 @@ class DecisionTreeClassifier(_BaseDecisionTree, ClassifierMixin):
 
 
 class DecisionTreeRegressor(_BaseDecisionTree, RegressorMixin):
+    """A regression tree. Leaves store the mean of their samples.
+
+    Since the output is piecewise constant, a regression tree cannot
+    extrapolate: beyond the range of the training data every prediction is the
+    value of the nearest boundary leaf, flat forever. A linear model
+    extrapolates (perhaps wrongly, but it moves); a tree simply stops.
+    """
+
     def __init__(self, criterion="squared_error", max_depth=None,
                  min_samples_split=2, min_samples_leaf=1, max_features=None,
                  min_impurity_decrease=0.0, ccp_alpha=0.0, monotonic_cst=None,

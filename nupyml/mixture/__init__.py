@@ -1,4 +1,58 @@
-"""Gaussian mixture models fit with log-space EM."""
+"""Gaussian mixture models: clustering as density estimation.
+
+THE MODEL
+---------
+Assume the data was GENERATED like this: pick a component k with probability
+``weight_k``, then draw a point from that component's Gaussian. Fitting means
+recovering the weights, means and covariances from the points alone -- the
+component labels were never observed.
+
+This is what "soft clustering" means: a point does not belong to a cluster, it
+has a POSTERIOR PROBABILITY of having come from each. A point midway between
+two components honestly reports 50/50 instead of being forced to pick.
+
+WHY THIS BEATS KMEANS
+---------------------
+KMeans is (almost) the special case where every covariance is a shared multiple
+of the identity and assignments are hard. Letting each component keep its own
+full covariance lets it be stretched, rotated and sized differently -- so a GMM
+fits elongated and overlapping clusters that KMeans has no vocabulary for.
+
+Being a real probability model, it also gives a likelihood, and therefore
+``bic``/``aic`` for choosing the number of components, and ``sample`` for
+generating new data. KMeans offers none of that.
+
+WHY EM, AND WHY IT WORKS
+------------------------
+The likelihood contains a log of a sum -- ``log(sum_k w_k * N(x | mu_k))`` --
+which does not separate, so there is nothing to solve directly. The trouble is
+circular: knowing which component made each point would make the parameters
+trivial, and knowing the parameters would make the assignment trivial.
+
+EM cuts the circle by alternating:
+
+* **E-step**: given the parameters, compute each point's posterior over
+  components (the "responsibilities").
+* **M-step**: given the responsibilities, update each component as a weighted
+  fit -- every point contributes to every component, in proportion.
+
+The guarantee is that each round cannot DECREASE the likelihood. EM is really
+maximising a lower bound on the likelihood: the E-step makes the bound touch
+the true likelihood at the current parameters, and the M-step maximises the
+bound. Since the bound touches, improving it improves the real thing. That is
+why EM converges monotonically -- to a local optimum, so ``n_init`` matters
+here as much as in KMeans.
+
+NUMERICAL REALITY
+-----------------
+Everything is computed in LOG space. A Gaussian density in 20 dimensions
+underflows to exactly 0.0 for any point that is not very close to the mean, and
+then a ratio of densities is 0/0. Working with log-densities and combining them
+with ``logsumexp`` -- which factors out the largest term before exponentiating
+-- keeps every quantity in a representable range. ``reg_covar`` guards the other
+failure: a component collapsing onto a single point makes its covariance
+singular and its likelihood infinite, which EM is otherwise happy to pursue.
+"""
 import numpy as np
 from scipy.special import logsumexp
 
@@ -7,6 +61,27 @@ from ..utils import check_array, check_random_state
 
 
 def _log_gaussian(X, mean, cov, cov_type, reg):
+    """Log-density of a multivariate Gaussian, via Cholesky.
+
+    The density needs ``(x-mu)' inv(C) (x-mu)`` and ``log|C|``. Neither is
+    computed the obvious way, because inverting a covariance and taking a
+    determinant are both numerically poor and needlessly expensive.
+
+    The Cholesky factor ``C = L L'`` gives both cheaply and stably:
+
+    * the quadratic form becomes ``||solve(L, x-mu)||^2`` -- a triangular solve,
+      no inverse ever formed;
+    * ``log|C| = 2*sum(log(diag(L)))`` -- a sum of logs rather than a product of
+      n numbers that would overflow.
+
+    Cholesky also fails loudly (rather than returning garbage) if the covariance
+    is not positive definite, which is a useful alarm.
+
+    ``covariance_type`` trades flexibility for parameters: ``full`` is d(d+1)/2
+    numbers per component and fits any ellipse; ``diag`` is d, axis-aligned
+    only; ``spherical`` is 1, round only. With limited data, fewer parameters
+    often generalise better.
+    """
     n, d = X.shape
     if cov_type == "full":
         cov = cov + reg * np.eye(d)
@@ -58,6 +133,16 @@ class GaussianMixture(BaseEstimator, DensityMixin, ClusterMixin):
         return weights, means, covs
 
     def _e_step(self, X, weights, means, covs):
+        """Responsibilities: the posterior probability of each component per point.
+
+        Bayes' rule, in log space::
+
+            log r_ik = log w_k + log N(x_i | mu_k, C_k) - log(sum over k)
+
+        The subtracted term is the normaliser, and ``logsumexp`` computes it
+        without ever exponentiating a large negative number. It also returns the
+        mean log-likelihood, which is what convergence is judged on.
+        """
         k = self.n_components
         log_prob = np.empty((len(X), k))
         for c in range(k):
@@ -68,6 +153,21 @@ class GaussianMixture(BaseEstimator, DensityMixin, ClusterMixin):
         return weighted - log_norm, float(log_norm.mean())
 
     def _m_step(self, X, log_resp):
+        """Refit every component, with each point weighted by its responsibility.
+
+        The update is exactly the maximum-likelihood fit of a Gaussian, except
+        that the "count" of points in a component is now a fractional sum of
+        responsibilities::
+
+            n_k    = sum_i r_ik
+            mu_k   = sum_i r_ik * x_i / n_k
+            C_k    = sum_i r_ik * (x_i - mu_k)(x_i - mu_k)' / n_k
+            w_k    = n_k / n
+
+        Set every responsibility to 0 or 1 and these collapse into the KMeans
+        M-step -- which is the precise sense in which KMeans is hard-assignment
+        EM.
+        """
         resp = np.exp(log_resp)
         nk = resp.sum(axis=0) + 1e-10
         weights = nk / len(X)
@@ -156,6 +256,17 @@ class GaussianMixture(BaseEstimator, DensityMixin, ClusterMixin):
         return np.vstack(out), np.concatenate(comps)
 
     def bic(self, X):
+        """Bayesian Information Criterion. LOWER is better.
+
+        ``-2*log-likelihood + n_params*log(n)``. Likelihood alone always favours
+        more components -- a component per point fits perfectly -- so it cannot
+        choose k. BIC charges for parameters, and the ``log(n)`` charge grows
+        with the sample size, so BIC gets stricter as evidence accumulates.
+
+        Sweeping k and taking the minimum BIC is the standard way to choose the
+        number of components. ``aic`` charges a flat 2 per parameter instead,
+        so it is more permissive and tends to pick larger models.
+        """
         X = check_array(X)
         k, d = self.n_components, X.shape[1]
         if self.covariance_type == "full":

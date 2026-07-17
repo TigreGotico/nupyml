@@ -1,13 +1,76 @@
-"""The Tensor class: an ndarray with a gradient tape."""
+"""Reverse-mode automatic differentiation over numpy arrays.
+
+WHAT AUTODIFF IS, AND WHAT IT IS NOT
+------------------------------------
+It is not symbolic differentiation: nothing here manipulates formulas or
+returns an expression for the derivative. It is not numerical differentiation
+either: nothing is estimated by nudging inputs and measuring the change (that
+would cost one forward pass per parameter, and lose precision to round-off).
+
+Autodiff is the observation that any program built from differentiable
+primitives is a composition of simple functions, and the chain rule turns the
+derivative of a composition into a product of the pieces' derivatives. So if
+every primitive knows its own local derivative, the derivative of any program
+made of them follows mechanically.
+
+FORWARD MODE VS REVERSE MODE
+----------------------------
+The chain rule for ``f(g(h(x)))`` gives a product of Jacobians::
+
+    df/dx = J_f @ J_g @ J_h
+
+Matrix products are associative, so we may multiply left-to-right or
+right-to-left, and the choice decides the cost.
+
+- *Forward mode* goes right-to-left, propagating one input's influence
+  forward. One pass gives the derivative of EVERY output with respect to ONE
+  input.
+- *Reverse mode* goes left-to-right, propagating one output's sensitivity
+  backward. One pass gives the derivative of ONE output with respect to EVERY
+  input.
+
+Machine learning almost always minimises a single scalar loss over millions of
+parameters, so reverse mode wins overwhelmingly: one backward pass yields every
+gradient. That single scalar output is why it is called backpropagation.
+
+The price is memory. Reverse mode has to know the graph before it can walk it
+backwards, so intermediate values are kept alive until the backward pass uses
+them. Forward mode needs no such tape.
+
+HOW THIS FILE DOES IT
+---------------------
+Every operation on a ``Tensor`` does two things:
+
+1. computes the output value immediately (this is "define-by-run": the graph is
+   a side effect of running the code, not a structure declared up front); and
+2. records a closure that knows how to convert a gradient flowing INTO the
+   output into gradients flowing OUT to each input.
+
+That closure is a vector-Jacobian product, or VJP. It never materialises the
+Jacobian -- for ``y = x @ W`` with a 1000x1000 W, the Jacobian would have a
+trillion entries, while the VJP is just another matmul.
+
+``backward()`` then walks the recorded graph in reverse topological order and
+calls each closure. The ordering is not a detail; see ``Tensor.backward``.
+"""
 import contextlib
 
 import numpy as np
 
+# Tracking is global rather than per-tensor so that `no_grad()` can switch off
+# an entire region of code, including library calls it does not control.
 _grad_enabled = True
 
 
 @contextlib.contextmanager
 def no_grad():
+    """Run a block without recording a graph.
+
+    Inference needs values, not gradients. Recording anyway would keep every
+    intermediate alive for a backward pass that never comes -- pure waste, and
+    on a long evaluation loop it is the difference between constant and
+    ever-growing memory.
+    """
     global _grad_enabled
     prev = _grad_enabled
     _grad_enabled = False
@@ -22,7 +85,19 @@ def is_grad_enabled():
 
 
 def _unbroadcast(grad, shape):
-    """Sum ``grad`` over axes that were broadcast to reach ``grad.shape``."""
+    """Undo broadcasting on the way back.
+
+    Broadcasting silently copies data: adding a ``(3,)`` bias to a ``(64, 3)``
+    batch reuses each bias element 64 times. Reuse means that on the backward
+    pass, the bias receives 64 separate contributions -- and the chain rule says
+    contributions to the same variable ADD.
+
+    So the adjoint of "copy" is "sum". Wherever the forward pass stretched a
+    dimension, the backward pass sums over it, which also restores the original
+    shape. Getting this wrong is the classic autodiff bug: the gradient is the
+    right numbers in the wrong shape, and numpy broadcasts it again instead of
+    complaining.
+    """
     if grad.shape == shape:
         return grad
     # sum over leading extra dims
@@ -37,10 +112,34 @@ def _unbroadcast(grad, shape):
 
 
 class Tensor:
-    """A numpy array plus autodiff bookkeeping."""
+    """An ndarray that remembers how it was computed.
 
+    Attributes
+    ----------
+    data : ndarray
+        The value. Always float64 here: autodiff on integers is meaningless,
+        and float32 would make gradient checking against finite differences
+        hopelessly noisy.
+    grad : ndarray or None
+        Filled in by ``backward()``. ``None`` means "no gradient has arrived",
+        which is deliberately distinct from "the gradient is zero".
+    requires_grad : bool
+        Whether this tensor is part of the graph. Inputs and constants are
+        ``False``; parameters are ``True``. It spreads: any result computed
+        from a tracked tensor is itself tracked.
+    _backward : callable or None
+        The VJP closure. Takes the gradient arriving at this node, and adds the
+        appropriate share to each input's ``.grad``.
+    _prev : tuple of Tensor
+        The inputs this node was computed from -- the graph edges.
+    """
+
+    # __slots__ rather than a dict: a graph holds one of these per intermediate
+    # value, so per-object overhead is multiplied by the size of the network.
     __slots__ = ("data", "grad", "requires_grad", "_backward", "_prev", "_op")
-    __array_priority__ = 100  # numpy defers to our __radd__ etc.
+    # tells numpy to defer to our __radd__/__rmul__ instead of trying to
+    # broadcast a Tensor into an ndarray elementwise
+    __array_priority__ = 100
 
     def __init__(self, data, requires_grad=False, _prev=(), _op=""):
         if isinstance(data, Tensor):
@@ -58,6 +157,14 @@ class Tensor:
     # ------------------------------------------------------------------
     @staticmethod
     def _make(data, parents, backward, op=""):
+        """Build a result node, recording the graph only if it is needed.
+
+        A node joins the graph only when at least one input is tracked. This is
+        what stops a forward pass through frozen weights, or any call inside
+        ``no_grad()``, from paying for bookkeeping it will never use: the
+        closure and the parent references are simply never stored, and the
+        intermediates become garbage immediately.
+        """
         req = _grad_enabled and any(p.requires_grad for p in parents)
         out = Tensor(data, requires_grad=req)
         if req:
@@ -99,6 +206,12 @@ class Tensor:
         return self.data.item()
 
     def detach(self):
+        """A view of the same values with the history cut off.
+
+        Gradients stop here. Useful whenever a value should be treated as a
+        constant even though it was computed from parameters -- a target, or a
+        quantity you deliberately do not want to backpropagate through.
+        """
         return Tensor(self.data, requires_grad=False)
 
     def zero_grad(self):
@@ -108,6 +221,33 @@ class Tensor:
     # backward
     # ------------------------------------------------------------------
     def backward(self, grad=None):
+        """Propagate gradients from this tensor back to every leaf.
+
+        WHY TOPOLOGICAL ORDER
+        ---------------------
+        A node's gradient is the SUM of contributions from every path that
+        leads out of it. If a tensor is used twice -- ``y = x*x + x`` -- then x
+        gets two contributions, and applying x's own VJP before both have
+        arrived would propagate a half-finished gradient onward. Wrong answer,
+        silently.
+
+        So the rule is: never process a node until every node that depends on it
+        has been processed. That is exactly reverse topological order. It is
+        also why the seed gradient starts at 1: d(loss)/d(loss) = 1, and every
+        other gradient is that seed routed backwards.
+
+        The traversal below is iterative rather than recursive, because a deep
+        network (say an RNN unrolled over a long sequence) would otherwise
+        blow Python's stack.
+
+        Parameters
+        ----------
+        grad : ndarray, optional
+            The gradient arriving at this tensor. Defaults to ones for a
+            scalar. A non-scalar has no canonical seed -- "the derivative of a
+            vector" is a Jacobian, and reverse mode computes one row at a time
+            -- so the caller must say which combination it wants.
+        """
         if not self.requires_grad:
             raise RuntimeError("Called backward on a tensor that does not require grad")
         if grad is None:
@@ -117,7 +257,9 @@ class Tensor:
         else:
             grad = np.asarray(grad, dtype=np.float64)
 
-        # topological order
+        # depth-first post-order gives reverse topological order when reversed.
+        # the `processed` flag emulates the "visit children, then me" moment
+        # that recursion gets for free.
         topo, visited = [], set()
         stack = [(self, False)]
         while stack:
@@ -139,6 +281,13 @@ class Tensor:
                 node._backward(node.grad)
 
     def _accumulate(self, grad):
+        """Add an incoming contribution to this tensor's gradient.
+
+        Accumulate, never overwrite: a tensor feeding several operations
+        receives one contribution per use, and the chain rule sums them. This
+        is also why training loops must call ``zero_grad()`` -- otherwise the
+        next step's gradients pile on top of the last step's.
+        """
         grad = _unbroadcast(np.asarray(grad, dtype=np.float64), self.data.shape)
         self.grad = grad if self.grad is None else self.grad + grad
 
@@ -209,6 +358,22 @@ class Tensor:
         return Tensor._make(self.data ** exponent, (self,), backward, "pow")
 
     def __matmul__(self, other):
+        """Matrix product, the workhorse of every dense layer.
+
+        For ``C = A @ B`` the VJPs are::
+
+            dL/dA = dL/dC @ B'
+            dL/dB = A' @ dL/dC
+
+        Worth seeing why rather than memorising: ``C_ij = sum_k A_ik B_kj``, so
+        ``A_ik`` influences the whole i-th row of C, weighted by row k of B.
+        Summing those influences is precisely ``dL/dC @ B'``. The transposes are
+        not a trick -- they are what "sum over the shared index" looks like.
+
+        This is also the clearest case for VJPs over Jacobians: the true
+        Jacobian here is a four-dimensional object, while the gradient is two
+        ordinary matmuls.
+        """
         other = self._wrap(other)
         a, b = self.data, other.data
         def backward(g):
@@ -250,6 +415,9 @@ class Tensor:
     # unary math
     # ------------------------------------------------------------------
     def exp(self):
+        # d/dx exp(x) = exp(x): the output is captured by the closure and
+        # reused, rather than recomputed on the backward pass. Trading memory
+        # for arithmetic like this is the whole reason a tape exists.
         out_data = np.exp(self.data)
         def backward(g):
             if self.requires_grad:
@@ -281,6 +449,23 @@ class Tensor:
         return Tensor._make(out_data, (self,), backward, "sigmoid")
 
     def relu(self):
+        """Rectifier: ``max(x, 0)``.
+
+        The derivative is 1 where the input was positive and 0 elsewhere -- so
+        backward is just a mask. Two consequences worth knowing:
+
+        * Gradients pass through the active half UNSCALED. Sigmoid and tanh
+          saturate and multiply gradients by something well under 1 at every
+          layer, which is what made deep networks untrainable for years. ReLU
+          not shrinking the gradient is most of why depth became practical.
+        * The dead half passes nothing. A unit pushed negative for every input
+          receives no gradient and can never recover -- a "dead" ReLU. That is
+          what leaky variants exist to avoid.
+
+        Strictly, ``max(x, 0)`` has no derivative at exactly 0. Sub-gradient
+        conventions allow anything in [0, 1]; the mask picks 0, and an exact
+        zero input is a measure-zero event anyway.
+        """
         mask = self.data > 0
         def backward(g):
             if self.requires_grad:
@@ -305,6 +490,13 @@ class Tensor:
     # reductions
     # ------------------------------------------------------------------
     def sum(self, axis=None, keepdims=False):
+        """Sum, whose adjoint is broadcast.
+
+        Summing collapses many inputs into one output, and each contributed
+        with weight 1 -- so the gradient arriving at the output is copied back
+        to every element that fed it. Note the duality with ``_unbroadcast``:
+        the adjoint of sum is broadcast, and the adjoint of broadcast is sum.
+        """
         def backward(g):
             if not self.requires_grad:
                 return
@@ -331,6 +523,17 @@ class Tensor:
         return out
 
     def max(self, axis=None, keepdims=False):
+        """Maximum, with the gradient routed only to the winner.
+
+        ``max`` is a selector: the output IS one of the inputs, so the gradient
+        flows entirely to whichever element won and not at all to the others.
+        This is what makes max-pooling backward a scatter.
+
+        Ties are split evenly between the winners. Any single winner would also
+        be a valid sub-gradient; splitting keeps the result independent of
+        argmax's arbitrary tie-breaking, so the same input always gives the
+        same gradient.
+        """
         out_data = self.data.max(axis=axis, keepdims=keepdims)
         def backward(g):
             if not self.requires_grad:

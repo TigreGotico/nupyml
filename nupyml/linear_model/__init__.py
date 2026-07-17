@@ -1,4 +1,51 @@
-"""Linear models: OLS, Ridge, Lasso, ElasticNet, Logistic, SGD, Perceptron."""
+"""Linear models: predictions that are weighted sums of the features.
+
+Every model here computes ``X @ w + b`` and differs only in two choices: what
+it does with that number, and what it penalises ``w`` for.
+
+WHAT THE NUMBER MEANS
+---------------------
+- Regression uses it directly as the prediction.
+- Classification pushes it through a squashing function to get a probability
+  (``LogisticRegression``), or just reads its sign (``Perceptron``,
+  ``LinearSVC``).
+
+The boundary between classes is therefore always a flat surface -- a line in
+2-D, a plane in 3-D. That is the defining limitation, and also why these models
+are so well understood: the problems are usually convex, so "the" solution
+exists and is unique, with no local minima to escape.
+
+WHAT THE PENALTY DOES
+---------------------
+Left alone, a linear model with many features will fit noise. A penalty on
+``w`` trades a little bias for a large drop in variance:
+
+============ ================== ==============================================
+penalty      model              effect
+============ ================== ==============================================
+none         LinearRegression   fits whatever the data says, noise included
+L2 ``w^2``   Ridge              shrinks weights smoothly toward zero
+L1 ``|w|``   Lasso              drives weights to EXACTLY zero: selection
+both         ElasticNet         shrinks, selects, and shares among correlates
+============ ================== ==============================================
+
+Why L1 selects and L2 does not is the most useful geometric fact in this file,
+and is explained in ``Lasso``.
+
+HOW THEY ARE SOLVED
+-------------------
+The penalty also decides the algorithm, which is why these are separate classes
+rather than one class with a flag:
+
+- ``LinearRegression``, ``Ridge`` -- the optimum has a closed form; just solve
+  a linear system.
+- ``Lasso``, ``ElasticNet`` -- ``|w|`` has no derivative at zero, so no
+  gradient method reaches an exact zero. Coordinate descent instead.
+- ``LogisticRegression`` -- convex but no closed form; hand the gradient to a
+  quasi-Newton solver.
+- ``SGDClassifier``, ``SGDRegressor`` -- same objectives, approximated one
+  mini-batch at a time, for data too large to hold at once.
+"""
 import numpy as np
 import scipy.optimize
 import scipy.sparse as sp
@@ -15,6 +62,39 @@ def _add_intercept_stats(X, y):
 
 
 class LinearRegression(BaseEstimator, RegressorMixin):
+    """Ordinary least squares: minimise ``||y - Xw||^2``.
+
+    THE GEOMETRY
+    ------------
+    The reachable predictions ``Xw`` form a subspace -- everything the columns
+    of X can build. Usually ``y`` does not lie in it. The closest point that
+    does is the perpendicular projection of ``y`` onto that subspace, and
+    "perpendicular" means the residual is orthogonal to every column::
+
+        X'(y - Xw) = 0    ==>    X'X w = X'y
+
+    Those are the normal equations, and they are what makes OLS a linear-algebra
+    problem rather than an optimization one.
+
+    WHY ``lstsq`` AND NOT ``inv(X'X) @ X'y``
+    ----------------------------------------
+    The textbook formula is a numerical trap. Forming ``X'X`` squares the
+    condition number, so correlated features -- exactly the case where the fit
+    is delicate -- lose about half the available precision. Worse, if features
+    are perfectly collinear, ``X'X`` is singular and the inverse does not exist,
+    though a best fit still does (many, in fact).
+
+    ``lstsq`` sidesteps both by factorising X directly and returning the
+    minimum-norm solution when the problem is degenerate.
+
+    THE INTERCEPT
+    -------------
+    Centring X and y, fitting without an intercept, then recovering
+    ``b = mean(y) - mean(X) @ w`` gives the same answer as appending a column
+    of ones, but keeps the penalty in the subclasses off the intercept -- where
+    it does not belong, since shifting the units of y should not be penalised.
+    """
+
     def __init__(self, fit_intercept=True):
         self.fit_intercept = fit_intercept
 
@@ -44,6 +124,34 @@ class LinearRegression(BaseEstimator, RegressorMixin):
 
 
 class Ridge(BaseEstimator, RegressorMixin):
+    """Least squares with an L2 penalty: ``||y - Xw||^2 + alpha*||w||^2``.
+
+    Setting the gradient to zero gives a barely-changed normal equation::
+
+        (X'X + alpha*I) w = X'y
+
+    A diagonal ridge added to ``X'X`` -- hence the name. That tiny change buys
+    a great deal:
+
+    *It always has a solution.* ``X'X`` may be singular; ``X'X + alpha*I`` never
+    is for ``alpha > 0``, since it lifts every eigenvalue by alpha. Ridge works
+    with more features than samples, where OLS is undefined.
+
+    *It stabilises correlated features.* Given two near-identical features, OLS
+    is free to put a huge positive weight on one and a huge negative weight on
+    the other -- the predictions cancel, the fit looks fine, and the weights are
+    nonsense driven by noise. The penalty makes that expensive, so ridge splits
+    the weight between them instead.
+
+    *It shrinks, but never to zero.* The penalty's gradient is ``2*alpha*w``,
+    which vanishes as w approaches zero, so the pull weakens exactly when it
+    would need to be decisive. Every feature keeps a small weight. For actual
+    selection, see ``Lasso``.
+
+    ``alpha`` chooses where on the bias-variance curve to sit: 0 is OLS,
+    infinity is the null model. ``RidgeCV`` picks it by cross-validation.
+    """
+
     def __init__(self, alpha=1.0, fit_intercept=True):
         self.alpha = alpha
         self.fit_intercept = fit_intercept
@@ -75,7 +183,45 @@ class Ridge(BaseEstimator, RegressorMixin):
 
 
 class _CoordinateDescent(BaseEstimator, RegressorMixin):
-    """Shared cyclic coordinate descent for Lasso / ElasticNet."""
+    """Cyclic coordinate descent for the L1-penalised objectives.
+
+    THE PROBLEM WITH GRADIENTS HERE
+    -------------------------------
+    ``|w|`` has a corner at zero -- no derivative. Gradient descent hovers
+    around the corner, and floating point ensures it lands on 1e-17 rather than
+    0.0, so "sparse" solutions are not actually sparse. Yet exact zeros are the
+    entire reason to use L1.
+
+    THE FIX: OPTIMIZE ONE WEIGHT AT A TIME
+    --------------------------------------
+    Freeze every weight but ``w_j``. The objective in that single variable is a
+    parabola plus ``alpha*|w_j|``, and that one-dimensional problem has a
+    closed-form minimum -- corner included. Cycle over j until nothing moves.
+
+    The closed form is the soft-thresholding operator::
+
+        w_j = sign(rho) * max(|rho| - alpha, 0) / (norm + l2)
+
+    Read it directly: ``rho`` is how much feature j correlates with what the
+    other features left unexplained. If that correlation is weaker than alpha,
+    ``max(..., 0)`` returns exactly 0.0 -- a real zero, produced by a max, not
+    by a limit. Otherwise the weight is pulled toward zero by alpha and stops.
+    That single line is what makes lasso a selector.
+
+    Convexity is what licenses the whole approach: coordinate descent can stall
+    at a non-optimal corner on a general function, but for this objective --
+    smooth plus separable-convex -- coordinate-wise optimality implies global
+    optimality.
+
+    THE RESIDUAL TRICK
+    ------------------
+    Recomputing ``y - Xw`` after each weight would cost O(n*d) per coordinate.
+    Instead the residual is updated in place by the one column that changed::
+
+        resid += X[:, j] * (w_j_old - w_j_new)
+
+    O(n) per coordinate, and the reason this scales.
+    """
 
     def __init__(self, alpha=1.0, l1_ratio=1.0, fit_intercept=True,
                  max_iter=1000, tol=1e-4):
@@ -123,6 +269,34 @@ class _CoordinateDescent(BaseEstimator, RegressorMixin):
 
 
 class Lasso(_CoordinateDescent):
+    """L1-penalised least squares: ``||y - Xw||^2 + alpha*||w||_1``.
+
+    WHY L1 SELECTS AND L2 DOES NOT
+    ------------------------------
+    Both penalties can be read as "minimise the error subject to a budget on
+    w". The shape of the budget region decides everything.
+
+    L2's region is a ball. L1's is a diamond -- ``|w1| + |w2| <= t`` -- with
+    corners ON the axes, and a corner is exactly a point where some coordinate
+    is zero.
+
+    The solution is where the growing error contours first touch the budget
+    region. A smooth ball is usually touched on a smooth part, at some generic
+    point with all coordinates non-zero. A pointy diamond is most easily
+    touched at a corner: corners stick out. So L1 lands on the axes, and lands
+    there for a whole range of alpha, not by coincidence.
+
+    That geometric picture is exactly what soft-thresholding does numerically:
+    it flattens a whole interval of ``rho`` onto zero rather than passing
+    through it.
+
+    WHAT TO WATCH OUT FOR
+    ---------------------
+    Given a group of correlated features, lasso tends to keep one arbitrarily
+    and zero the rest -- convenient for parsimony, misleading if you read the
+    survivor as "the important one". ``ElasticNet`` exists for that case.
+    """
+
     def __init__(self, alpha=1.0, fit_intercept=True, max_iter=1000, tol=1e-4):
         super().__init__(alpha=alpha, l1_ratio=1.0, fit_intercept=fit_intercept,
                          max_iter=max_iter, tol=tol)
@@ -133,6 +307,20 @@ class Lasso(_CoordinateDescent):
 
 
 class ElasticNet(_CoordinateDescent):
+    """Both penalties at once: ``alpha * (l1_ratio*||w||_1 + (1-l1_ratio)/2*||w||^2)``.
+
+    Lasso's weakness is correlated features: it picks one and discards its
+    twins, and which one it picks can flip with a small change in the data.
+    Ridge's weakness is that it never selects.
+
+    Mixing them gives the "grouping effect": the L1 part still zeroes whole
+    irrelevant features, while the L2 part encourages correlated survivors to
+    share weight rather than fight over it. The result is stabler than lasso
+    and sparser than ridge.
+
+    ``l1_ratio`` slides between them -- 1.0 is lasso, 0.0 is ridge.
+    """
+
     def __init__(self, alpha=1.0, l1_ratio=0.5, fit_intercept=True,
                  max_iter=1000, tol=1e-4):
         super().__init__(alpha=alpha, l1_ratio=l1_ratio,
@@ -140,7 +328,58 @@ class ElasticNet(_CoordinateDescent):
 
 
 class LogisticRegression(BaseEstimator, ClassifierMixin):
-    """Multinomial logistic regression fit with L-BFGS and analytic gradients."""
+    """Linear classification by maximum likelihood. A classifier, despite the name.
+
+    THE MODEL
+    ---------
+    A linear score ``z = Xw + b`` is unbounded, and probabilities are not. The
+    sigmoid maps one onto the other::
+
+        p = 1 / (1 + exp(-z))
+
+    This is not an arbitrary squashing choice. Rearranged, it says the model is
+    linear in the LOG-ODDS::
+
+        log(p / (1 - p)) = z
+
+    which is what "linear model" means here, and why coefficients are read as
+    "a unit of this feature multiplies the odds by ``exp(w_j)``". For more than
+    two classes, softmax generalises it.
+
+    THE LOSS
+    --------
+    Fit by maximising the likelihood of the observed labels, equivalently
+    minimising the negative log-likelihood::
+
+        -sum_i [ y_i*log(p_i) + (1-y_i)*log(1-p_i) ]
+
+    Squared error is a poor fit here: it is non-convex under the sigmoid, and
+    it barely punishes confident mistakes. Log-loss is convex, and its penalty
+    for a confidently wrong answer grows without bound -- which is what you
+    want a classifier to fear.
+
+    THE GRADIENT
+    ------------
+    Despite the sigmoid and the log, the gradient collapses to::
+
+        dL/dw = X' (p - y)
+
+    "error times input", the same form as least squares. The sigmoid's
+    derivative cancels exactly against the log-loss's -- not a coincidence, but
+    a property of matching an exponential-family likelihood to its canonical
+    link.
+
+    NO CLOSED FORM
+    --------------
+    ``p`` depends on ``w`` non-linearly, so unlike least squares there is
+    nothing to solve directly. The problem is convex with no local minima, so
+    the analytic gradient is handed to L-BFGS, which builds a curvature
+    estimate from successive gradients and converges in far fewer passes than
+    plain gradient descent -- without ever forming the Hessian.
+
+    ``C`` is INVERSE regularisation strength (small C, strong penalty), which
+    is the SVM convention rather than the ``alpha`` used by Ridge.
+    """
 
     def __init__(self, C=1.0, fit_intercept=True, max_iter=200, tol=1e-6):
         self.C = C
@@ -258,9 +497,35 @@ class Perceptron(BaseEstimator, ClassifierMixin):
 
 
 class SGDClassifier(BaseEstimator, ClassifierMixin):
-    """Binary/multiclass linear classifier trained with minibatch SGD.
+    """Linear classification by mini-batch stochastic gradient descent.
 
-    loss='log' gives logistic regression; loss='hinge' a linear SVM.
+    The models here are not new: ``loss="log"`` is logistic regression and
+    ``loss="hinge"`` is a linear SVM. What changes is how they are fit.
+
+    WHY APPROXIMATE THE GRADIENT ON PURPOSE
+    ---------------------------------------
+    The true gradient sums over every sample, so one step costs a full pass.
+    But that sum is an average, and an average can be estimated from a sample:
+    a mini-batch gives a noisy gradient for a fraction of the work. Many rough
+    steps beat one exact step -- the noise mostly cancels over a sequence of
+    updates, and the parameters are moving anyway.
+
+    This is what makes the method scale to data that does not fit in memory,
+    and it is what ``partial_fit`` exposes: stream a chunk, take a step, drop
+    the chunk.
+
+    THE TWO LOSSES
+    --------------
+    * ``hinge``: ``max(0, 1 - y*z)``. Zero once a point is correct AND at least
+      a margin away, so correct-and-confident points contribute no gradient at
+      all -- the boundary is set by the points near it. Not differentiable at
+      the kink; the sub-gradient is used.
+    * ``log``: ``log(1 + exp(-y*z))``. Never exactly zero, so every point keeps
+      nudging forever, but smooth and probabilistic.
+
+    The price of SGD is that ``learning_rate`` now matters: too large diverges,
+    too small crawls. The closed-form and quasi-Newton solvers in this module
+    have no such knob.
     """
 
     def __init__(self, loss="hinge", alpha=1e-4, max_iter=1000, tol=1e-3,
