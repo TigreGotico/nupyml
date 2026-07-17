@@ -129,6 +129,10 @@ A reasonable path through the library:
     cross-entropy, LambdaMART's NDCG-scaled lambda gradients) with the ranking
     metrics that judge an order (NDCG, MAP, MRR, hit-rate), plus Slope One and
     co-clustering collaborative filtering.
+38. AutoML and GP expansion -- BOHB search (``model_selection``, Hyperband's
+    schedule with TPE's proposals), greedy ensemble selection (``ensemble``), and
+    scalable/vector GPs (``gaussian_process``: inducing-point sparse GP and a
+    multi-output GP).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

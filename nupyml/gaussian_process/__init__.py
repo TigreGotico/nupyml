@@ -178,7 +178,12 @@ class GaussianProcessClassifier(BaseEstimator, ClassifierMixin):
         return self.classes_[(self.predict_proba(X)[:, 1] > 0.5).astype(int)]
 
 
+from ._sparse import (SparseGaussianProcessRegressor,  # noqa: E402
+                      MultiOutputGaussianProcessRegressor)
+
 __all__ = ["Kernel", "ConstantKernel", "WhiteKernel", "RBF", "Matern",
            "RationalQuadratic", "ExpSineSquared", "DotProduct", "Sum",
            "Product", "ConstantTimes", "GaussianProcessRegressor",
-           "GaussianProcessClassifier"]
+           "GaussianProcessClassifier",
+           "SparseGaussianProcessRegressor",
+           "MultiOutputGaussianProcessRegressor"]

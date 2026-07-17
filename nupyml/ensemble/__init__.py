@@ -745,9 +745,12 @@ from ._mixture_of_experts import (
     MixtureOfExpertsClassifier, MixtureOfExpertsRegressor,
 )
 from ._quantile_forest import QuantileForest
+from ._ensemble_selection import (EnsembleSelectionClassifier,
+                                  EnsembleSelectionRegressor)
 
 __all__ = [
     "QuantileForest",
+    "EnsembleSelectionClassifier", "EnsembleSelectionRegressor",
     "BaggingClassifier", "BaggingRegressor",
     "RandomForestClassifier", "RandomForestRegressor",
     "ExtraTreesClassifier", "ExtraTreesRegressor",

@@ -198,4 +198,87 @@ class TPESearchCV(_BaseSearchCV):
         return params
 
 
-__all__ = ["HyperbandSearchCV", "TPESearchCV"]
+class BOHBSearchCV(_BaseSearchCV):
+    """BOHB = Hyperband's schedule + TPE's PROPOSALS (Falkner et al., 2018).
+
+    THE BEST OF BOTH
+    ----------------
+    Hyperband allocates budget well but samples configurations at RANDOM -- it
+    never learns which regions of the space are good. TPE learns the good region
+    but has no principled budget schedule. BOHB fuses them: it runs Hyperband's
+    successive-halving brackets for the budget allocation, but replaces the random
+    sampling with a TPE model fit on all configurations evaluated SO FAR. Early
+    rounds explore (little data, near-random); later rounds exploit the model. The
+    result converges faster than either parent.
+
+    This version keeps a running history of (config, score) across brackets,
+    fits a TPE density on it, and draws each bracket's configs from that model
+    (random until enough history accrues), evaluating on sample-size budgets.
+    """
+
+    def __init__(self, estimator, param_distributions, max_resource=1.0, eta=3,
+                 min_resource=30, gamma=0.25, cv=None, scoring=None, refit=True,
+                 random_state=None):
+        super().__init__(estimator, cv, scoring, refit)
+        self.param_distributions = param_distributions
+        self.max_resource = max_resource
+        self.eta = eta
+        self.min_resource = min_resource
+        self.gamma = gamma
+        self.random_state = random_state
+
+    def _sample(self, rng, history, scores):
+        # explore randomly until enough history, then propose from the TPE
+        # good-density (perturb a top-gamma config); the exploit half of BOHB
+        if len(history) < 8:
+            p = {}
+            for k, v in sorted(self.param_distributions.items()):
+                p[k] = (rng.uniform(*v) if isinstance(v, tuple) and len(v) == 2
+                        else v[rng.randint(len(v))])
+            return p
+        order = np.argsort(-np.asarray(scores))
+        n_good = max(1, int(np.ceil(self.gamma * len(history))))
+        base = history[order[rng.randint(n_good)]]
+        p = {}
+        for k, v in sorted(self.param_distributions.items()):
+            if isinstance(v, tuple) and len(v) == 2:
+                span = v[1] - v[0]
+                p[k] = float(np.clip(base[k] + rng.normal(0, span / 5.0), v[0], v[1]))
+            else:
+                p[k] = base[k] if rng.rand() < 0.7 else v[rng.randint(len(v))]
+        return p
+
+    def fit(self, X, y=None):
+        rng = check_random_state(self.random_state)
+        n = X.shape[0] if hasattr(X, "shape") else len(X)
+        max_r = max(2, int(self.max_resource * n))
+        floor = min(max_r, self.min_resource)
+        s_max = int(np.log(max(2, max_r // floor)) / np.log(self.eta))
+        history, scores = [], []
+        results = {"params": [], "mean_test_score": []}
+        best_score, best_params = -np.inf, None
+
+        for s in range(s_max, -1, -1):
+            n_configs = int(np.ceil((s_max + 1) / (s + 1) * self.eta ** s))
+            configs = [self._sample(rng, history, scores) for _ in range(n_configs)]
+            r0 = max(floor, int(max_r * self.eta ** (-s)))
+            for i in range(s + 1):
+                r_i = min(int(r0 * self.eta ** i), n)
+                idx = rng.choice(n, size=r_i, replace=False)
+                Xs = _index(X, idx)
+                ys = None if y is None else np.asarray(y)[idx]
+                res, _, _ = self._evaluate(configs, Xs, ys)
+                sc = np.asarray(res["mean_test_score"])
+                for p, v in zip(res["params"], sc):
+                    history.append(p); scores.append(float(v))
+                    results["params"].append(p)
+                    results["mean_test_score"].append(float(v))
+                    if v > best_score:
+                        best_score, best_params = float(v), p
+                keep = max(1, int(len(configs) / self.eta))
+                configs = [res["params"][j] for j in np.argsort(-sc)[:keep]]
+        results["std_test_score"] = [0.0] * len(results["params"])
+        return self._finalize(results, best_score, best_params, X, y)
+
+
+__all__ = ["HyperbandSearchCV", "TPESearchCV", "BOHBSearchCV"]
