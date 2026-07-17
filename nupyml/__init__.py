@@ -85,6 +85,10 @@ A reasonable path through the library:
     quantile regression, Venn-Abers probability intervals, adaptive conformal),
     neighbourhood recommenders and SVD++ in ``recommend``, and the AutoML-lite
     searchers in ``model_selection`` (Hyperband, TPE).
+27. ``tsclass`` -- time-series CLASSIFICATION (labelling a whole series by its
+    shape): ROCKET random convolutional kernels, shapelet transform, BOSS
+    symbolic bag-of-words, DTW k-NN, a tsfresh-style feature bank, and the matrix
+    profile for motif/discord discovery.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
