@@ -358,6 +358,10 @@ A reasonable path through the library:
 106. embeddings v5 / retrieval in ``embed`` -- GraRep and HOPE (high-order proximity
      node embeddings), personalized-PageRank embeddings, and the IVFPQ index
      (inverted file + product-quantised residuals).
+107. neural architectures v7 in ``nn`` -- the Conditional Neural Process (amortised
+     regression with uncertainty), PointNet (permutation-invariant point clouds), the
+     energy-based model (Langevin sampling), SimSiam (non-contrastive self-supervision),
+     and the variational graph autoencoder (VGAE).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

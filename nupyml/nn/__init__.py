@@ -112,6 +112,8 @@ from ._architectures6 import (Bidirectional, DifferentiableNeuralComputer,
                              GraphTransformer)
 from ._losses_extra6 import (energy_score, DINOLoss, distribution_focal_loss,
                              region_mutual_information, BoxRegressionLoss2)
+from ._architectures7 import (ConditionalNeuralProcess, PointNet,
+                             EnergyBasedModel, SimSiam, VGAE)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -213,4 +215,5 @@ __all__ = [
     "ModernHopfieldNetwork", "GraphTransformer",
     "energy_score", "DINOLoss", "distribution_focal_loss",
     "region_mutual_information", "BoxRegressionLoss2",
+    "ConditionalNeuralProcess", "PointNet", "EnergyBasedModel", "SimSiam", "VGAE",
 ]
