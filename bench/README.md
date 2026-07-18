@@ -69,6 +69,9 @@ any that reach outside `nupyml` / `numpy` / `scipy` / the stdlib as an
 | `keypoint_matching` | supervised | accuracy | shape recognition from image descriptors |
 | `intermittent_forecast` | forecast | RMSE (lower is better) | sparse intermittent-demand forecasting |
 | `ood_detection` | clustering | ROC-AUC | out-of-distribution scoring |
+| `volatility_forecast` | forecast | RMSE (lower is better) | forecast return variance (GARCH vs static) |
+| `multivariate_forecast` | forecast | RMSE (lower is better) | jointly forecast coupled series (VAR) |
+| `node_classification` | supervised | accuracy | label graph nodes from adjacency features |
 
 Two KINDs beyond `supervised`/`clustering`/`forecast`:
 
