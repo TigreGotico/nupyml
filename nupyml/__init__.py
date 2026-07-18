@@ -199,6 +199,10 @@ A reasonable path through the library:
 57. conformal & uncertainty v2 in ``inference`` -- adaptive prediction sets
     (APS, RAPS), cross-conformal regression (jackknife+/CV+), time-series
     conformal (EnbPI), and deep-ensemble epistemic uncertainty.
+58. more ``semi_supervised`` -- co-training (two feature views teach each other),
+    tri-training (two agreeing classifiers teach the third), and positive-
+    unlabeled learning (the Elkan-Noto correction for learning from positives and
+    unlabeled data alone).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
