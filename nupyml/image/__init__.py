@@ -18,8 +18,14 @@ from .features import (histogram_of_oriented_gradients, local_binary_pattern,
                        gabor_features)
 from .shape import (integral_image, rectangle_sum, label, erosion, dilation,
                     opening, closing, hough_line)
+from .vision import (harris_corners, corner_peaks, canny, match_template,
+                     lucas_kanade, chamfer_distance_transform,
+                     non_max_suppression, slic)
 
 __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "graycomatrix", "haralick_features", "gabor_kernel", "gabor_features",
            "integral_image", "rectangle_sum", "label", "erosion", "dilation",
-           "opening", "closing", "hough_line"]
+           "opening", "closing", "hough_line",
+           "harris_corners", "corner_peaks", "canny", "match_template",
+           "lucas_kanade", "chamfer_distance_transform", "non_max_suppression",
+           "slic"]

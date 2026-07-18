@@ -221,6 +221,9 @@ A reasonable path through the library:
 64. more ``evolutionary`` -- the island model (migrating sub-populations),
     novelty search (reward behavioural novelty over fitness on deceptive
     problems), and MAP-Elites (quality-diversity: a grid of diverse high-performers).
+65. computer vision in ``image`` -- Harris corners, Canny edges, template
+    matching, Lucas-Kanade optical flow, the chamfer distance transform,
+    non-maximum suppression, and SLIC superpixels.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
