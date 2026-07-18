@@ -35,7 +35,10 @@ from .word2vec import Word2Vec, GloVe
 from .tokenizer import BPETokenizer, WordPieceTokenizer
 from .guided import (CategoricalVectorizer, LabelGuidedEmbeddings,
                      EntityEmbeddingEncoder)
+from ._embeddings2 import (ppmi_svd, Item2Vec, FastText, PoincareEmbedding,
+                          StarSpace)
 
 __all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
            "CategoricalVectorizer", "LabelGuidedEmbeddings",
-           "EntityEmbeddingEncoder"]
+           "EntityEmbeddingEncoder",
+           "ppmi_svd", "Item2Vec", "FastText", "PoincareEmbedding", "StarSpace"]

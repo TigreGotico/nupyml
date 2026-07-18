@@ -215,6 +215,9 @@ A reasonable path through the library:
 62. bandits/planning v2 in ``rl`` (linear Thompson sampling, combinatorial and
     sleeping bandits, Dyna-Q model-based planning) and online statistics in
     ``streaming`` (single-pass Welford covariance and a P^2 streaming quantile).
+63. more ``embed`` -- count-based word vectors (PPMI+SVD), item2vec (skip-gram on
+    baskets), FastText (subword vectors, OOV-robust), Poincare hyperbolic
+    embeddings (for hierarchies), and StarSpace (embed everything into one space).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

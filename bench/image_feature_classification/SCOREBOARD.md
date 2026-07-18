@@ -6,7 +6,7 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_pixels_rf` | 0.9759 | 11.19 |
-| 2 | `baseline_hog_svc` | 0.9370 | 0.95 |
+| 1 | `baseline_pixels_rf` | 0.9759 | 48.41 |
+| 2 | `baseline_hog_svc` | 0.9370 | 2.92 |
 
 _Regenerate with `python bench/harness.py image_feature_classification`._

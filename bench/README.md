@@ -65,6 +65,10 @@ any that reach outside `nupyml` / `numpy` / `scipy` / the stdlib as an
 | `semi_supervised` | supervised | accuracy | learning from few labels + unlabeled (-1 sentinel) |
 | `multi_output_regression` | supervised | avg R² | vector-valued regression |
 | `density_estimation` | density | mean log-likelihood | fit p(x), score held-out points |
+| `symbolic_regression` | supervised | R² | recover a nonlinear formula |
+| `keypoint_matching` | supervised | accuracy | shape recognition from image descriptors |
+| `intermittent_forecast` | forecast | RMSE (lower is better) | sparse intermittent-demand forecasting |
+| `ood_detection` | clustering | ROC-AUC | out-of-distribution scoring |
 
 Two KINDs beyond `supervised`/`clustering`/`forecast`:
 
