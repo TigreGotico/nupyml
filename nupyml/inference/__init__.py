@@ -29,10 +29,14 @@ from ._conformal2 import APS, RAPS, JackknifePlus, EnbPI, DeepEnsemble
 from ._advanced import (NUTS, SVGD, ExpectationPropagationClassifier,
                         SliceSampler)
 from ._advanced2 import RelevanceVectorMachine, BayesianNeuralNetwork
+from ._advanced3 import (EnsembleKalmanFilter, MarkovSwitchingModel, BayesianPMF,
+                        RaoBlackwellisedParticleFilter)
 
 __all__ = [
     "NUTS", "SVGD", "ExpectationPropagationClassifier", "SliceSampler",
     "RelevanceVectorMachine", "BayesianNeuralNetwork",
+    "EnsembleKalmanFilter", "MarkovSwitchingModel", "BayesianPMF",
+    "RaoBlackwellisedParticleFilter",
     "MetropolisHastings", "GibbsSampler", "HamiltonianMC",
     "ConformalRegressor", "ConformalClassifier", "MondrianConformalRegressor",
     "ConformalizedQuantileRegression", "VennAbersCalibrator",

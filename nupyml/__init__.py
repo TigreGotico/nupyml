@@ -326,6 +326,10 @@ A reasonable path through the library:
     Differentiable Neural Computer (dynamic memory allocation), the neural spline
     flow (rational-quadratic couplings), the modern Hopfield network (attention as
     associative memory), and the graph transformer (attention with edge features).
+97. probabilistic v4 in ``inference`` -- the Ensemble Kalman Filter (ensemble data
+    assimilation), the Markov-switching regime model (Hamilton filter), Bayesian
+    probabilistic matrix factorisation (Gibbs-sampled factors), and the
+    Rao-Blackwellised particle filter (marginalise the linear-Gaussian part).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
