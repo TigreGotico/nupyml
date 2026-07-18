@@ -162,6 +162,9 @@ A reasonable path through the library:
     inference (ADVI, posterior by optimization), a sequential Monte Carlo sampler,
     approximate Bayesian computation (likelihood-free), and the GPLVM (nonlinear
     probabilistic PCA).
+47. deep RL in ``rl`` -- DQN (a neural Q-function with experience replay and a
+    target network) and PPO (the clipped-surrogate policy update), extending the
+    tabular and policy-gradient methods to function approximation.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

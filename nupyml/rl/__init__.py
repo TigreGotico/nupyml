@@ -44,9 +44,10 @@ this package.
 from .bandits import (EpsilonGreedy, UCB1, ThompsonSampling, LinUCB, EXP3)
 from .tabular import QLearning, SARSA, ExpectedSARSA, value_iteration, policy_iteration
 from .policy_gradient import REINFORCE, ActorCritic
+from ._deep import DQN, PPO
 
 __all__ = [
     "EpsilonGreedy", "UCB1", "ThompsonSampling", "LinUCB", "EXP3",
     "QLearning", "SARSA", "ExpectedSARSA", "value_iteration", "policy_iteration",
-    "REINFORCE", "ActorCritic",
+    "REINFORCE", "ActorCritic", "DQN", "PPO",
 ]
