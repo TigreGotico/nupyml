@@ -98,6 +98,8 @@ from ._architectures3 import (HighwayNetwork, SqueezeExcitation, CausalConv1d,
 from ._optim_extra3 import Shampoo, LARS, LARC, NovoGrad, Adan
 from ._losses_extra3 import (CircleLoss, MultiSimilarityLoss, AngularLoss,
                              BoxRegressionLoss, SSIMLoss, TukeyBiweightLoss)
+from ._architectures4 import (WaveNet, CapsuleLayer, SpatialTransformer,
+                             EchoStateNetwork, PointerNetwork)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -187,4 +189,6 @@ __all__ = [
     "Shampoo", "LARS", "LARC", "NovoGrad", "Adan",
     "CircleLoss", "MultiSimilarityLoss", "AngularLoss", "BoxRegressionLoss",
     "SSIMLoss", "TukeyBiweightLoss",
+    "WaveNet", "CapsuleLayer", "SpatialTransformer", "EchoStateNetwork",
+    "PointerNetwork",
 ]

@@ -254,6 +254,10 @@ A reasonable path through the library:
 74. meta-learning in ``meta`` -- prototypical and matching networks (few-shot
     classification of unseen classes), Reptile and first-order MAML (learn an
     initialisation that adapts fast), and dataset meta-features for AutoML.
+75. neural architectures v4 in ``nn`` -- WaveNet (gated dilated-causal stack),
+    the capsule network (dynamic routing by agreement), the spatial transformer
+    (learnable affine warp), the echo state network (random reservoir, trained
+    readout), and the pointer network (output distribution over input positions).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
