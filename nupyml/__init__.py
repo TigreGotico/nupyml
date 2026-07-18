@@ -343,6 +343,9 @@ A reasonable path through the library:
 101. vision v4 in ``image`` -- the FAST corner detector, LoG blob detection
      (scale-space), Hough circle detection, the fundamental matrix (normalised
      8-point + RANSAC, epipolar geometry), and mean-shift segmentation.
+102. language v4 in ``text`` -- TextTiling topic segmentation, PMI collocation
+     extraction, the Norvig noisy-channel spell corrector, the chrF and METEOR
+     generation metrics, and the HMM part-of-speech tagger.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
