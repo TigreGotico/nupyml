@@ -96,6 +96,8 @@ from ._flows2 import MAF
 from ._architectures3 import (HighwayNetwork, SqueezeExcitation, CausalConv1d,
                              TemporalConvNet, GATv2, HyperNetwork)
 from ._optim_extra3 import Shampoo, LARS, LARC, NovoGrad, Adan
+from ._losses_extra3 import (CircleLoss, MultiSimilarityLoss, AngularLoss,
+                             BoxRegressionLoss, SSIMLoss, TukeyBiweightLoss)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -183,4 +185,6 @@ __all__ = [
     "HighwayNetwork", "SqueezeExcitation", "CausalConv1d", "TemporalConvNet",
     "GATv2", "HyperNetwork",
     "Shampoo", "LARS", "LARC", "NovoGrad", "Adan",
+    "CircleLoss", "MultiSimilarityLoss", "AngularLoss", "BoxRegressionLoss",
+    "SSIMLoss", "TukeyBiweightLoss",
 ]

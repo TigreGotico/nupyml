@@ -234,6 +234,9 @@ A reasonable path through the library:
 68. optimizers v3 in ``nn`` -- Shampoo (matrix preconditioning), LARS/LARC
     (layer-wise trust ratios for huge batches), NovoGrad (one scalar second
     moment per layer), and Adan (Nesterov look-ahead on the gradient difference).
+69. losses v3 in ``nn`` -- Circle and multi-similarity pair-weighting, the angular
+    loss, the IoU box-regression family (IoU/GIoU/DIoU/CIoU), SSIM structural
+    similarity, and Tukey's redescending biweight for robust regression.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
