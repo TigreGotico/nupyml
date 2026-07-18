@@ -110,6 +110,8 @@ from ._losses_extra5 import (BarronLoss, lovasz_hinge, crps_ensemble,
 from ._architectures6 import (Bidirectional, DifferentiableNeuralComputer,
                              NeuralSplineFlow, ModernHopfieldNetwork,
                              GraphTransformer)
+from ._losses_extra6 import (energy_score, DINOLoss, distribution_focal_loss,
+                             region_mutual_information, BoxRegressionLoss2)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -209,4 +211,6 @@ __all__ = [
     "ProxyAnchorLoss",
     "Bidirectional", "DifferentiableNeuralComputer", "NeuralSplineFlow",
     "ModernHopfieldNetwork", "GraphTransformer",
+    "energy_score", "DINOLoss", "distribution_focal_loss",
+    "region_mutual_information", "BoxRegressionLoss2",
 ]

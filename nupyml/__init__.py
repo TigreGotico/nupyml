@@ -352,6 +352,9 @@ A reasonable path through the library:
 104. numerical optimization v4 in ``optimize`` -- SLSQP (equality-constrained SQP),
      the augmented Lagrangian (method of multipliers), SVRG and SAGA (variance-
      reduced stochastic gradients), mirror descent, and proximal Newton.
+105. losses v6 in ``nn`` -- the energy score (multivariate proper score), the DINO
+     self-distillation loss, distribution focal loss (distributional box regression),
+     region mutual information (segmentation), and the EIoU/SIoU box losses.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
