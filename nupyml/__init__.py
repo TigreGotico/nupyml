@@ -309,6 +309,9 @@ A reasonable path through the library:
 91. language v3 in ``text`` -- the unigram (SentencePiece-style) subword tokenizer,
     beam-search decoding, Word Mover's Distance (optimal transport over embeddings),
     the averaged-perceptron tagger, and BLEU / ROUGE generation metrics.
+92. evolutionary v3 in ``evolutionary`` -- estimation-of-distribution algorithms
+    (UMDA and the compact GA), SPEA2 strength-Pareto multi-objective selection,
+    Cartesian genetic programming, and the grey wolf optimizer.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

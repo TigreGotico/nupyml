@@ -80,10 +80,12 @@ from .programming import SymbolicRegressor, GeneticProgram
 from .sklearn_api import GAFeatureSelector, GASearchCV
 from ._qd import IslandModelGA, NoveltySearch, MAPElites
 from ._advanced2 import NEAT, MOEAD, GrammaticalEvolution, AntColonyOptimization
+from ._advanced3 import UMDA, CompactGA, SPEA2, CartesianGP, GreyWolfOptimizer
 
 __all__ = [
     "IslandModelGA", "NoveltySearch", "MAPElites",
     "NEAT", "MOEAD", "GrammaticalEvolution", "AntColonyOptimization",
+    "UMDA", "CompactGA", "SPEA2", "CartesianGP", "GreyWolfOptimizer",
     "GeneticAlgorithm", "BinaryGeneticAlgorithm", "tournament_selection",
     "roulette_selection", "rank_selection",
     "CMAES", "EvolutionStrategy",
