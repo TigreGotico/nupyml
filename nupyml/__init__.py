@@ -237,6 +237,9 @@ A reasonable path through the library:
 69. losses v3 in ``nn`` -- Circle and multi-similarity pair-weighting, the angular
     loss, the IoU box-regression family (IoU/GIoU/DIoU/CIoU), SSIM structural
     similarity, and Tukey's redescending biweight for robust regression.
+70. feature engineering v2 in ``encoders`` -- MDLP supervised binning (target-
+    driven cut points via minimum description length) and DateTimeFeatures
+    (calendar fields plus their cyclical encodings from a timestamp).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

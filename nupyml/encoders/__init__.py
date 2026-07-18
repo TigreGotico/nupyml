@@ -38,10 +38,11 @@ The category_encoders and feature-engine libraries.
 """
 from .categorical import (WOEEncoder, JamesSteinEncoder, MEstimateEncoder,
                          LeaveOneOutEncoder, BinaryEncoder, CountEncoder)
-from .engineering import Winsorizer, RareLabelEncoder, CyclicalEncoder
+from .engineering import (Winsorizer, RareLabelEncoder, CyclicalEncoder,
+                          MDLPDiscretizer, DateTimeFeatures)
 
 __all__ = [
     "WOEEncoder", "JamesSteinEncoder", "MEstimateEncoder", "LeaveOneOutEncoder",
     "BinaryEncoder", "CountEncoder", "Winsorizer", "RareLabelEncoder",
-    "CyclicalEncoder",
+    "CyclicalEncoder", "MDLPDiscretizer", "DateTimeFeatures",
 ]
