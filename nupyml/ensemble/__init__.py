@@ -751,6 +751,8 @@ from ._advanced import (ExplainableBoostingClassifier, RotationForestClassifier,
                         CascadeForestClassifier, RegularizedGreedyForest)
 from ._advanced2 import (MondrianForest, KNORA, SuperLearner,
                          BayesianModelAveraging)
+from ._advanced3 import (RandomSubspaceClassifier, NegativeCorrelationLearning,
+                         GrowNet, SnapshotEnsemble)
 
 __all__ = [
     "QuantileForest",
@@ -771,4 +773,6 @@ __all__ = [
     "ExplainableBoostingClassifier", "RotationForestClassifier",
     "CascadeForestClassifier", "RegularizedGreedyForest",
     "MondrianForest", "KNORA", "SuperLearner", "BayesianModelAveraging",
+    "RandomSubspaceClassifier", "NegativeCorrelationLearning", "GrowNet",
+    "SnapshotEnsemble",
 ]

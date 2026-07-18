@@ -337,6 +337,9 @@ A reasonable path through the library:
     dynamic factor model (common latent drivers), Croston SBA/TSB (intermittent-
     demand bias correction and obsolescence), Kalman-EM (learn state-space noise),
     and DeepAR (probabilistic autoregressive forecasting).
+100. ensembles v4 in ``ensemble`` -- the random subspace method (feature-subset
+     bagging), negative correlation learning (jointly-trained diverse nets), GrowNet
+     (gradient boosting of shallow nets), and the snapshot ensemble (cyclic-LR minima).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
