@@ -107,6 +107,9 @@ from ._architectures5 import (VisionTransformer, NeuralTuringMachine, Glow,
                              ddim_sample, RelativePositionAttention)
 from ._losses_extra5 import (BarronLoss, lovasz_hinge, crps_ensemble,
                              ListNetLoss, ProxyAnchorLoss)
+from ._architectures6 import (Bidirectional, DifferentiableNeuralComputer,
+                             NeuralSplineFlow, ModernHopfieldNetwork,
+                             GraphTransformer)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -204,4 +207,6 @@ __all__ = [
     "RelativePositionAttention",
     "BarronLoss", "lovasz_hinge", "crps_ensemble", "ListNetLoss",
     "ProxyAnchorLoss",
+    "Bidirectional", "DifferentiableNeuralComputer", "NeuralSplineFlow",
+    "ModernHopfieldNetwork", "GraphTransformer",
 ]

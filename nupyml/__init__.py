@@ -322,6 +322,10 @@ A reasonable path through the library:
 95. embeddings v4 / retrieval in ``embed`` -- GraphWave (spectral graph-wavelet
     structural embeddings), NetMF (the matrix-factorisation view of DeepWalk/
     node2vec), hash embeddings (fixed shared pool), and the HNSW ANN index.
+96. neural architectures v6 in ``nn`` -- the bidirectional (BiLSTM) wrapper, the
+    Differentiable Neural Computer (dynamic memory allocation), the neural spline
+    flow (rational-quadratic couplings), the modern Hopfield network (attention as
+    associative memory), and the graph transformer (attention with edge features).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
