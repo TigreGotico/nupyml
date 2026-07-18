@@ -190,6 +190,9 @@ A reasonable path through the library:
 54. ``tensor`` -- multi-way decompositions (the tensor analogue of PCA/NMF): CP/
     PARAFAC (uniquely-identifiable rank-1 sum), Tucker/HOSVD (core + per-mode
     factors), tensor-train (a chain of 3-way cores), and non-negative CP.
+55. ``matrix`` -- low-rank recovery: RobustPCA (split a matrix into low-rank +
+    sparse, outlier-robust PCA) and SoftImpute (complete missing entries), both on
+    the singular-value-thresholding proximal operator of the nuclear norm.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
