@@ -362,6 +362,9 @@ A reasonable path through the library:
      regression with uncertainty), PointNet (permutation-invariant point clouds), the
      energy-based model (Langevin sampling), SimSiam (non-contrastive self-supervision),
      and the variational graph autoencoder (VGAE).
+108. probabilistic v5 in ``inference`` -- nested sampling (Bayesian evidence),
+     the determinantal point process (diverse-subset sampling), Bayesian quadrature
+     (integration as GP regression), and the sparse variational GP (inducing points).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

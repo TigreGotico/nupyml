@@ -31,12 +31,16 @@ from ._advanced import (NUTS, SVGD, ExpectationPropagationClassifier,
 from ._advanced2 import RelevanceVectorMachine, BayesianNeuralNetwork
 from ._advanced3 import (EnsembleKalmanFilter, MarkovSwitchingModel, BayesianPMF,
                         RaoBlackwellisedParticleFilter)
+from ._advanced4 import (NestedSampling, DeterminantalPointProcess,
+                        BayesianQuadrature, SparseVariationalGP)
 
 __all__ = [
     "NUTS", "SVGD", "ExpectationPropagationClassifier", "SliceSampler",
     "RelevanceVectorMachine", "BayesianNeuralNetwork",
     "EnsembleKalmanFilter", "MarkovSwitchingModel", "BayesianPMF",
     "RaoBlackwellisedParticleFilter",
+    "NestedSampling", "DeterminantalPointProcess", "BayesianQuadrature",
+    "SparseVariationalGP",
     "MetropolisHastings", "GibbsSampler", "HamiltonianMC",
     "ConformalRegressor", "ConformalClassifier", "MondrianConformalRegressor",
     "ConformalizedQuantileRegression", "VennAbersCalibrator",
