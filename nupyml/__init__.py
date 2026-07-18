@@ -333,6 +333,10 @@ A reasonable path through the library:
 98. causal inference v2 in ``causal`` -- the Causal Forest (heterogeneous treatment
     effects via honest trees), Regression Discontinuity (local-linear effect at a
     cutoff), and the R-learner (residual-on-residual heterogeneous effects).
+99. time series v5 in ``timeseries`` -- VECM (cointegration / error correction), the
+    dynamic factor model (common latent drivers), Croston SBA/TSB (intermittent-
+    demand bias correction and obsolescence), Kalman-EM (learn state-space noise),
+    and DeepAR (probabilistic autoregressive forecasting).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

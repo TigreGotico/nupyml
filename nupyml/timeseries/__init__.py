@@ -52,6 +52,8 @@ from ._advanced import (Croston, Theta, SSA, sax, dtw_barycenter_averaging,
 from ._advanced2 import GARCH, VAR, AutoETS, ProphetForecaster, MSTL
 from ._structural import BayesianStructuralTimeSeries
 from ._advanced3 import SARIMA, TBATS, reconcile_forecasts, NBeats
+from ._advanced4 import (VECM, DynamicFactorModel, CrostonSBA, CrostonTSB,
+                        KalmanEM, DeepAR)
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",
@@ -64,4 +66,5 @@ __all__ = [
     "GARCH", "VAR", "AutoETS", "ProphetForecaster", "MSTL",
     "BayesianStructuralTimeSeries",
     "SARIMA", "TBATS", "reconcile_forecasts", "NBeats",
+    "VECM", "DynamicFactorModel", "CrostonSBA", "CrostonTSB", "KalmanEM", "DeepAR",
 ]
