@@ -180,6 +180,9 @@ A reasonable path through the library:
     attention (O(n) attention), Neural ODE (continuous-depth), a diagonal
     state-space model (S4-style long-range memory), and KAN (learnable-spline
     activations on edges).
+52. more ``nn`` optimizers -- AdaBelief, Adamax, Yogi, AdaBound, Adafactor
+    (sublinear memory), plus PCGrad (multi-task gradient surgery) and a
+    natural-gradient (Fisher-preconditioned) optimizer.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

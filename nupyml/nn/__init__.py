@@ -87,6 +87,8 @@ from ._compression import (magnitude_prune, quantize_weights,
                            low_rank_approximation, KnowledgeDistillation)
 from ._architectures2 import (DeepSets, SetTransformer, GIN, LinearAttention,
                               NeuralODE, StateSpaceModel, KAN)
+from ._optim_extra2 import (AdaBelief, Adamax, Yogi, AdaBound, Adafactor,
+                            pcgrad, NaturalGradient)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -166,4 +168,6 @@ __all__ = [
     "KnowledgeDistillation",
     "DeepSets", "SetTransformer", "GIN", "LinearAttention", "NeuralODE",
     "StateSpaceModel", "KAN",
+    "AdaBelief", "Adamax", "Yogi", "AdaBound", "Adafactor", "pcgrad",
+    "NaturalGradient",
 ]
