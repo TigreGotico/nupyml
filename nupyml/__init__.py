@@ -251,6 +251,9 @@ A reasonable path through the library:
 73. anomaly / OOD v2 in ``anomaly`` -- the extended isolation forest (oblique
     cuts), the data-dependent isolation kernel, Deep SVDD (learned smallest-ball
     one-class), and the energy score (post-hoc OOD from a classifier's logits).
+74. meta-learning in ``meta`` -- prototypical and matching networks (few-shot
+    classification of unseen classes), Reptile and first-order MAML (learn an
+    initialisation that adapts fast), and dataset meta-features for AutoML.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
