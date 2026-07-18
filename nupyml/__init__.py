@@ -231,6 +231,9 @@ A reasonable path through the library:
     squeeze-and-excitation channel attention, the temporal convolutional network
     (dilated causal convs), GATv2 dynamic graph attention, and hypernetworks
     (a net that generates another net's weights).
+68. optimizers v3 in ``nn`` -- Shampoo (matrix preconditioning), LARS/LARC
+    (layer-wise trust ratios for huge batches), NovoGrad (one scalar second
+    moment per layer), and Adan (Nesterov look-ahead on the gradient difference).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
