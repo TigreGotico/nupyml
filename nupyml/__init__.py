@@ -193,6 +193,9 @@ A reasonable path through the library:
 55. ``matrix`` -- low-rank recovery: RobustPCA (split a matrix into low-rank +
     sparse, outlier-robust PCA) and SoftImpute (complete missing entries), both on
     the singular-value-thresholding proximal operator of the nuclear norm.
+56. continuous-control & advanced ``rl`` -- DDPG, TD3 (twin critics), and SAC
+    (max-entropy) for continuous actions, generalized advantage estimation, and
+    MCTS planning by UCT tree search.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
