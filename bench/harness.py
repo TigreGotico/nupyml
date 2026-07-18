@@ -144,6 +144,13 @@ def run_submission(task_dir, submission_path, timeout=TIMEOUT_SECONDS):
                      events_train=evt_train, X_test=X_test)
             n_expected = len(dur_test)
             def call_metric(yp): return task.metric(dur_test, evt_test, yp)
+        elif kind == "density":
+            # unsupervised density: fit on X_train, return a log-density per test
+            # point; the score is the mean held-out log-likelihood (no labels)
+            X_train, X_test = data
+            np.savez(in_npz, X_train=X_train, X_test=X_test)
+            n_expected = len(X_test)
+            def call_metric(yp): return task.metric(yp)
         else:
             return None, 0.0, f"error(unknown KIND {kind!r})"
 

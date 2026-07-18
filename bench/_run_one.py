@@ -47,6 +47,8 @@ def main():
     elif kind == "survival":
         y_pred = module.solve(data["X_train"], data["durations_train"],
                               data["events_train"], data["X_test"])
+    elif kind == "density":
+        y_pred = module.solve(data["X_train"], data["X_test"])
     else:
         raise ValueError(f"unknown KIND {kind!r}")
 

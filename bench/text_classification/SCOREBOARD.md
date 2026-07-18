@@ -6,7 +6,7 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_tfidf_logreg` | 0.8667 | 0.42 |
+| 1 | `baseline_tfidf_logreg` | 0.8667 | 0.44 |
 | 2 | `baseline_count_nb` | 0.8593 | 0.23 |
 
 _Regenerate with `python bench/harness.py text_classification`._

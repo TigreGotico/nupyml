@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_pointwise_ridge` | 0.9884 | 0.37 |
-| 2 | `baseline_ranknet` | 0.9865 | 1.70 |
-| 3 | `baseline_lambdamart` | 0.9000 | 1.48 |
+| 1 | `baseline_pointwise_ridge` | 0.9884 | 0.40 |
+| 2 | `baseline_ranknet` | 0.9865 | 1.76 |
+| 3 | `baseline_lambdamart` | 0.9000 | 1.51 |
 
 _Regenerate with `python bench/harness.py learning_to_rank`._

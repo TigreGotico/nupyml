@@ -61,6 +61,10 @@ any that reach outside `nupyml` / `numpy` / `scipy` / the stdlib as an
 | `image_feature_classification` | supervised | accuracy | hand-crafted image features (HOG/LBP) |
 | `learning_to_rank` | ranking | NDCG@10 | query-grouped learning to rank |
 | `survival_risk` | survival | concordance index | risk ranking under censoring |
+| `matrix_completion` | supervised | RMSE (lower is better) | low-rank matrix completion |
+| `semi_supervised` | supervised | accuracy | learning from few labels + unlabeled (-1 sentinel) |
+| `multi_output_regression` | supervised | avg R² | vector-valued regression |
+| `density_estimation` | density | mean log-likelihood | fit p(x), score held-out points |
 
 Two KINDs beyond `supervised`/`clustering`/`forecast`:
 
@@ -70,6 +74,9 @@ Two KINDs beyond `supervised`/`clustering`/`forecast`:
 - **`survival`** — `solve(X_train, durations_train, events_train, X_test) ->
   risk_scores` (higher = fails sooner). `events=0` means censored; the held-out
   `(durations_test, events_test)` feed the concordance index.
+- **`density`** — `solve(X_train, X_test) -> log_probs`, one log-density per test
+  point. Unsupervised; the score is the mean held-out log-likelihood. Entries
+  must return proper (normalised) log-densities.
 
 ## How scoring works
 

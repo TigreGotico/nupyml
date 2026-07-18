@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_holt_winters` | 1.1988 | 0.42 |
-| 2 | `baseline_arima` | 3.7564 | 0.44 |
-| 3 | `baseline_naive_last` | 5.3014 | 0.13 |
+| 1 | `baseline_holt_winters` | 1.1988 | 0.47 |
+| 2 | `baseline_arima` | 3.7564 | 0.50 |
+| 3 | `baseline_naive_last` | 5.3014 | 0.16 |
 
 _Regenerate with `python bench/harness.py sine_forecast`._
