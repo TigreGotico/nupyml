@@ -349,6 +349,9 @@ A reasonable path through the library:
 103. evolutionary v4 in ``evolutionary`` -- gene expression programming (linear
      genome), harmony search, the memetic algorithm (GA + local search), lexicase
      selection (case-by-case), and SHADE (success-history adaptive DE).
+104. numerical optimization v4 in ``optimize`` -- SLSQP (equality-constrained SQP),
+     the augmented Lagrangian (method of multipliers), SVRG and SAGA (variance-
+     reduced stochastic gradients), mirror descent, and proximal Newton.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

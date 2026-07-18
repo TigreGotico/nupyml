@@ -17,6 +17,8 @@ from ._solvers2 import (lbfgs, levenberg_marquardt, frank_wolfe, powell,
                         cross_entropy_method)
 from ._solvers3 import (trust_region_newton_cg, interior_point_qp, spsa, owlqn,
                         basin_hopping)
+from ._solvers4 import (slsqp, augmented_lagrangian, svrg, saga, mirror_descent,
+                        proximal_newton)
 
 __all__ = ["linprog_simplex", "quadratic_program", "conjugate_gradient",
            "fista", "soft_threshold", "lasso_fista", "admm_lasso",
@@ -24,4 +26,6 @@ __all__ = ["linprog_simplex", "quadratic_program", "conjugate_gradient",
            "lbfgs", "levenberg_marquardt", "frank_wolfe", "powell",
            "cross_entropy_method",
            "trust_region_newton_cg", "interior_point_qp", "spsa", "owlqn",
-           "basin_hopping"]
+           "basin_hopping",
+           "slsqp", "augmented_lagrangian", "svrg", "saga", "mirror_descent",
+           "proximal_newton"]
