@@ -747,6 +747,8 @@ from ._mixture_of_experts import (
 from ._quantile_forest import QuantileForest
 from ._ensemble_selection import (EnsembleSelectionClassifier,
                                   EnsembleSelectionRegressor)
+from ._advanced import (ExplainableBoostingClassifier, RotationForestClassifier,
+                        CascadeForestClassifier, RegularizedGreedyForest)
 
 __all__ = [
     "QuantileForest",
@@ -764,4 +766,6 @@ __all__ = [
     "NGBoostRegressor", "goss_sample", "exclusive_feature_bundles",
     "bundle_features", "ordered_target_statistic",
     "MixtureOfExpertsClassifier", "MixtureOfExpertsRegressor",
+    "ExplainableBoostingClassifier", "RotationForestClassifier",
+    "CascadeForestClassifier", "RegularizedGreedyForest",
 ]

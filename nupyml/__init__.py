@@ -261,6 +261,9 @@ A reasonable path through the library:
 76. time series v3 in ``timeseries`` -- GARCH (volatility clustering), VAR (vector
     autoregression), AutoETS (AIC-selected exponential smoothing), the Prophet-
     style changepoint+Fourier forecaster, and MSTL (multi-seasonal decomposition).
+77. ensembles v2 in ``ensemble`` -- the Explainable Boosting Machine (glass-box
+    additive shape functions), Rotation Forest (PCA-rotated feature subspaces),
+    Cascade/Deep Forest (stacked forest layers), and the Regularized Greedy Forest.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
