@@ -39,6 +39,7 @@ from .factorization import (MatrixFactorization, ALS, BPR, FactorizationMachine,
 from .neighborhood import UserBasedCF, ItemBasedCF, SLIM
 from ._neighborhood2 import SlopeOne, CoClusteringCF
 from ._session import GRU4Rec
+from ._neural import NeuralCF, DeepFM
 
 __all__ = ["MatrixFactorization", "ALS", "BPR", "FactorizationMachine", "SVDpp",
-           "UserBasedCF", "ItemBasedCF", "SLIM", "SlopeOne", "CoClusteringCF", "GRU4Rec"]
+           "UserBasedCF", "ItemBasedCF", "SLIM", "SlopeOne", "CoClusteringCF", "GRU4Rec", "NeuralCF", "DeepFM"]

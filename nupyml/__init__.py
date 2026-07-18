@@ -209,6 +209,9 @@ A reasonable path through the library:
 60. ``gaussian_process`` v2 -- a spectral-mixture kernel (learn the kernel in the
     frequency domain, extrapolate periodicity), a heavy-tailed Student-t process,
     and a deep-kernel GP (a neural feature map before the kernel).
+61. neural recommenders in ``recommend`` (NeuralCF, DeepFM -- learned nonlinear
+    user-item interactions) and automated feature engineering in
+    ``feature_extraction`` (DeepFeatureSynthesis: per-entity aggregation features).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

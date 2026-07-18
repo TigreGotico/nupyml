@@ -164,6 +164,7 @@ class TfidfVectorizer(CountVectorizer):
 
 
 from ._hashing import FeatureHasher, DictVectorizer, HashingVectorizer  # noqa: E402
+from ._synthesis import DeepFeatureSynthesis  # noqa: E402
 
 __all__ = ["CountVectorizer", "TfidfVectorizer", "FeatureHasher",
-           "DictVectorizer", "HashingVectorizer"]
+           "DictVectorizer", "HashingVectorizer", "DeepFeatureSynthesis"]
