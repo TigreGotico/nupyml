@@ -13,5 +13,9 @@ embeddings (see ``embed``):
   conditions each tag on the word and the PREVIOUS tag, decoded with Viterbi.
 """
 from ._language import (KneserNeyLM, TextRank, LexRank, rake_keywords, MEMM)
+from ._language2 import (UnigramTokenizer, beam_search, word_movers_distance,
+                         AveragedPerceptronTagger, bleu, rouge_n, rouge_l)
 
-__all__ = ["KneserNeyLM", "TextRank", "LexRank", "rake_keywords", "MEMM"]
+__all__ = ["KneserNeyLM", "TextRank", "LexRank", "rake_keywords", "MEMM",
+           "UnigramTokenizer", "beam_search", "word_movers_distance",
+           "AveragedPerceptronTagger", "bleu", "rouge_n", "rouge_l"]

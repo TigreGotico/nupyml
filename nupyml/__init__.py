@@ -306,6 +306,9 @@ A reasonable path through the library:
     Mondrian process), KNORA dynamic ensemble selection (per-query competent
     classifiers), the super learner (cross-validated oracle stacking), and Bayesian
     model averaging (posterior-weighted models).
+91. language v3 in ``text`` -- the unigram (SentencePiece-style) subword tokenizer,
+    beam-search decoding, Word Mover's Distance (optimal transport over embeddings),
+    the averaged-perceptron tagger, and BLEU / ROUGE generation metrics.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
