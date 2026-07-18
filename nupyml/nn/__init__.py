@@ -83,6 +83,8 @@ from ._architectures import (
     MixtureDensityNetwork, SiameseNetwork,
 )
 from ._self_sup_extra import BarlowTwins, BYOL
+from ._compression import (magnitude_prune, quantize_weights,
+                           low_rank_approximation, KnowledgeDistillation)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -158,4 +160,6 @@ __all__ = [
     "ResidualBlock", "TransformerDecoderLayer", "CausalLanguageModel",
     "MixtureDensityNetwork", "SiameseNetwork",
     "BarlowTwins", "BYOL",
+    "magnitude_prune", "quantize_weights", "low_rank_approximation",
+    "KnowledgeDistillation",
 ]

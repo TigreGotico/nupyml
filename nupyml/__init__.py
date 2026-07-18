@@ -168,6 +168,10 @@ A reasonable path through the library:
 48. language & NLP -- an n-gram language model with Kneser-Ney smoothing,
     TextRank keyword/summary extraction, and SIF sentence embeddings (in
     ``topic``), plus GRU4Rec session-based recommendation (in ``recommend``).
+49. model compression in ``nn`` (magnitude pruning, weight quantization, low-rank
+    factorization, knowledge distillation) and calibration in ``calibration``
+    (temperature scaling, histogram binning, beta calibration, and the expected
+    calibration error).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

@@ -177,4 +177,8 @@ class CalibratedClassifierCV(BaseEstimator, ClassifierMixin):
         return self.classes_[np.argmax(self.predict_proba(X), axis=1)]
 
 
-__all__ = ["CalibratedClassifierCV"]
+from ._advanced import (expected_calibration_error, TemperatureScaling,  # noqa: E402
+                        HistogramBinning, BetaCalibration)
+
+__all__ = ["CalibratedClassifierCV", "expected_calibration_error",
+           "TemperatureScaling", "HistogramBinning", "BetaCalibration"]
