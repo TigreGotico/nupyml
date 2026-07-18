@@ -267,6 +267,9 @@ A reasonable path through the library:
 78. probabilistic inference v2 in ``inference`` -- NUTS (self-tuning HMC), SVGD
     (particle variational inference), expectation propagation (moment-matching
     probit classifier), and the slice sampler (tuning-free MCMC).
+79. text / language models in ``text`` -- Kneser-Ney n-gram smoothing (continuation
+    probabilities), TextRank and LexRank extractive summarisation (PageRank over a
+    sentence graph), RAKE keyword extraction, and the MEMM discriminative tagger.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
