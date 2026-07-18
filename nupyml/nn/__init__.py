@@ -105,6 +105,8 @@ from ._losses_extra4 import (soft_dtw, EvidentialLoss, SeesawLoss, RankNetLoss,
 from ._dbn import DeepBeliefNetwork
 from ._architectures5 import (VisionTransformer, NeuralTuringMachine, Glow,
                              ddim_sample, RelativePositionAttention)
+from ._losses_extra5 import (BarronLoss, lovasz_hinge, crps_ensemble,
+                             ListNetLoss, ProxyAnchorLoss)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -200,4 +202,6 @@ __all__ = [
     "DeepBeliefNetwork",
     "VisionTransformer", "NeuralTuringMachine", "Glow", "ddim_sample",
     "RelativePositionAttention",
+    "BarronLoss", "lovasz_hinge", "crps_ensemble", "ListNetLoss",
+    "ProxyAnchorLoss",
 ]

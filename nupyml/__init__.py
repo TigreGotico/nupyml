@@ -315,6 +315,10 @@ A reasonable path through the library:
 93. numerical optimization v3 in ``optimize`` -- trust-region Newton-CG (Steihaug),
     interior-point QP, SPSA (two-evaluation stochastic gradient), OWL-QN (L1
     quasi-Newton), and basin-hopping global optimisation.
+94. losses v5 in ``nn`` -- Barron's adaptive robust loss (one shape parameter spans
+    L2/Charbonnier/Cauchy/Welsch), Lovász-softmax (differentiable IoU surrogate),
+    CRPS (proper score for probabilistic forecasts), ListNet (listwise ranking),
+    and the proxy-anchor metric loss.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
