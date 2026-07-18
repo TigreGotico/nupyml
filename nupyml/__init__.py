@@ -312,6 +312,9 @@ A reasonable path through the library:
 92. evolutionary v3 in ``evolutionary`` -- estimation-of-distribution algorithms
     (UMDA and the compact GA), SPEA2 strength-Pareto multi-objective selection,
     Cartesian genetic programming, and the grey wolf optimizer.
+93. numerical optimization v3 in ``optimize`` -- trust-region Newton-CG (Steihaug),
+    interior-point QP, SPSA (two-evaluation stochastic gradient), OWL-QN (L1
+    quasi-Newton), and basin-hopping global optimisation.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

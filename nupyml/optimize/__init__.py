@@ -15,9 +15,13 @@ from ._solvers import (linprog_simplex, quadratic_program, conjugate_gradient,
                        nelder_mead, simulated_annealing, particle_swarm)
 from ._solvers2 import (lbfgs, levenberg_marquardt, frank_wolfe, powell,
                         cross_entropy_method)
+from ._solvers3 import (trust_region_newton_cg, interior_point_qp, spsa, owlqn,
+                        basin_hopping)
 
 __all__ = ["linprog_simplex", "quadratic_program", "conjugate_gradient",
            "fista", "soft_threshold", "lasso_fista", "admm_lasso",
            "nelder_mead", "simulated_annealing", "particle_swarm",
            "lbfgs", "levenberg_marquardt", "frank_wolfe", "powell",
-           "cross_entropy_method"]
+           "cross_entropy_method",
+           "trust_region_newton_cg", "interior_point_qp", "spsa", "owlqn",
+           "basin_hopping"]
