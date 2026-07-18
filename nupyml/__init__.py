@@ -224,6 +224,9 @@ A reasonable path through the library:
 65. computer vision in ``image`` -- Harris corners, Canny edges, template
     matching, Lucas-Kanade optical flow, the chamfer distance transform,
     non-maximum suppression, and SLIC superpixels.
+66. ``timeseries`` v2 -- Croston (intermittent demand), the Theta method, singular
+    spectrum analysis, SAX symbolisation, DTW barycenter averaging, and Fourier
+    seasonal features.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

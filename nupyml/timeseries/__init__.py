@@ -47,6 +47,8 @@ from .kalman import (KalmanFilter, ExtendedKalmanFilter, UnscentedKalmanFilter,
 from .arima import AutoRegressive, ARMA, ARIMA
 from .smoothing import (SimpleExponentialSmoothing, Holt, HoltWinters,
                         STL, seasonal_decompose)
+from ._advanced import (Croston, Theta, SSA, sax, dtw_barycenter_averaging,
+                        fourier_features)
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",
@@ -54,4 +56,6 @@ __all__ = [
     "AutoRegressive", "ARMA", "ARIMA",
     "SimpleExponentialSmoothing", "Holt", "HoltWinters",
     "STL", "seasonal_decompose",
+    "Croston", "Theta", "SSA", "sax", "dtw_barycenter_averaging",
+    "fourier_features",
 ]
