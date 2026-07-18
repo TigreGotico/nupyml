@@ -39,10 +39,12 @@ from ._embeddings2 import (ppmi_svd, Item2Vec, FastText, PoincareEmbedding,
                           StarSpace)
 from ._embeddings3 import LSHIndex, feature_hashing, struc2vec, metapath2vec
 from ._embeddings4 import GraphWave, NetMF, HashEmbedding, HNSW
+from ._embeddings5 import GraRep, HOPE, PersonalizedPageRankEmbedding, IVFPQIndex
 
 __all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
            "CategoricalVectorizer", "LabelGuidedEmbeddings",
            "EntityEmbeddingEncoder",
            "ppmi_svd", "Item2Vec", "FastText", "PoincareEmbedding", "StarSpace",
            "LSHIndex", "feature_hashing", "struc2vec", "metapath2vec",
-           "GraphWave", "NetMF", "HashEmbedding", "HNSW"]
+           "GraphWave", "NetMF", "HashEmbedding", "HNSW",
+           "GraRep", "HOPE", "PersonalizedPageRankEmbedding", "IVFPQIndex"]

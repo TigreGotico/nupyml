@@ -355,6 +355,9 @@ A reasonable path through the library:
 105. losses v6 in ``nn`` -- the energy score (multivariate proper score), the DINO
      self-distillation loss, distribution focal loss (distributional box regression),
      region mutual information (segmentation), and the EIoU/SIoU box losses.
+106. embeddings v5 / retrieval in ``embed`` -- GraRep and HOPE (high-order proximity
+     node embeddings), personalized-PageRank embeddings, and the IVFPQ index
+     (inverted file + product-quantised residuals).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
