@@ -36,8 +36,12 @@ from .detectors import HBOS, ECOD, COPOD, KNN, CBLOF, ABOD
 from ._advanced import (LODA, FeatureBaggingDetector, HalfSpaceTrees,
                         MahalanobisDetector, PCAReconstructionDetector,
                         threshold_iqr, threshold_mad, threshold_gesd)
+from ._advanced2 import (ExtendedIsolationForest, IsolationKernel, DeepSVDD,
+                         energy_score)
 
 __all__ = ["HBOS", "ECOD", "COPOD", "KNN", "CBLOF", "ABOD",
            "LODA", "FeatureBaggingDetector", "HalfSpaceTrees",
            "MahalanobisDetector", "PCAReconstructionDetector",
-           "threshold_iqr", "threshold_mad", "threshold_gesd"]
+           "threshold_iqr", "threshold_mad", "threshold_gesd",
+           "ExtendedIsolationForest", "IsolationKernel", "DeepSVDD",
+           "energy_score"]

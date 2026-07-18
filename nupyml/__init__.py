@@ -248,6 +248,9 @@ A reasonable path through the library:
     durations, not geometric), and in ``pgm`` loopy belief propagation (approximate
     inference on graphs with cycles) and the Gaussian Bayesian network (linear-
     Gaussian nodes, exact closed-form conditioning).
+73. anomaly / OOD v2 in ``anomaly`` -- the extended isolation forest (oblique
+    cuts), the data-dependent isolation kernel, Deep SVDD (learned smallest-ball
+    one-class), and the energy score (post-hoc OOD from a classifier's logits).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
