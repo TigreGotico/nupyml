@@ -226,6 +226,8 @@ class KernelDensity(BaseEstimator, DensityMixin):
 
 
 from ._centroid import NearestCentroid, RadiusNeighborsClassifier  # noqa: E402
+from ._kdtree import KDTree  # noqa: E402
 
 __all__ = ["KNeighborsClassifier", "KNeighborsRegressor", "NearestNeighbors",
-           "KernelDensity", "NearestCentroid", "RadiusNeighborsClassifier"]
+           "KernelDensity", "NearestCentroid", "RadiusNeighborsClassifier",
+           "KDTree"]

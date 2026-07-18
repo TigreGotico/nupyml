@@ -47,9 +47,10 @@ from .glassbox import (ExplainableBoostingRegressor,
                        ExplainableBoostingClassifier)
 from .effects import accumulated_local_effects, h_statistic
 from .local import surrogate_tree, Anchors, counterfactual
+from ._treeshap import TreeSHAP
 
 __all__ = ["permutation_importance", "partial_dependence", "ice", "LIME",
            "KernelSHAP", "integrated_gradients",
            "ExplainableBoostingRegressor", "ExplainableBoostingClassifier",
            "accumulated_local_effects", "h_statistic",
-           "surrogate_tree", "Anchors", "counterfactual"]
+           "surrogate_tree", "Anchors", "counterfactual", "TreeSHAP"]

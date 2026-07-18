@@ -172,6 +172,9 @@ A reasonable path through the library:
     factorization, knowledge distillation) and calibration in ``calibration``
     (temperature scaling, histogram binning, beta calibration, and the expected
     calibration error).
+50. tree & performance expansion -- oblivious (symmetric) trees and linear-leaf
+    regression trees in ``tree``, a ``KDTree`` for fast exact neighbour queries in
+    ``neighbors``, and exact ``TreeSHAP`` attributions in ``explain``.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

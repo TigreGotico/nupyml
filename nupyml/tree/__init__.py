@@ -636,4 +636,9 @@ class DecisionTreeRegressor(_BaseDecisionTree, RegressorMixin):
         return self._predict_values(X)
 
 
-__all__ = ["DecisionTreeClassifier", "DecisionTreeRegressor"]
+from ._oblivious import (ObliviousDecisionTreeClassifier,  # noqa: E402
+                        ObliviousDecisionTreeRegressor, LinearTreeRegressor)
+
+__all__ = ["DecisionTreeClassifier", "DecisionTreeRegressor",
+           "ObliviousDecisionTreeClassifier", "ObliviousDecisionTreeRegressor",
+           "LinearTreeRegressor"]
