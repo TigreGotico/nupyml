@@ -218,6 +218,9 @@ A reasonable path through the library:
 63. more ``embed`` -- count-based word vectors (PPMI+SVD), item2vec (skip-gram on
     baskets), FastText (subword vectors, OOV-robust), Poincare hyperbolic
     embeddings (for hierarchies), and StarSpace (embed everything into one space).
+64. more ``evolutionary`` -- the island model (migrating sub-populations),
+    novelty search (reward behavioural novelty over fitness on deceptive
+    problems), and MAP-Elites (quality-diversity: a grid of diverse high-performers).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
