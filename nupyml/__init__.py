@@ -282,6 +282,9 @@ A reasonable path through the library:
 83. numerical optimization v2 in ``optimize`` -- L-BFGS (limited-memory quasi-
     Newton), Levenberg-Marquardt (nonlinear least squares), Frank-Wolfe (projection-
     free), Powell's method (derivative-free), and the cross-entropy method.
+84. losses v4 in ``nn`` -- soft-DTW (differentiable sequence alignment), the
+    evidential loss (Dirichlet uncertainty / OOD), the seesaw loss (long-tail
+    rebalancing), RankNet (pairwise ranking), and the boundary loss (segmentation).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
