@@ -79,9 +79,11 @@ from .multiobjective import NSGA2, pareto_front, non_dominated_sort
 from .programming import SymbolicRegressor, GeneticProgram
 from .sklearn_api import GAFeatureSelector, GASearchCV
 from ._qd import IslandModelGA, NoveltySearch, MAPElites
+from ._advanced2 import NEAT, MOEAD, GrammaticalEvolution, AntColonyOptimization
 
 __all__ = [
     "IslandModelGA", "NoveltySearch", "MAPElites",
+    "NEAT", "MOEAD", "GrammaticalEvolution", "AntColonyOptimization",
     "GeneticAlgorithm", "BinaryGeneticAlgorithm", "tournament_selection",
     "roulette_selection", "rank_selection",
     "CMAES", "EvolutionStrategy",

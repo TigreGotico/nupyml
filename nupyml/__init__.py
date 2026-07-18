@@ -273,6 +273,9 @@ A reasonable path through the library:
 80. vision v2 in ``image`` -- Gaussian/Laplacian pyramids, marker watershed
     segmentation, active contours (balloon snakes), ORB oriented-binary descriptors
     + matching, bag of visual words, and content-aware seam carving.
+81. evolutionary v2 in ``evolutionary`` -- NEAT (evolving network topology), MOEA/D
+    (decomposition multi-objective), grammatical evolution (grammar-guided programs),
+    and ant colony optimisation (pheromone-guided combinatorial search).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
