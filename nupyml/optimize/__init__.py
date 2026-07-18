@@ -13,7 +13,11 @@ Only numpy is used.
 from ._solvers import (linprog_simplex, quadratic_program, conjugate_gradient,
                        fista, soft_threshold, lasso_fista, admm_lasso,
                        nelder_mead, simulated_annealing, particle_swarm)
+from ._solvers2 import (lbfgs, levenberg_marquardt, frank_wolfe, powell,
+                        cross_entropy_method)
 
 __all__ = ["linprog_simplex", "quadratic_program", "conjugate_gradient",
            "fista", "soft_threshold", "lasso_fista", "admm_lasso",
-           "nelder_mead", "simulated_annealing", "particle_swarm"]
+           "nelder_mead", "simulated_annealing", "particle_swarm",
+           "lbfgs", "levenberg_marquardt", "frank_wolfe", "powell",
+           "cross_entropy_method"]

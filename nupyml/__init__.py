@@ -279,6 +279,9 @@ A reasonable path through the library:
 82. embeddings v3 in ``embed`` -- LSH approximate nearest neighbours, the feature-
     hashing trick, struc2vec (structural-role node embeddings), and metapath2vec
     (heterogeneous-graph embeddings via typed random walks).
+83. numerical optimization v2 in ``optimize`` -- L-BFGS (limited-memory quasi-
+    Newton), Levenberg-Marquardt (nonlinear least squares), Frank-Wolfe (projection-
+    free), Powell's method (derivative-free), and the cross-entropy method.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
