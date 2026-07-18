@@ -165,6 +165,9 @@ A reasonable path through the library:
 47. deep RL in ``rl`` -- DQN (a neural Q-function with experience replay and a
     target network) and PPO (the clipped-surrogate policy update), extending the
     tabular and policy-gradient methods to function approximation.
+48. language & NLP -- an n-gram language model with Kneser-Ney smoothing,
+    TextRank keyword/summary extraction, and SIF sentence embeddings (in
+    ``topic``), plus GRU4Rec session-based recommendation (in ``recommend``).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

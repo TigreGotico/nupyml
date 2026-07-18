@@ -37,8 +37,11 @@ from .lda import LatentDirichletAllocation, topic_coherence
 from .lsa import LatentSemanticAnalysis
 from .ranking import BM25
 from .doc2vec import Doc2Vec
+from .language import (NGramLanguageModel, textrank_keywords, textrank_summary,
+                      SIFEmbedding)
 
 __all__ = [
     "LatentDirichletAllocation", "topic_coherence", "LatentSemanticAnalysis",
     "BM25", "Doc2Vec",
+    "NGramLanguageModel", "textrank_keywords", "textrank_summary", "SIFEmbedding",
 ]
