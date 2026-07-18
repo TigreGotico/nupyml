@@ -749,6 +749,8 @@ from ._ensemble_selection import (EnsembleSelectionClassifier,
                                   EnsembleSelectionRegressor)
 from ._advanced import (ExplainableBoostingClassifier, RotationForestClassifier,
                         CascadeForestClassifier, RegularizedGreedyForest)
+from ._advanced2 import (MondrianForest, KNORA, SuperLearner,
+                         BayesianModelAveraging)
 
 __all__ = [
     "QuantileForest",
@@ -768,4 +770,5 @@ __all__ = [
     "MixtureOfExpertsClassifier", "MixtureOfExpertsRegressor",
     "ExplainableBoostingClassifier", "RotationForestClassifier",
     "CascadeForestClassifier", "RegularizedGreedyForest",
+    "MondrianForest", "KNORA", "SuperLearner", "BayesianModelAveraging",
 ]

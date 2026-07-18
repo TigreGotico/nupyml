@@ -302,6 +302,10 @@ A reasonable path through the library:
 89. vision v3 in ``image`` -- SIFT scale-invariant keypoints + descriptors,
     Horn-Schunck dense optical flow, Felzenszwalb graph segmentation, homography
     estimation (DLT + RANSAC), and the Viola-Jones Haar-cascade detector.
+90. ensembles v3 in ``ensemble`` -- the Mondrian forest (online random forest via a
+    Mondrian process), KNORA dynamic ensemble selection (per-query competent
+    classifiers), the super learner (cross-validated oracle stacking), and Bayesian
+    model averaging (posterior-weighted models).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
