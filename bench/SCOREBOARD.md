@@ -4,4 +4,4 @@ Best score per task. Regenerate with `python bench/harness.py`.
 
 | Task | Metric | Best submission | Best score |
 |------|--------|-----------------|-----------:|
-| [image_segmentation](image_segmentation/SCOREBOARD.md) | `adjusted_rand` | `baseline_kmeans` | 1.0000 |
+| [timeseries_anomaly](timeseries_anomaly/SCOREBOARD.md) | `roc_auc` | `baseline_isolation_forest` | 0.9295 |

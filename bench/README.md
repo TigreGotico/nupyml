@@ -73,6 +73,8 @@ any that reach outside `nupyml` / `numpy` / `scipy` / the stdlib as an
 | `link_prediction` | supervised | ROC-AUC | rank true edges above non-edges from graph features |
 | `hierarchical_forecast` | forecast | RMSE (lower is better) | forecast a part/total hierarchy coherently |
 | `image_segmentation` | clustering | adjusted Rand index | segment an image's pixels into regions |
+| `regime_detection` | clustering | adjusted Rand index | segment a series into its hidden regimes |
+| `timeseries_anomaly` | clustering | ROC-AUC | score anomalous timesteps in a series |
 | `multivariate_forecast` | forecast | RMSE (lower is better) | jointly forecast coupled series (VAR) |
 | `node_classification` | supervised | accuracy | label graph nodes from adjacency features |
 
