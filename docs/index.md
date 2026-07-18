@@ -15,14 +15,20 @@ algorithms work the way they do.
   (estimators and autograd), and a first pipeline.
 - **[Classic ML](classic-ml.md)** — the scikit-learn-parity estimators: linear
   models, trees and ensembles, SVMs, clustering, decomposition, the works.
-- **[Neural networks](neural-networks.md)** — the autograd engine, layers,
-  optimizers, and the `MLP*` wrappers.
+- **[Neural networks](neural-networks.md)** — the autograd engine, layers, the
+  architecture zoo (transformers, WaveNet, capsule nets, S4, …), the loss and
+  optimizer families, generative and self-supervised models, and the `MLP*`
+  wrappers.
 - **[Statistics & inference](statistics.md)** — the `stats` package (regression
   *with* standard errors, p-values, CIs, diagnostics) and `inference`
-  (MCMC, Bayesian optimization, conformal prediction).
+  (MCMC / NUTS / SVGD / slice sampling, variational inference, expectation
+  propagation, Bayesian optimization, conformal prediction).
 - **[Beyond scikit-learn](beyond-sklearn.md)** — the ecosystem-adjacent families:
-  graphical models, anomaly/drift, topic models, optimal transport, graphs,
-  survival, copulas, recommenders, image features, and more.
+  graphical models, anomaly / OOD / drift, topic models and language (`text`),
+  optimal transport, graphs and network embeddings, survival, copulas,
+  recommenders, computer vision, time-series forecasting and classification,
+  fairness, meta-learning, numerical optimization, signal / tensor / matrix
+  methods, and more.
 - **[The benchmark suite](benchmarks.md)** — `bench/`, a nupyml-only community
   benchmark that doubles as end-to-end QA.
 - **[Reading guide](reading-guide.md)** — the handful of files most worth reading

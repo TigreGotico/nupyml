@@ -7,14 +7,14 @@ contract and compose in pipelines and searches.
 |---|---|
 | `linear_model` | LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression, Perceptron, SGD*; **robust**: Huber, Quantile (LP), TheilSen, RANSAC; **Bayesian**: BayesianRidge, ARDRegression; **GLMs**: Poisson, Gamma, Tweedie (log/identity links); **CV paths**: RidgeCV, LassoCV, ElasticNetCV, LogisticRegressionCV; OrthogonalMatchingPursuit |
 | `tree` | DecisionTreeClassifier/Regressor — vectorized CART, cost-complexity pruning (`ccp_alpha`), native NaN routing, monotonic constraints |
-| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), Voting, **Stacking** |
+| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, **ExplainableBoostingClassifier**, **RotationForest**, **CascadeForest**, **RegularizedGreedyForest** |
 | `svm` | SVC (SMO, one-vs-one, `probability=True` via Platt), SVR, **NuSVC**, **NuSVR**, LinearSVC |
 | `neighbors` | KNeighborsClassifier/Regressor, NearestNeighbors, KernelDensity |
 | `naive_bayes` | Gaussian, Multinomial, Bernoulli, Complement, **Categorical** |
-| `cluster` | KMeans (k-means++), MiniBatchKMeans, DBSCAN, Agglomerative, MeanShift, Spectral, **Birch**, **OPTICS**, **AffinityPropagation**, **HDBSCAN** |
+| `cluster` | KMeans (k-means++), MiniBatchKMeans, DBSCAN, Agglomerative, MeanShift, Spectral, Birch, OPTICS, AffinityPropagation, HDBSCAN, KMedoids/KModes, FuzzyCMeans, bisecting, co-clustering, density-peak, consensus, **DPMeans**, **PossibilisticCMeans**, **SparseSubspaceClustering** |
 | `mixture` | GaussianMixture (log-space EM), **BayesianGaussianMixture** (variational, Dirichlet / Dirichlet-process priors) |
 | `decomposition` | PCA, TruncatedSVD, NMF, FastICA, KernelPCA, **SparsePCA**, **DictionaryLearning**, **SparseCoder**, **MiniBatchNMF**, **LatentDirichletAllocation** |
-| `manifold` | TSNE (exact), **TSNEBarnesHut**, Isomap, MDS, LocallyLinearEmbedding, **SpectralEmbedding** |
+| `manifold` | TSNE (exact), TSNEBarnesHut, Isomap, MDS, LocallyLinearEmbedding, SpectralEmbedding, UMAP, SelfOrganizingMap, **DiffusionMap**, **PHATE** |
 | `gaussian_process` | GPR, GPC (Laplace); **composable kernels** — RBF (with ARD), Matérn, RationalQuadratic, ExpSineSquared, DotProduct, White, Constant, combined with `+` and `*` |
 | `outlier` | **IsolationForest**, **LocalOutlierFactor**, **OneClassSVM**, **EllipticEnvelope** (MCD) |
 | `semi_supervised` | **LabelPropagation**, **LabelSpreading**, **SelfTrainingClassifier** |
@@ -24,13 +24,13 @@ contract and compose in pipelines and searches.
 | `impute` | SimpleImputer, KNNImputer, IterativeImputer, MissingIndicator |
 | `kernel_approximation` | Nystroem, RBFSampler, SkewedChi2Sampler, AdditiveChi2Sampler |
 | `random_projection` | Gaussian / Sparse random projection, `johnson_lindenstrauss_min_dim` |
-| `hmm` | GaussianHMM, MultinomialHMM (forward-backward, Viterbi, Baum-Welch) |
+| `hmm` | GaussianHMM, MultinomialHMM (forward-backward, Viterbi, Baum-Welch), **HiddenSemiMarkovModel** (explicit durations) |
 | `discriminant` | LDA (classifier + transform), QDA |
 | `cross_decomposition` | PLS regression / canonical, CCA |
 | `covariance` | Empirical, Ledoit-Wolf, OAS, graphical-lasso, MCD |
 | `feature_extraction` | CountVectorizer, TfidfVectorizer (sparse, matches sklearn) |
 | `preprocessing` | Standard/MinMax/MaxAbs/Robust scalers, Normalizer, Label/OneHot/Ordinal encoders, PolynomialFeatures, KBinsDiscretizer, Binarizer |
-| `model_selection` | train_test_split, KFold, StratifiedKFold, GroupKFold, StratifiedGroupKFold, TimeSeriesSplit, ShuffleSplit, LeaveOneOut/POut, Repeated*, PredefinedSplit; cross_val_score/predict; GridSearchCV, RandomizedSearchCV, HalvingGridSearchCV, **HyperbandSearchCV**, **TPESearchCV**; learning_curve, validation_curve, permutation_importance; string scorers |
+| `model_selection` | train_test_split, KFold, StratifiedKFold, GroupKFold, StratifiedGroupKFold, TimeSeriesSplit, ShuffleSplit, LeaveOneOut/POut, Repeated*, PredefinedSplit; cross_val_score/predict; GridSearchCV, RandomizedSearchCV, HalvingGridSearchCV, **HyperbandSearchCV**, **BOHBSearchCV**, **TPESearchCV**; learning_curve, validation_curve, permutation_importance; string scorers |
 | `pipeline` | Pipeline, make_pipeline, FeatureUnion, ColumnTransformer |
 | `metrics` | 40+ metrics: accuracy, precision/recall/F1, ROC-AUC, PR curve, average precision, log-loss, Brier, MCC, Cohen's kappa, NDCG, calibration curve, MSE/MAE/R²/pinball/deviances, silhouette, Calinski-Harabasz, Davies-Bouldin, NMI/homogeneity/completeness/V-measure |
 | `datasets` | make_moons/blobs/circles/classification/regression/spiral; **bundled** iris, wine, breast_cancer, digits, diabetes, linnerud |

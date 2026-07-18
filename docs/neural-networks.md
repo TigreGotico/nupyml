@@ -30,23 +30,55 @@ order matters.
 `nupyml.nn` provides the standard building blocks, all as autograd `Module`s:
 
 - **Dense / conv**: `Linear`, `Conv2d` (im2col), `MaxPool2d` / `AvgPool2d`,
-  `Flatten`.
-- **Normalization**: `BatchNorm1d` / `BatchNorm2d`, `LayerNorm`.
-- **Regularization**: `Dropout`.
+  `CausalConv1d`, `Flatten`.
+- **Normalization**: `BatchNorm1d` / `BatchNorm2d`, `LayerNorm`, `RMSNorm`,
+  `GroupNorm`, `InstanceNorm`.
+- **Activations / gating**: `ReLU`, `LeakyReLU`, `GELU`, `SiLU`, `Mish`, `ELU`,
+  `SELU`, `Softplus`, `GLU`, `SwiGLU`.
+- **Regularization**: `Dropout`, `StochasticDepth`.
 - **Sequence**: `Embedding`, `RNN`, `GRU`, `LSTM`.
-- **Attention**: `MultiHeadAttention`, `TransformerEncoderLayer`,
-  `PositionalEncoding`.
-- **Containers**: `Sequential`, and any subclass of `Module`.
+- **Attention**: `MultiHeadAttention`, `TransformerEncoderLayer` /
+  `TransformerDecoderLayer`, `PositionalEncoding`, rotary embeddings, ALiBi,
+  linear/Performer attention.
+- **Containers**: `Sequential`, `ModuleList`, and any subclass of `Module`.
+
+### Architectures
+
+Beyond the primitives, complete architectures are provided as modules:
+
+- **Sets / graphs**: `DeepSets`, `SetTransformer`, `GIN`, `GATv2`.
+- **Sequence models**: `TemporalConvNet` (dilated causal), `WaveNet` (gated
+  dilated-causal), `StateSpaceModel` (S4), `PointerNetwork`, `EchoStateNetwork`
+  (reservoir computing), `CausalLanguageModel`.
+- **Deep-net building blocks**: `ResidualBlock`, `HighwayNetwork`,
+  `SqueezeExcitation`, `HyperNetwork` (a net that generates another's weights),
+  `SpatialTransformer`, `CapsuleLayer` (dynamic routing), `KAN`, `NeuralODE`,
+  `MixtureDensityNetwork`, `SiameseNetwork`, `DeepBeliefNetwork` (stacked RBMs).
+- **Generative**: `AutoEncoder` (+ denoising / sparse), `VAE` / `ConditionalVAE`,
+  `VQVAE`, `GAN` / `WGAN`, `DDPM` diffusion, normalizing flows (`RealNVP`, `MAF`).
+- **Self-supervised**: `SimCLR`, `BYOL`, `BarlowTwins`, `MaskedAutoEncoder`,
+  plus `KnowledgeDistillation`.
 
 `autograd/functional.py` shows convolution implemented as a matmul (im2col) and
 the numerically stable softmax / log-softmax.
 
-## Losses and optimizers
+## Losses, optimizers, schedulers
 
-- **Losses**: MSE, MAE, Huber, cross-entropy (with a fused log-softmax for
-  stability), BCE, BCE-with-logits.
-- **Optimizers**: SGD (with momentum / Nesterov), Adam, AdamW, RMSprop.
-- **Schedulers**: StepLR, cosine, warmup.
+- **Losses** (40+): the base set — MSE, MAE, Huber, cross-entropy (fused
+  log-softmax), BCE, BCE-with-logits — plus:
+  - *segmentation*: Dice, Tversky, focal-Tversky, IoU, boundary;
+  - *imbalance / robustness*: focal, class-balanced, PolyLoss, GHM, seesaw,
+    symmetric/generalized/asymmetric cross-entropy, Tukey biweight;
+  - *metric learning*: contrastive, triplet, N-pairs, InfoNCE, SupCon, ArcFace,
+    CosFace, center, Circle, multi-similarity, angular;
+  - *other*: soft-DTW (differentiable alignment), evidential (Dirichlet
+    uncertainty), RankNet, SSIM, VICReg, quantile, Tweedie, Wasserstein.
+- **Optimizers**: SGD (momentum / Nesterov), Adam, AdamW, RMSprop, Adagrad,
+  Adadelta, Nadam, RAdam, Adamax, AMSGrad, Lion, Lookahead, AdaBelief, Yogi,
+  AdaBound, Adafactor, LAMB, SAM, SWA, EMA, natural gradient, and **Shampoo,
+  LARS / LARC, NovoGrad, Adan**.
+- **Schedulers**: StepLR, cosine annealing, warmup, exponential, polynomial,
+  cyclical, one-cycle.
 - **Utilities**: gradient clipping, `DataLoader` for minibatching.
 
 ## Estimator wrappers

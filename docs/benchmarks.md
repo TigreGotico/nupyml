@@ -26,6 +26,17 @@ The `solve` signature is chosen by the task's `KIND`:
 | `supervised` | `solve(X_train, y_train, X_test) -> y_pred` |
 | `clustering` | `solve(X) -> labels` |
 | `forecast` | `solve(y_history, horizon) -> y_future` |
+| `ranking` | `solve(X_train, y_train, groups_train, X_test, groups_test) -> scores` |
+| `survival` | `solve(X_train, durations_train, events_train, X_test) -> risk_scores` |
+| `density` | `solve(X_train, X_test) -> log_density` |
+
+There are **25 tasks** across those KINDs — supervised classification and
+regression (digits, moons, diabetes, fraud, text, image features, keypoints,
+symbolic regression, semi-supervised, multi-label, multi-output, matrix
+completion, node classification, …), clustering and OOD/anomaly ranking,
+forecasting (sine, intermittent demand, **volatility**, **multivariate**),
+learning-to-rank, survival risk, and density estimation — with more added over
+time. See [`bench/README.md`](../bench/README.md) for the full list.
 
 ## Running it
 

@@ -46,9 +46,14 @@ runnable without a heavy optional dependency.
 
 ## `inference` — Bayesian and distribution-free uncertainty
 
-### Sampling and optimization
+### Sampling and approximate inference
 
-- **MCMC**: `MetropolisHastings`, `GibbsSampler`, `HamiltonianMC`.
+- **MCMC**: `MetropolisHastings`, `GibbsSampler`, `HamiltonianMC`, **`NUTS`**
+  (self-tuning HMC), and the tuning-free **`SliceSampler`**.
+- **Variational / particle**: `MeanFieldVI` (ADVI-style), **`SVGD`** (Stein
+  variational gradient descent), and `ExpectationPropagationClassifier`
+  (moment-matching for a probit posterior).
+- **Simulation-based**: `SequentialMonteCarlo`, `ABC`, `GPLVM`.
 - **Bayesian optimization**: `BayesianOptimization` over a `GaussianProcessRegressor`.
 
 ### Conformal prediction
@@ -68,6 +73,10 @@ of the noise, and the guarantee survives a badly misspecified predictor.
   where the width is itself an honest signal of calibration certainty.
 - `AdaptiveConformalInference` (ACI) — online conformal that keeps its long-run
   miss rate on target even when the stream **drifts** and exchangeability breaks.
+- `APS` / `RAPS` — adaptive prediction *sets* for classification (calibrated set
+  size), `JackknifePlus` / CV+ (leave-one-out conformal without a held-out split),
+  `EnbPI` (conformal intervals for time series), and `DeepEnsemble` (epistemic
+  uncertainty from an ensemble).
 
 ```python
 from nupyml.inference import ConformalRegressor

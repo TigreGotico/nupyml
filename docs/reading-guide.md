@@ -16,6 +16,9 @@ obvious way, and the code explains why.
 | `evolutionary/strategies.py` | CMA-ES: a derivative-free quasi-Newton method that learns the landscape's shape into a covariance matrix. |
 | `pgm/inference.py` | Variable elimination: pushing sums inside products so exact inference stays tractable. |
 | `inference/conformal.py` | Why an exchangeability argument alone yields a finite-sample coverage guarantee — and where split conformal's fixed width falls short. |
+| `inference/_advanced.py` | The No-U-Turn Sampler's recursive tree-doubling, and SVGD moving a set of particles to the posterior by a deterministic kernel flow. |
+| `nn/_losses_extra4.py` | Soft-DTW: replacing DTW's hard `min` with a `-γ·logsumexp` soft-min so sequence alignment becomes differentiable. |
+| `evolutionary/_advanced2.py` | NEAT: why growing a network's topology needs a topological-order forward pass (a new hidden node can outrank the output it feeds). |
 
 ## The API contract
 
