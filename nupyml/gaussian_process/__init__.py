@@ -180,10 +180,13 @@ class GaussianProcessClassifier(BaseEstimator, ClassifierMixin):
 
 from ._sparse import (SparseGaussianProcessRegressor,  # noqa: E402
                       MultiOutputGaussianProcessRegressor)
+from ._advanced2 import (SpectralMixtureKernel, StudentTProcess,  # noqa: E402
+                        DeepKernelGP)
 
 __all__ = ["Kernel", "ConstantKernel", "WhiteKernel", "RBF", "Matern",
            "RationalQuadratic", "ExpSineSquared", "DotProduct", "Sum",
            "Product", "ConstantTimes", "GaussianProcessRegressor",
            "GaussianProcessClassifier",
            "SparseGaussianProcessRegressor",
-           "MultiOutputGaussianProcessRegressor"]
+           "MultiOutputGaussianProcessRegressor",
+           "SpectralMixtureKernel", "StudentTProcess", "DeepKernelGP"]

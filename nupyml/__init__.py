@@ -206,6 +206,9 @@ A reasonable path through the library:
 59. density & generative v2 -- ``nn.MAF`` (masked autoregressive flow, an
     exact-likelihood density), ``neighbors.KNNDensity`` (adaptive k-NN density),
     and ``nonparametric.ConditionalKDE`` (the full conditional density p(y|x)).
+60. ``gaussian_process`` v2 -- a spectral-mixture kernel (learn the kernel in the
+    frequency domain, extrapolate periodicity), a heavy-tailed Student-t process,
+    and a deep-kernel GP (a neural feature map before the kernel).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
