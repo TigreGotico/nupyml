@@ -51,6 +51,7 @@ from ._advanced import (Croston, Theta, SSA, sax, dtw_barycenter_averaging,
                         fourier_features)
 from ._advanced2 import GARCH, VAR, AutoETS, ProphetForecaster, MSTL
 from ._structural import BayesianStructuralTimeSeries
+from ._advanced3 import SARIMA, TBATS, reconcile_forecasts, NBeats
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",
@@ -62,4 +63,5 @@ __all__ = [
     "fourier_features",
     "GARCH", "VAR", "AutoETS", "ProphetForecaster", "MSTL",
     "BayesianStructuralTimeSeries",
+    "SARIMA", "TBATS", "reconcile_forecasts", "NBeats",
 ]

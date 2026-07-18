@@ -296,6 +296,9 @@ A reasonable path through the library:
     model with a noise variance), the Relevance Vector Machine and MC-dropout
     Bayesian neural network in ``inference``, and the Bayesian structural time
     series in ``timeseries`` (decomposable Kalman forecaster with uncertainty).
+88. time series v4 in ``timeseries`` -- SARIMA (seasonal ARIMA), TBATS (trig
+    multiple-seasonality + Box-Cox), hierarchical forecast reconciliation
+    (bottom-up / OLS / MinT), and N-BEATS (neural basis-expansion forecasting).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
