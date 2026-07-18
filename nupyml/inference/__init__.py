@@ -28,9 +28,11 @@ from ._bayesian import MeanFieldVI, SequentialMonteCarlo, ABC, GPLVM
 from ._conformal2 import APS, RAPS, JackknifePlus, EnbPI, DeepEnsemble
 from ._advanced import (NUTS, SVGD, ExpectationPropagationClassifier,
                         SliceSampler)
+from ._advanced2 import RelevanceVectorMachine, BayesianNeuralNetwork
 
 __all__ = [
     "NUTS", "SVGD", "ExpectationPropagationClassifier", "SliceSampler",
+    "RelevanceVectorMachine", "BayesianNeuralNetwork",
     "MetropolisHastings", "GibbsSampler", "HamiltonianMC",
     "ConformalRegressor", "ConformalClassifier", "MondrianConformalRegressor",
     "ConformalizedQuantileRegression", "VennAbersCalibrator",

@@ -292,6 +292,10 @@ A reasonable path through the library:
     transformer), the Neural Turing Machine (differentiable external memory), Glow
     (normalizing flow with invertible linear mixing), DDIM (deterministic few-step
     diffusion sampling), and relative-position attention (distance-only bias).
+87. probabilistic v3 -- Probabilistic PCA in ``decomposition`` (PCA as a latent
+    model with a noise variance), the Relevance Vector Machine and MC-dropout
+    Bayesian neural network in ``inference``, and the Bayesian structural time
+    series in ``timeseries`` (decomposable Kalman forecaster with uncertainty).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

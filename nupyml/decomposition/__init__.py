@@ -431,7 +431,9 @@ from ._sparse import (  # noqa: E402
 
 from ._factor import FactorAnalysis, IncrementalPCA  # noqa: E402
 
-__all__ = ["PCA", "TruncatedSVD", "NMF", "FastICA", "KernelPCA",
+__all__ = [
+    'ProbabilisticPCA',"PCA", "TruncatedSVD", "NMF", "FastICA", "KernelPCA",
            "FactorAnalysis", "IncrementalPCA",
            "SparsePCA", "DictionaryLearning", "SparseCoder", "MiniBatchNMF",
            "LatentDirichletAllocation"]
+from ._ppca import ProbabilisticPCA

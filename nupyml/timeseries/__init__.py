@@ -50,6 +50,7 @@ from .smoothing import (SimpleExponentialSmoothing, Holt, HoltWinters,
 from ._advanced import (Croston, Theta, SSA, sax, dtw_barycenter_averaging,
                         fourier_features)
 from ._advanced2 import GARCH, VAR, AutoETS, ProphetForecaster, MSTL
+from ._structural import BayesianStructuralTimeSeries
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",
@@ -60,4 +61,5 @@ __all__ = [
     "Croston", "Theta", "SSA", "sax", "dtw_barycenter_averaging",
     "fourier_features",
     "GARCH", "VAR", "AutoETS", "ProphetForecaster", "MSTL",
+    "BayesianStructuralTimeSeries",
 ]
