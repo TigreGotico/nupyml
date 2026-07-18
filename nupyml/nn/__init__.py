@@ -93,6 +93,8 @@ from ._losses_extra2 import (SymmetricCrossEntropy, GeneralizedCrossEntropy,
                             AsymmetricLoss, CharbonnierLoss, MSLELoss, SMAPELoss,
                             ListMLELoss, VICRegLoss)
 from ._flows2 import MAF
+from ._architectures3 import (HighwayNetwork, SqueezeExcitation, CausalConv1d,
+                             TemporalConvNet, GATv2, HyperNetwork)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -177,4 +179,6 @@ __all__ = [
     "SymmetricCrossEntropy", "GeneralizedCrossEntropy", "AsymmetricLoss",
     "CharbonnierLoss", "MSLELoss", "SMAPELoss", "ListMLELoss", "VICRegLoss",
     "MAF",
+    "HighwayNetwork", "SqueezeExcitation", "CausalConv1d", "TemporalConvNet",
+    "GATv2", "HyperNetwork",
 ]

@@ -227,6 +227,10 @@ A reasonable path through the library:
 66. ``timeseries`` v2 -- Croston (intermittent demand), the Theta method, singular
     spectrum analysis, SAX symbolisation, DTW barycenter averaging, and Fourier
     seasonal features.
+67. neural architectures v3 in ``nn`` -- Highway networks (learned carry gate),
+    squeeze-and-excitation channel attention, the temporal convolutional network
+    (dilated causal convs), GATv2 dynamic graph attention, and hypernetworks
+    (a net that generates another net's weights).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
