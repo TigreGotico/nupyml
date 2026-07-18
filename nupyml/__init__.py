@@ -270,6 +270,9 @@ A reasonable path through the library:
 79. text / language models in ``text`` -- Kneser-Ney n-gram smoothing (continuation
     probabilities), TextRank and LexRank extractive summarisation (PageRank over a
     sentence graph), RAKE keyword extraction, and the MEMM discriminative tagger.
+80. vision v2 in ``image`` -- Gaussian/Laplacian pyramids, marker watershed
+    segmentation, active contours (balloon snakes), ORB oriented-binary descriptors
+    + matching, bag of visual words, and content-aware seam carving.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

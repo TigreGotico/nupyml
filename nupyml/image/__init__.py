@@ -21,6 +21,9 @@ from .shape import (integral_image, rectangle_sum, label, erosion, dilation,
 from .vision import (harris_corners, corner_peaks, canny, match_template,
                      lucas_kanade, chamfer_distance_transform,
                      non_max_suppression, slic)
+from .vision2 import (gaussian_pyramid, laplacian_pyramid, pyramid_reconstruct,
+                      watershed, active_contour, orb_descriptors,
+                      match_descriptors, BagOfVisualWords, seam_carving)
 
 __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "graycomatrix", "haralick_features", "gabor_kernel", "gabor_features",
@@ -28,4 +31,7 @@ __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "opening", "closing", "hough_line",
            "harris_corners", "corner_peaks", "canny", "match_template",
            "lucas_kanade", "chamfer_distance_transform", "non_max_suppression",
-           "slic"]
+           "slic",
+           "gaussian_pyramid", "laplacian_pyramid", "pyramid_reconstruct",
+           "watershed", "active_contour", "orb_descriptors", "match_descriptors",
+           "BagOfVisualWords", "seam_carving"]
