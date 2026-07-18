@@ -340,6 +340,9 @@ A reasonable path through the library:
 100. ensembles v4 in ``ensemble`` -- the random subspace method (feature-subset
      bagging), negative correlation learning (jointly-trained diverse nets), GrowNet
      (gradient boosting of shallow nets), and the snapshot ensemble (cyclic-LR minima).
+101. vision v4 in ``image`` -- the FAST corner detector, LoG blob detection
+     (scale-space), Hough circle detection, the fundamental matrix (normalised
+     8-point + RANSAC, epipolar geometry), and mean-shift segmentation.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
