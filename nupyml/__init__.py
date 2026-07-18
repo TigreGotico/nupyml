@@ -258,6 +258,9 @@ A reasonable path through the library:
     the capsule network (dynamic routing by agreement), the spatial transformer
     (learnable affine warp), the echo state network (random reservoir, trained
     readout), and the pointer network (output distribution over input positions).
+76. time series v3 in ``timeseries`` -- GARCH (volatility clustering), VAR (vector
+    autoregression), AutoETS (AIC-selected exponential smoothing), the Prophet-
+    style changepoint+Fourier forecaster, and MSTL (multi-seasonal decomposition).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

@@ -49,6 +49,7 @@ from .smoothing import (SimpleExponentialSmoothing, Holt, HoltWinters,
                         STL, seasonal_decompose)
 from ._advanced import (Croston, Theta, SSA, sax, dtw_barycenter_averaging,
                         fourier_features)
+from ._advanced2 import GARCH, VAR, AutoETS, ProphetForecaster, MSTL
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",
@@ -58,4 +59,5 @@ __all__ = [
     "STL", "seasonal_decompose",
     "Croston", "Theta", "SSA", "sax", "dtw_barycenter_averaging",
     "fourier_features",
+    "GARCH", "VAR", "AutoETS", "ProphetForecaster", "MSTL",
 ]
