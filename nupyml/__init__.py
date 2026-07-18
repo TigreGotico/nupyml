@@ -276,6 +276,9 @@ A reasonable path through the library:
 81. evolutionary v2 in ``evolutionary`` -- NEAT (evolving network topology), MOEA/D
     (decomposition multi-objective), grammatical evolution (grammar-guided programs),
     and ant colony optimisation (pheromone-guided combinatorial search).
+82. embeddings v3 in ``embed`` -- LSH approximate nearest neighbours, the feature-
+    hashing trick, struc2vec (structural-role node embeddings), and metapath2vec
+    (heterogeneous-graph embeddings via typed random walks).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

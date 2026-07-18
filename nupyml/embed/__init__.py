@@ -37,8 +37,10 @@ from .guided import (CategoricalVectorizer, LabelGuidedEmbeddings,
                      EntityEmbeddingEncoder)
 from ._embeddings2 import (ppmi_svd, Item2Vec, FastText, PoincareEmbedding,
                           StarSpace)
+from ._embeddings3 import LSHIndex, feature_hashing, struc2vec, metapath2vec
 
 __all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
            "CategoricalVectorizer", "LabelGuidedEmbeddings",
            "EntityEmbeddingEncoder",
-           "ppmi_svd", "Item2Vec", "FastText", "PoincareEmbedding", "StarSpace"]
+           "ppmi_svd", "Item2Vec", "FastText", "PoincareEmbedding", "StarSpace",
+           "LSHIndex", "feature_hashing", "struc2vec", "metapath2vec"]
