@@ -264,6 +264,9 @@ A reasonable path through the library:
 77. ensembles v2 in ``ensemble`` -- the Explainable Boosting Machine (glass-box
     additive shape functions), Rotation Forest (PCA-rotated feature subspaces),
     Cascade/Deep Forest (stacked forest layers), and the Regularized Greedy Forest.
+78. probabilistic inference v2 in ``inference`` -- NUTS (self-tuning HMC), SVGD
+    (particle variational inference), expectation propagation (moment-matching
+    probit classifier), and the slice sampler (tuning-free MCMC).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
