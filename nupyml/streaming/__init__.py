@@ -26,5 +26,7 @@ in advance.
 """
 from .online import FTRLProximal, Hedge, OnlineGradientDescent
 from .hoeffding import HoeffdingTree
+from ._online_stats import OnlineCovariance, OnlineQuantile
 
-__all__ = ["FTRLProximal", "Hedge", "OnlineGradientDescent", "HoeffdingTree"]
+__all__ = ["FTRLProximal", "Hedge", "OnlineGradientDescent", "HoeffdingTree",
+           "OnlineCovariance", "OnlineQuantile"]

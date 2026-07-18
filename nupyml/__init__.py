@@ -212,6 +212,9 @@ A reasonable path through the library:
 61. neural recommenders in ``recommend`` (NeuralCF, DeepFM -- learned nonlinear
     user-item interactions) and automated feature engineering in
     ``feature_extraction`` (DeepFeatureSynthesis: per-entity aggregation features).
+62. bandits/planning v2 in ``rl`` (linear Thompson sampling, combinatorial and
+    sleeping bandits, Dyna-Q model-based planning) and online statistics in
+    ``streaming`` (single-pass Welford covariance and a P^2 streaming quantile).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
