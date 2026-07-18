@@ -53,7 +53,10 @@ runnable without a heavy optional dependency.
 - **Variational / particle**: `MeanFieldVI` (ADVI-style), **`SVGD`** (Stein
   variational gradient descent), and `ExpectationPropagationClassifier`
   (moment-matching for a probit posterior).
-- **Simulation-based**: `SequentialMonteCarlo`, `ABC`, `GPLVM`.
+- **Simulation-based**: `SequentialMonteCarlo`, `ABC`, `GPLVM`, the
+  `EnsembleKalmanFilter` (ensemble data assimilation), the `RaoBlackwellisedParticleFilter`,
+  the `MarkovSwitchingModel` (regime switching), and `BayesianPMF` (Gibbs-sampled
+  matrix factorisation).
 - **Sparse / neural Bayes**: `RelevanceVectorMachine` (sparse Bayesian kernel
   regression -- a handful of relevance vectors with a predictive distribution) and
   `BayesianNeuralNetwork` (MC-dropout for calibrated epistemic uncertainty).

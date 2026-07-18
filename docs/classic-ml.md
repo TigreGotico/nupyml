@@ -7,7 +7,7 @@ contract and compose in pipelines and searches.
 |---|---|
 | `linear_model` | LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression, Perceptron, SGD*; **robust**: Huber, Quantile (LP), TheilSen, RANSAC; **Bayesian**: BayesianRidge, ARDRegression; **GLMs**: Poisson, Gamma, Tweedie (log/identity links); **CV paths**: RidgeCV, LassoCV, ElasticNetCV, LogisticRegressionCV; OrthogonalMatchingPursuit |
 | `tree` | DecisionTreeClassifier/Regressor — vectorized CART, cost-complexity pruning (`ccp_alpha`), native NaN routing, monotonic constraints |
-| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, **ExplainableBoostingClassifier**, **RotationForest**, **CascadeForest**, **RegularizedGreedyForest**, **MondrianForest** (online), **KNORA**, **SuperLearner**, **BayesianModelAveraging** |
+| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, EBM, RotationForest, CascadeForest, RGF, MondrianForest (online), KNORA, SuperLearner, BayesianModelAveraging, **RandomSubspace**, **NegativeCorrelationLearning**, **GrowNet**, **SnapshotEnsemble** |
 | `svm` | SVC (SMO, one-vs-one, `probability=True` via Platt), SVR, **NuSVC**, **NuSVR**, LinearSVC |
 | `neighbors` | KNeighborsClassifier/Regressor, NearestNeighbors, KernelDensity |
 | `naive_bayes` | Gaussian, Multinomial, Bernoulli, Complement, **Categorical** |

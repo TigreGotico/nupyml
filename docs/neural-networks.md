@@ -54,8 +54,10 @@ Beyond the primitives, complete architectures are provided as modules:
   `SqueezeExcitation`, `HyperNetwork` (a net that generates another's weights),
   `SpatialTransformer`, `CapsuleLayer` (dynamic routing), `KAN`, `NeuralODE`,
   `MixtureDensityNetwork`, `SiameseNetwork`, `DeepBeliefNetwork` (stacked RBMs),
-  `VisionTransformer` (patch tokens), `NeuralTuringMachine` (addressable external
-  memory), `RelativePositionAttention` (distance-only bias).
+  `VisionTransformer` (patch tokens), `NeuralTuringMachine` /
+  `DifferentiableNeuralComputer` (addressable external memory), `Bidirectional`
+  (BiLSTM/BiGRU), `ModernHopfieldNetwork` (attention as associative memory),
+  `GraphTransformer` (edge-feature attention), `RelativePositionAttention`.
 - **Generative**: `AutoEncoder` (+ denoising / sparse), `VAE` / `ConditionalVAE`,
   `VQVAE`, `GAN` / `WGAN`, `DDPM` diffusion (with `ddim_sample` for fast
   deterministic sampling), normalizing flows (`RealNVP`, `MAF`, `Glow`).
@@ -76,9 +78,11 @@ the numerically stable softmax / log-softmax.
     CosFace, center, Circle, multi-similarity, angular;
   - *ranking*: RankNet (pairwise), ListNet (listwise);
   - *robust / probabilistic*: Barron adaptive (spans L2/Charbonnier/Cauchy/Welsch),
-    Tukey biweight, CRPS (proper score for forecasts);
-  - *segmentation*: Dice, Tversky, boundary, Lovász-softmax (IoU surrogate);
-  - *metric*: proxy-anchor, and the ArcFace/CosFace/SupCon family above;
+    Tukey biweight, CRPS and the multivariate energy score (proper scores),
+    distribution focal loss;
+  - *segmentation*: Dice, Tversky, boundary, Lovász-softmax (IoU surrogate),
+    region mutual information; *detection*: IoU/GIoU/DIoU/CIoU/EIoU/SIoU;
+  - *metric / self-supervised*: proxy-anchor, ArcFace/CosFace/SupCon, DINO;
   - *other*: soft-DTW (differentiable alignment), evidential (Dirichlet
     uncertainty), SSIM, VICReg, quantile, Tweedie, Wasserstein.
 - **Optimizers**: SGD (momentum / Nesterov), Adam, AdamW, RMSprop, Adagrad,
