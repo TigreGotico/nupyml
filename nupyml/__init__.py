@@ -299,6 +299,9 @@ A reasonable path through the library:
 88. time series v4 in ``timeseries`` -- SARIMA (seasonal ARIMA), TBATS (trig
     multiple-seasonality + Box-Cox), hierarchical forecast reconciliation
     (bottom-up / OLS / MinT), and N-BEATS (neural basis-expansion forecasting).
+89. vision v3 in ``image`` -- SIFT scale-invariant keypoints + descriptors,
+    Horn-Schunck dense optical flow, Felzenszwalb graph segmentation, homography
+    estimation (DLT + RANSAC), and the Viola-Jones Haar-cascade detector.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

@@ -24,6 +24,8 @@ from .vision import (harris_corners, corner_peaks, canny, match_template,
 from .vision2 import (gaussian_pyramid, laplacian_pyramid, pyramid_reconstruct,
                       watershed, active_contour, orb_descriptors,
                       match_descriptors, BagOfVisualWords, seam_carving)
+from .vision3 import (sift, horn_schunck, felzenszwalb, estimate_homography,
+                      ransac_homography, ViolaJones)
 
 __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "graycomatrix", "haralick_features", "gabor_kernel", "gabor_features",
@@ -34,4 +36,6 @@ __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "slic",
            "gaussian_pyramid", "laplacian_pyramid", "pyramid_reconstruct",
            "watershed", "active_contour", "orb_descriptors", "match_descriptors",
-           "BagOfVisualWords", "seam_carving"]
+           "BagOfVisualWords", "seam_carving",
+           "sift", "horn_schunck", "felzenszwalb", "estimate_homography",
+           "ransac_homography", "ViolaJones"]
