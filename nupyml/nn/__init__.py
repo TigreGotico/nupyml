@@ -102,6 +102,7 @@ from ._architectures4 import (WaveNet, CapsuleLayer, SpatialTransformer,
                              EchoStateNetwork, PointerNetwork)
 from ._losses_extra4 import (soft_dtw, EvidentialLoss, SeesawLoss, RankNetLoss,
                              BoundaryLoss)
+from ._dbn import DeepBeliefNetwork
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -194,4 +195,5 @@ __all__ = [
     "WaveNet", "CapsuleLayer", "SpatialTransformer", "EchoStateNetwork",
     "PointerNetwork",
     "soft_dtw", "EvidentialLoss", "SeesawLoss", "RankNetLoss", "BoundaryLoss",
+    "DeepBeliefNetwork",
 ]

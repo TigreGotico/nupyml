@@ -285,6 +285,9 @@ A reasonable path through the library:
 84. losses v4 in ``nn`` -- soft-DTW (differentiable sequence alignment), the
     evidential loss (Dirichlet uncertainty / OOD), the seesaw loss (long-tail
     rebalancing), RankNet (pairwise ranking), and the boundary loss (segmentation).
+85. the deep belief network in ``nn`` -- stacked RBMs with greedy layer-wise
+    unsupervised pretraining and a supervised softmax readout (the historical
+    bridge from shallow models to deep learning).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
