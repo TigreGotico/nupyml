@@ -37,13 +37,17 @@ belief propagation, junction tree" and never built them.
 
 Koller & Friedman, *Probabilistic Graphical Models* (2009).
 """
+from ._factor import Factor
 from .bayes_net import BayesianNetwork, DiscreteCPD
 from .markov import MarkovRandomField, MarkovChain
 from .inference import variable_elimination, belief_propagation
 from .structure import chow_liu, hill_climb_structure
+from ._extra import loopy_belief_propagation, GaussianBayesianNetwork
 
 __all__ = [
+    "Factor",
     "BayesianNetwork", "DiscreteCPD", "MarkovRandomField", "MarkovChain",
     "variable_elimination", "belief_propagation", "chow_liu",
     "hill_climb_structure",
+    "loopy_belief_propagation", "GaussianBayesianNetwork",
 ]

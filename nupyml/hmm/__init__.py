@@ -39,6 +39,7 @@ from scipy.special import logsumexp
 
 from ..base import BaseEstimator, check_is_fitted
 from ..utils import check_random_state
+from ._hsmm import HiddenSemiMarkovModel
 
 
 class _BaseHMM(BaseEstimator):
@@ -233,4 +234,4 @@ class MultinomialHMM(_BaseHMM):
         return X, states
 
 
-__all__ = ["GaussianHMM", "MultinomialHMM"]
+__all__ = ["GaussianHMM", "MultinomialHMM", "HiddenSemiMarkovModel"]

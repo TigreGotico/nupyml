@@ -244,6 +244,10 @@ A reasonable path through the library:
     a random walk's spectrum / diffused potential), and in ``cluster`` DP-means
     (nonparametric k), possibilistic c-means (memberships that need not sum to 1),
     and sparse subspace clustering (grouping points by shared subspace).
+72. graphical models v2 -- the hidden semi-Markov model in ``hmm`` (explicit state
+    durations, not geometric), and in ``pgm`` loopy belief propagation (approximate
+    inference on graphs with cycles) and the Gaussian Bayesian network (linear-
+    Gaussian nodes, exact closed-form conditioning).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
