@@ -346,6 +346,9 @@ A reasonable path through the library:
 102. language v4 in ``text`` -- TextTiling topic segmentation, PMI collocation
      extraction, the Norvig noisy-channel spell corrector, the chrF and METEOR
      generation metrics, and the HMM part-of-speech tagger.
+103. evolutionary v4 in ``evolutionary`` -- gene expression programming (linear
+     genome), harmony search, the memetic algorithm (GA + local search), lexicase
+     selection (case-by-case), and SHADE (success-history adaptive DE).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
