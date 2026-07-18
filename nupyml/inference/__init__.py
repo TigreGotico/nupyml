@@ -25,6 +25,7 @@ from .conformal import (ConformalRegressor, ConformalClassifier,
                         AdaptiveConformalInference)
 from .bayesopt import BayesianOptimization, GaussianProcessRegressor
 from ._bayesian import MeanFieldVI, SequentialMonteCarlo, ABC, GPLVM
+from ._conformal2 import APS, RAPS, JackknifePlus, EnbPI, DeepEnsemble
 
 __all__ = [
     "MetropolisHastings", "GibbsSampler", "HamiltonianMC",
@@ -33,4 +34,5 @@ __all__ = [
     "AdaptiveConformalInference",
     "BayesianOptimization", "GaussianProcessRegressor",
     "MeanFieldVI", "SequentialMonteCarlo", "ABC", "GPLVM",
+    "APS", "RAPS", "JackknifePlus", "EnbPI", "DeepEnsemble",
 ]

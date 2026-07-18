@@ -196,6 +196,9 @@ A reasonable path through the library:
 56. continuous-control & advanced ``rl`` -- DDPG, TD3 (twin critics), and SAC
     (max-entropy) for continuous actions, generalized advantage estimation, and
     MCTS planning by UCT tree search.
+57. conformal & uncertainty v2 in ``inference`` -- adaptive prediction sets
+    (APS, RAPS), cross-conformal regression (jackknife+/CV+), time-series
+    conformal (EnbPI), and deep-ensemble epistemic uncertainty.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
