@@ -39,14 +39,17 @@ a tour of every package, and a reading guide to the parts most worth studying.
   Performer attention, `NeuralODE`, `StateSpaceModel` (S4), `KAN`; **v3/v4**:
   `HighwayNetwork`, `SqueezeExcitation`, `TemporalConvNet`, `GATv2`,
   `HyperNetwork`, `WaveNet`, `CapsuleLayer`, `SpatialTransformer`,
-  `EchoStateNetwork`, `PointerNetwork`, and the `DeepBeliefNetwork` (stacked RBMs).
+  `EchoStateNetwork`, `PointerNetwork`, `DeepBeliefNetwork` (stacked RBMs),
+  `VisionTransformer`, `NeuralTuringMachine` (external memory), `Glow`
+  (invertible-linear flow), `RelativePositionAttention`, and `ddim_sample`.
 - **Generative / self-supervised**: `AutoEncoder`/denoising/sparse, `VAE`/CVAE,
   `VQVAE`, `GAN`/WGAN, `DDPM` diffusion, normalizing flows (`RealNVP`, `MAF`);
   `SimCLR`, `BYOL`, `BarlowTwins`, `MaskedAutoEncoder`; knowledge distillation.
 - **Losses**: the base set (MSE/MAE/Huber/cross-entropy/BCE) plus focal, dice/
   tversky/IoU, contrastive/triplet/InfoNCE/ArcFace/CosFace/SupCon, Circle,
-  multi-similarity, angular, SSIM, Tukey biweight, **soft-DTW**, **evidential**,
-  **seesaw**, **RankNet**, **boundary** — 40+ in total.
+  multi-similarity, angular, SSIM, Tukey biweight, soft-DTW, evidential, seesaw,
+  RankNet, boundary, **Barron** adaptive-robust, **Lovász-softmax**, **CRPS**,
+  **ListNet**, **proxy-anchor** — 45+ in total.
 - **Optimizers**: SGD (+momentum/Nesterov), Adam(W), RMSprop, Adagrad, Nadam,
   RAdam, Lion, Lookahead, AdaBelief, Yogi, AdaBound, Adafactor, LAMB, SAM, SWA,
   and **Shampoo, LARS/LARC, NovoGrad, Adan**; StepLR / cosine / warmup / cyclical
@@ -61,13 +64,13 @@ a tour of every package, and a reading guide to the parts most worth studying.
 |---|---|
 | `linear_model` | LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression, Perceptron, SGD*; **robust**: Huber, Quantile (LP), TheilSen, RANSAC; **Bayesian**: BayesianRidge, ARDRegression; **GLMs**: Poisson, Gamma, Tweedie (log/identity links); **CV paths**: RidgeCV, LassoCV, ElasticNetCV, LogisticRegressionCV; OrthogonalMatchingPursuit |
 | `tree` | DecisionTreeClassifier/Regressor — vectorized CART, cost-complexity pruning (`ccp_alpha`), native NaN routing, monotonic constraints |
-| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, **ExplainableBoostingClassifier**, **RotationForest**, **CascadeForest**, **RegularizedGreedyForest** |
+| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, **ExplainableBoostingClassifier**, **RotationForest**, **CascadeForest**, **RegularizedGreedyForest**, **MondrianForest** (online), **KNORA**, **SuperLearner**, **BayesianModelAveraging** |
 | `svm` | SVC (SMO, one-vs-one, `probability=True` via Platt), SVR, **NuSVC**, **NuSVR**, LinearSVC |
 | `neighbors` | KNeighborsClassifier/Regressor, NearestNeighbors, KernelDensity |
 | `naive_bayes` | Gaussian, Multinomial, Bernoulli, Complement, **Categorical** |
 | `cluster` | KMeans (k-means++), MiniBatchKMeans, DBSCAN, Agglomerative, MeanShift, Spectral, Birch, OPTICS, AffinityPropagation, HDBSCAN, KMedoids/KModes, FuzzyCMeans, bisecting/co-clustering, **DPMeans**, **PossibilisticCMeans**, **SparseSubspaceClustering** |
 | `mixture` | GaussianMixture (log-space EM), **BayesianGaussianMixture** (variational, Dirichlet / Dirichlet-process priors) |
-| `decomposition` | PCA, TruncatedSVD, NMF, FastICA, KernelPCA, **SparsePCA**, **DictionaryLearning**, **SparseCoder**, **MiniBatchNMF**, **LatentDirichletAllocation** |
+| `decomposition` | PCA, **ProbabilisticPCA**, FactorAnalysis, TruncatedSVD, NMF, FastICA, KernelPCA, **SparsePCA**, **DictionaryLearning**, **SparseCoder**, **MiniBatchNMF**, **LatentDirichletAllocation** |
 | `manifold` | TSNE (exact), TSNEBarnesHut, Isomap, MDS, LocallyLinearEmbedding, SpectralEmbedding, UMAP, SOM, **DiffusionMap**, **PHATE** |
 | `covariance` / `cross_decomposition` | EmpiricalCovariance, LedoitWolf, OAS, GraphicalLasso, MinCovDet; PLS/CCA |
 | `gaussian_process` | GPR, GPC (Laplace); **composable kernels** — RBF (with ARD), Matérn, RationalQuadratic, ExpSineSquared, DotProduct, White, Constant, combined with `+` and `*` |
@@ -102,22 +105,22 @@ friends. Each is documented in [`docs/`](docs/index.md).
 | Package | What it adds |
 |---|---|
 | `stats` | Statistical **inference**, not just point estimates: OLS/WLS/GLM/Logit/Probit/Poisson with a `.summary()` (SEs, t/z, p-values, CIs, R²/AIC/BIC, HC robust SEs), ANOVA, and diagnostics (Durbin-Watson, Ljung-Box, Breusch-Pagan, White, Jarque-Bera, ADF, KPSS, Granger) |
-| `inference` | MCMC (Metropolis/Gibbs/HMC, **NUTS**, **slice**), **SVGD** & mean-field VI, SMC, ABC, GPLVM, Bayesian optimization, **expectation propagation**, and **conformal prediction** — split/Mondrian, CQR, Venn-Abers, APS/RAPS, jackknife+/CV+, EnbPI for streams |
+| `inference` | MCMC (Metropolis/Gibbs/HMC, **NUTS**, **slice**), **SVGD** & mean-field VI, SMC, ABC, GPLVM, **Relevance Vector Machine**, **Bayesian NN** (MC-dropout), Bayesian optimization, **expectation propagation**, and **conformal prediction** — split/Mondrian, CQR, Venn-Abers, APS/RAPS, jackknife+/CV+, EnbPI for streams |
 | `pgm` / `hmm` | Discrete **Bayesian networks** (variable elimination, belief propagation, **loopy BP**, Chow-Liu/hill-climb), **Gaussian Bayesian networks**; Gaussian/Multinomial HMM and the **hidden semi-Markov model** |
 | `anomaly` / `drift` | HBOS, ECOD, COPOD, KNN, CBLOF, ABOD, LODA, half-space trees, Mahalanobis/PCA-reconstruction, **extended isolation forest**, **isolation kernel**, **Deep SVDD**, **energy-score OOD**; ADWIN/DDM/EDDM/Page-Hinkley/KSWIN **concept-drift** |
-| `topic` / `text` | LDA (collapsed Gibbs), LSA, BM25, Doc2Vec, SIF; **Kneser-Ney** n-gram LM, **TextRank**/**LexRank** summarisation, **RAKE** keywords, the **MEMM** tagger |
+| `topic` / `text` | LDA (collapsed Gibbs), LSA, BM25, Doc2Vec, SIF; **Kneser-Ney** n-gram LM, **TextRank**/**LexRank**, **RAKE**, MEMM & **averaged-perceptron** taggers, **unigram** subword tokenizer, **beam search**, **Word Mover's Distance**, **BLEU**/**ROUGE** |
 | `multilabel` / `active` / `ranking` | Binary relevance → classifier chains → label powerset → RAkEL → MLkNN; uncertainty/margin/entropy/QBC/core-set **active learning**; learning-to-rank (LambdaMART, RankNet) with NDCG/MAP/MRR |
 | `optimal_transport` / `metric_learning` | Sinkhorn, Wasserstein, **unbalanced**/**sliced**/**Gromov-Wasserstein**, barycenters & OT mapping, MMD/energy distance; ITML, LFDA, RCA |
-| `graph` / `embed` / `gnn` | PageRank, HITS, centralities, Louvain, link prediction, Girvan-Newman, max-flow/min-cut, WL/random-walk kernels; word2vec/GloVe/**FastText**/**Poincaré**, DeepWalk/node2vec/LINE, **struc2vec**/**metapath2vec**, **LSH-ANN**, feature hashing; GCN/GraphSAGE/GAT |
+| `graph` / `embed` / `gnn` | PageRank, HITS, centralities, Louvain, link prediction, Girvan-Newman, max-flow/min-cut, WL/random-walk kernels; word2vec/GloVe/**FastText**/**Poincaré**, DeepWalk/node2vec/LINE, **struc2vec**/**metapath2vec**/**GraphWave**/**NetMF**, **LSH**/**HNSW** ANN, feature & hash embeddings; GCN/GraphSAGE/GAT |
 | `changepoint` / `copula` / `survival` | PELT, BinSeg, CUSUM, BOCPD; Gaussian/t/Archimedean copulas; Kaplan-Meier, Cox, random survival forest, AFT/Weibull-AFT, competing risks, IPCW evaluation |
 | `encoders` | Target encoders that bound leak (WOE, James-Stein, M-estimate, leave-one-out), binary/count, winsorizer, rare-label, cyclical, **MDLP supervised binning**, **DateTimeFeatures** |
-| `image` | HOG, LBP, GLCM/Haralick, Gabor, Hough, morphology; **corners/Canny/template-matching/optical-flow/SLIC** and **pyramids/watershed/active-contours/ORB/bag-of-visual-words/seam-carving** |
+| `image` | HOG, LBP, GLCM/Haralick, Gabor, Hough, morphology; corners/Canny/template-matching/optical-flow/SLIC, pyramids/watershed/active-contours/ORB/bag-of-visual-words/seam-carving, and **SIFT**/**Horn-Schunck**/**Felzenszwalb**/**homography+RANSAC**/**Viola-Jones** |
 | `imbalance` | SMOTE/ADASYN/Borderline/Tomek/NearMiss resampling **and** balanced ensembles (BalancedRandomForest, RUSBoost, EasyEnsemble) |
 | `recommend` | Matrix factorization, ALS, BPR, factorization machines, SVD++, neighborhood CF (user/item KNN, SLIM), and neural recommenders (NeuralCF, DeepFM, GRU4Rec) |
-| `timeseries` / `tsclass` / `sequence` | Kalman/EKF/UKF/particle filters, ARIMA, Holt-Winters, STL, Croston, Theta, SSA, SAX, DBA, **GARCH**, **VAR**, **AutoETS**, **Prophet-style**, **MSTL**; ROCKET/BOSS/shapelets/matrix-profile; DTW, CRF, structured perceptron |
+| `timeseries` / `tsclass` / `sequence` | Kalman/EKF/UKF/particle filters, ARIMA, **SARIMA**, Holt-Winters, STL, Croston, Theta, SSA, SAX, DBA, **GARCH**, **VAR**, **AutoETS**, **Prophet-style**, **MSTL**, **TBATS**, **Bayesian structural TS**, hierarchical **reconciliation**, **N-BEATS**; ROCKET/BOSS/shapelets/matrix-profile; DTW, CRF, structured perceptron |
 | `causal` / `explain` / `fairness` | IPW/doubly-robust effect estimation; SHAP, LIME, PDP, integrated gradients, EBM/ALE/anchors; group-fairness metrics + reweighing/threshold-optimizer reductions |
-| `rl` / `evolutionary` / `meta` | Bandits, tabular & deep RL (DQN/PPO), continuous control (DDPG/TD3/SAC); CMA-ES/ES/DE/PSO/GP, island model, novelty search, MAP-Elites, **NEAT**, **MOEA/D**, grammatical evolution, ant colony; few-shot **prototypical/matching nets**, **Reptile**, **MAML**, meta-features |
-| `optimize` | LP simplex, QP, conjugate gradient, FISTA/ADMM, Nelder-Mead; **L-BFGS**, **Levenberg-Marquardt**, **Frank-Wolfe**, **Powell**, **cross-entropy method** |
+| `rl` / `evolutionary` / `meta` | Bandits, tabular & deep RL (DQN/PPO), continuous control (DDPG/TD3/SAC); CMA-ES/ES/DE/PSO/GP, island model, novelty search, MAP-Elites, **NEAT**, **MOEA/D**, **SPEA2**, grammatical & **Cartesian** GP, ant colony, **UMDA**/**compact-GA** EDAs, **grey wolf**; few-shot **prototypical/matching nets**, **Reptile**, **MAML**, meta-features |
+| `optimize` | LP simplex, QP, conjugate gradient, FISTA/ADMM, Nelder-Mead; **L-BFGS**, **Levenberg-Marquardt**, **Frank-Wolfe**, **Powell**, **cross-entropy method**, **trust-region Newton-CG**, **interior-point QP**, **SPSA**, **OWL-QN**, **basin-hopping** |
 | `signal` / `tensor` / `matrix` | Wavelets/DWT, STFT/mel/MFCC, EMD, peak/envelope; CP/Tucker tensor decompositions; robust PCA, soft-impute, singular-value thresholding |
 | `ordinal` / `nonparametric` | Proportional-odds & rank-ridge ordinal regression; GAMs, splines, isotonic/quantile nonparametrics |
 | `search` / `streaming` / `patterns` | LSH/IVF/PQ + Bloom/CMS/HLL/t-digest; FTRL/Hedge/Hoeffding; Apriori/FP-Growth/ECLAT |

@@ -7,13 +7,13 @@ contract and compose in pipelines and searches.
 |---|---|
 | `linear_model` | LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression, Perceptron, SGD*; **robust**: Huber, Quantile (LP), TheilSen, RANSAC; **Bayesian**: BayesianRidge, ARDRegression; **GLMs**: Poisson, Gamma, Tweedie (log/identity links); **CV paths**: RidgeCV, LassoCV, ElasticNetCV, LogisticRegressionCV; OrthogonalMatchingPursuit |
 | `tree` | DecisionTreeClassifier/Regressor — vectorized CART, cost-complexity pruning (`ccp_alpha`), native NaN routing, monotonic constraints |
-| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, **ExplainableBoostingClassifier**, **RotationForest**, **CascadeForest**, **RegularizedGreedyForest** |
+| `ensemble` | RandomForest, ExtraTrees, Bagging, AdaBoost (SAMME), GradientBoosting, **HistGradientBoosting** (binned, second-order, NaN + categorical support), GOSS/DART/NGBoost, Voting, **Stacking**, mixture-of-experts, **ExplainableBoostingClassifier**, **RotationForest**, **CascadeForest**, **RegularizedGreedyForest**, **MondrianForest** (online), **KNORA**, **SuperLearner**, **BayesianModelAveraging** |
 | `svm` | SVC (SMO, one-vs-one, `probability=True` via Platt), SVR, **NuSVC**, **NuSVR**, LinearSVC |
 | `neighbors` | KNeighborsClassifier/Regressor, NearestNeighbors, KernelDensity |
 | `naive_bayes` | Gaussian, Multinomial, Bernoulli, Complement, **Categorical** |
 | `cluster` | KMeans (k-means++), MiniBatchKMeans, DBSCAN, Agglomerative, MeanShift, Spectral, Birch, OPTICS, AffinityPropagation, HDBSCAN, KMedoids/KModes, FuzzyCMeans, bisecting, co-clustering, density-peak, consensus, **DPMeans**, **PossibilisticCMeans**, **SparseSubspaceClustering** |
 | `mixture` | GaussianMixture (log-space EM), **BayesianGaussianMixture** (variational, Dirichlet / Dirichlet-process priors) |
-| `decomposition` | PCA, TruncatedSVD, NMF, FastICA, KernelPCA, **SparsePCA**, **DictionaryLearning**, **SparseCoder**, **MiniBatchNMF**, **LatentDirichletAllocation** |
+| `decomposition` | PCA, **ProbabilisticPCA**, FactorAnalysis, TruncatedSVD, NMF, FastICA, KernelPCA, **SparsePCA**, **DictionaryLearning**, **SparseCoder**, **MiniBatchNMF**, **LatentDirichletAllocation** |
 | `manifold` | TSNE (exact), TSNEBarnesHut, Isomap, MDS, LocallyLinearEmbedding, SpectralEmbedding, UMAP, SelfOrganizingMap, **DiffusionMap**, **PHATE** |
 | `gaussian_process` | GPR, GPC (Laplace); **composable kernels** — RBF (with ARD), Matérn, RationalQuadratic, ExpSineSquared, DotProduct, White, Constant, combined with `+` and `*` |
 | `outlier` | **IsolationForest**, **LocalOutlierFactor**, **OneClassSVM**, **EllipticEnvelope** (MCD) |

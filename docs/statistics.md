@@ -54,6 +54,9 @@ runnable without a heavy optional dependency.
   variational gradient descent), and `ExpectationPropagationClassifier`
   (moment-matching for a probit posterior).
 - **Simulation-based**: `SequentialMonteCarlo`, `ABC`, `GPLVM`.
+- **Sparse / neural Bayes**: `RelevanceVectorMachine` (sparse Bayesian kernel
+  regression -- a handful of relevance vectors with a predictive distribution) and
+  `BayesianNeuralNetwork` (MC-dropout for calibrated epistemic uncertainty).
 - **Bayesian optimization**: `BayesianOptimization` over a `GaussianProcessRegressor`.
 
 ### Conformal prediction

@@ -40,10 +40,11 @@ that concrete.
   tf-idf), BM25 ranking (tf saturation + length normalization), Doc2Vec
   (PV-DBOW), SIF sentence embeddings, and UMass coherence for scoring topics.
 - **Language** (`text`): **Kneser-Ney** n-gram smoothing (continuation
-  probabilities, the smoothing that actually works), **TextRank** and **LexRank**
-  extractive summarisation (PageRank over a sentence-similarity graph), **RAKE**
-  keyword extraction, and the **MEMM** discriminative sequence tagger (with the
-  `LinearChainCRF` and structured perceptron in `sequence`).
+  probabilities, the smoothing that actually works), the **unigram** (SentencePiece-
+  style) subword tokenizer, **TextRank** and **LexRank** summarisation, **RAKE**
+  keyword extraction, the **MEMM** and **averaged-perceptron** taggers, **beam
+  search** decoding, **Word Mover's Distance** (OT over word embeddings), and
+  **BLEU** / **ROUGE** generation metrics (with `LinearChainCRF` in `sequence`).
 
 ## Multi-label & active learning — `multilabel`, `active`
 
@@ -110,12 +111,13 @@ monotonic lighting), GLCM + Haralick statistics, and Gabor filter banks. Plus
 structure tools: the integral image (constant-time box sums), connected-component
 labelling, binary morphology, and the Hough line transform.
 
-**Feature & geometry** (v2): Harris corners, Canny edges, template matching,
-Lucas-Kanade optical flow, the chamfer distance transform, non-maximum
-suppression, SLIC superpixels; Gaussian/Laplacian **pyramids**, **watershed**
-segmentation, **active contours** (balloon snakes), **ORB** oriented-binary
-descriptors + matching, **bag of visual words**, and content-aware **seam
-carving**.
+**Feature & geometry** (v2/v3): Harris corners, Canny edges, template matching,
+Lucas-Kanade & **Horn-Schunck** (dense) optical flow, the chamfer distance
+transform, non-maximum suppression, SLIC & **Felzenszwalb** segmentation,
+Gaussian/Laplacian **pyramids**, **watershed**, **active contours** (balloon
+snakes), **ORB** and **SIFT** descriptors + matching, **bag of visual words**,
+content-aware **seam carving**, **homography** estimation (DLT + RANSAC), and the
+**Viola-Jones** Haar-cascade detector.
 
 ## Imbalance ensembles — `imbalance`
 
@@ -147,17 +149,17 @@ selection.
 
 | Package | Contents |
 |---|---|
-| `timeseries` | Kalman / EKF / UKF / particle filters, ARIMA, Holt-Winters, STL, Croston, Theta, SSA, SAX, DBA; **GARCH**, **VAR**, **AutoETS**, **Prophet-style**, **MSTL** |
+| `timeseries` | Kalman / EKF / UKF / particle filters, ARIMA, **SARIMA**, Holt-Winters, STL, Croston, Theta, SSA, SAX, DBA; **GARCH**, **VAR**, **AutoETS**, **Prophet-style**, **MSTL**, **TBATS**, **Bayesian structural TS**, hierarchical **reconciliation** (MinT), **N-BEATS** |
 | `tsclass` | ROCKET, BOSS, shapelet transform, k-NN-DTW, matrix profile (motifs/discords) |
 | `sequence` | DTW, edit distances, linear-chain CRF, structured perceptron |
 | `causal` | IPW, doubly-robust effect estimation |
 | `explain` | SHAP, LIME, PDP, integrated gradients, EBM/ALE/H-statistic, anchors, counterfactuals |
 | `fairness` | group metrics (DP/EO/equal-opportunity), reweighing, correlation remover, exponentiated-gradient reduction, threshold optimizer |
-| `embed` | word2vec, GloVe, **FastText**, **Poincaré**, StarSpace, item2vec, PPMI+SVD, BPE, WordPiece; **LSH-ANN**, feature hashing, struc2vec, metapath2vec |
+| `embed` | word2vec, GloVe, **FastText**, **Poincaré**, StarSpace, item2vec, PPMI+SVD, BPE, WordPiece; **LSH** & **HNSW** ANN, feature & **hash** embeddings, struc2vec, metapath2vec, **GraphWave**, **NetMF** |
 | `gnn` | GCN, GraphSAGE, GAT |
 | `rl` | multi-armed bandits (v2), tabular RL, deep RL (DQN/PPO), continuous control (DDPG/TD3/SAC), GAE, MCTS |
-| `evolutionary` | CMA-ES, ES, differential evolution, PSO, genetic programming, symbolic regression, NSGA-II, island model, novelty search, MAP-Elites, **NEAT**, **MOEA/D**, grammatical evolution, ant colony |
-| `optimize` | LP simplex, QP, conjugate gradient, FISTA, ADMM, Nelder-Mead; **L-BFGS**, **Levenberg-Marquardt**, **Frank-Wolfe**, **Powell**, **cross-entropy method** |
+| `evolutionary` | CMA-ES, ES, differential evolution, PSO, genetic programming, symbolic regression, NSGA-II, **SPEA2**, island model, novelty search, MAP-Elites, **NEAT**, **MOEA/D**, grammatical & **Cartesian** GP, ant colony, **UMDA** / **compact-GA** (EDAs), **grey wolf** |
+| `optimize` | LP simplex, QP, conjugate gradient, FISTA, ADMM, Nelder-Mead; **L-BFGS**, **Levenberg-Marquardt**, **Frank-Wolfe**, **Powell**, **cross-entropy method**, **trust-region Newton-CG**, **interior-point QP**, **SPSA**, **OWL-QN**, **basin-hopping** |
 | `signal` | wavelets / DWT, STFT / spectrogram / mel / MFCC, EMD, peaks / envelope / ZCR |
 | `tensor` / `matrix` | CP & Tucker decompositions; robust PCA, soft-impute, singular-value thresholding |
 | `ordinal` / `nonparametric` | proportional-odds & rank-ridge ordinal regression; kernel regression, GAMs / splines, density tools |

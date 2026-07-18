@@ -53,9 +53,12 @@ Beyond the primitives, complete architectures are provided as modules:
 - **Deep-net building blocks**: `ResidualBlock`, `HighwayNetwork`,
   `SqueezeExcitation`, `HyperNetwork` (a net that generates another's weights),
   `SpatialTransformer`, `CapsuleLayer` (dynamic routing), `KAN`, `NeuralODE`,
-  `MixtureDensityNetwork`, `SiameseNetwork`, `DeepBeliefNetwork` (stacked RBMs).
+  `MixtureDensityNetwork`, `SiameseNetwork`, `DeepBeliefNetwork` (stacked RBMs),
+  `VisionTransformer` (patch tokens), `NeuralTuringMachine` (addressable external
+  memory), `RelativePositionAttention` (distance-only bias).
 - **Generative**: `AutoEncoder` (+ denoising / sparse), `VAE` / `ConditionalVAE`,
-  `VQVAE`, `GAN` / `WGAN`, `DDPM` diffusion, normalizing flows (`RealNVP`, `MAF`).
+  `VQVAE`, `GAN` / `WGAN`, `DDPM` diffusion (with `ddim_sample` for fast
+  deterministic sampling), normalizing flows (`RealNVP`, `MAF`, `Glow`).
 - **Self-supervised**: `SimCLR`, `BYOL`, `BarlowTwins`, `MaskedAutoEncoder`,
   plus `KnowledgeDistillation`.
 
@@ -71,8 +74,13 @@ the numerically stable softmax / log-softmax.
     symmetric/generalized/asymmetric cross-entropy, Tukey biweight;
   - *metric learning*: contrastive, triplet, N-pairs, InfoNCE, SupCon, ArcFace,
     CosFace, center, Circle, multi-similarity, angular;
+  - *ranking*: RankNet (pairwise), ListNet (listwise);
+  - *robust / probabilistic*: Barron adaptive (spans L2/Charbonnier/Cauchy/Welsch),
+    Tukey biweight, CRPS (proper score for forecasts);
+  - *segmentation*: Dice, Tversky, boundary, Lovász-softmax (IoU surrogate);
+  - *metric*: proxy-anchor, and the ArcFace/CosFace/SupCon family above;
   - *other*: soft-DTW (differentiable alignment), evidential (Dirichlet
-    uncertainty), RankNet, SSIM, VICReg, quantile, Tweedie, Wasserstein.
+    uncertainty), SSIM, VICReg, quantile, Tweedie, Wasserstein.
 - **Optimizers**: SGD (momentum / Nesterov), Adam, AdamW, RMSprop, Adagrad,
   Adadelta, Nadam, RAdam, Adamax, AMSGrad, Lion, Lookahead, AdaBelief, Yogi,
   AdaBound, Adafactor, LAMB, SAM, SWA, EMA, natural gradient, and **Shampoo,
