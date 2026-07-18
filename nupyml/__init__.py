@@ -319,6 +319,9 @@ A reasonable path through the library:
     L2/Charbonnier/Cauchy/Welsch), Lovász-softmax (differentiable IoU surrogate),
     CRPS (proper score for probabilistic forecasts), ListNet (listwise ranking),
     and the proxy-anchor metric loss.
+95. embeddings v4 / retrieval in ``embed`` -- GraphWave (spectral graph-wavelet
+    structural embeddings), NetMF (the matrix-factorisation view of DeepWalk/
+    node2vec), hash embeddings (fixed shared pool), and the HNSW ANN index.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
