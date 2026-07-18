@@ -89,6 +89,9 @@ from ._architectures2 import (DeepSets, SetTransformer, GIN, LinearAttention,
                               NeuralODE, StateSpaceModel, KAN)
 from ._optim_extra2 import (AdaBelief, Adamax, Yogi, AdaBound, Adafactor,
                             pcgrad, NaturalGradient)
+from ._losses_extra2 import (SymmetricCrossEntropy, GeneralizedCrossEntropy,
+                            AsymmetricLoss, CharbonnierLoss, MSLELoss, SMAPELoss,
+                            ListMLELoss, VICRegLoss)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -170,4 +173,6 @@ __all__ = [
     "StateSpaceModel", "KAN",
     "AdaBelief", "Adamax", "Yogi", "AdaBound", "Adafactor", "pcgrad",
     "NaturalGradient",
+    "SymmetricCrossEntropy", "GeneralizedCrossEntropy", "AsymmetricLoss",
+    "CharbonnierLoss", "MSLELoss", "SMAPELoss", "ListMLELoss", "VICRegLoss",
 ]

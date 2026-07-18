@@ -183,6 +183,10 @@ A reasonable path through the library:
 52. more ``nn`` optimizers -- AdaBelief, Adamax, Yogi, AdaBound, Adafactor
     (sublinear memory), plus PCGrad (multi-task gradient surgery) and a
     natural-gradient (Fisher-preconditioned) optimizer.
+53. more ``nn`` losses -- noise-robust classification (symmetric and generalized
+    cross-entropy), multi-label asymmetric loss, robust/relative regression
+    (Charbonnier, MSLE, SMAPE), listwise ranking (ListMLE), and the VICReg
+    self-supervised regulariser.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
