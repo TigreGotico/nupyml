@@ -85,6 +85,8 @@ from ._architectures import (
 from ._self_sup_extra import BarlowTwins, BYOL
 from ._compression import (magnitude_prune, quantize_weights,
                            low_rank_approximation, KnowledgeDistillation)
+from ._architectures2 import (DeepSets, SetTransformer, GIN, LinearAttention,
+                              NeuralODE, StateSpaceModel, KAN)
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -162,4 +164,6 @@ __all__ = [
     "BarlowTwins", "BYOL",
     "magnitude_prune", "quantize_weights", "low_rank_approximation",
     "KnowledgeDistillation",
+    "DeepSets", "SetTransformer", "GIN", "LinearAttention", "NeuralODE",
+    "StateSpaceModel", "KAN",
 ]

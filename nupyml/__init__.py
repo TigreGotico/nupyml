@@ -175,6 +175,11 @@ A reasonable path through the library:
 50. tree & performance expansion -- oblivious (symmetric) trees and linear-leaf
     regression trees in ``tree``, a ``KDTree`` for fast exact neighbour queries in
     ``neighbors``, and exact ``TreeSHAP`` attributions in ``explain``.
+51. more ``nn`` architectures -- DeepSets and the Set Transformer (permutation-
+    invariant set models), GIN (WL-expressive graph net), linear/Performer
+    attention (O(n) attention), Neural ODE (continuous-depth), a diagonal
+    state-space model (S4-style long-range memory), and KAN (learnable-spline
+    activations on edges).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
