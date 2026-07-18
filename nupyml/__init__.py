@@ -187,6 +187,9 @@ A reasonable path through the library:
     cross-entropy), multi-label asymmetric loss, robust/relative regression
     (Charbonnier, MSLE, SMAPE), listwise ranking (ListMLE), and the VICReg
     self-supervised regulariser.
+54. ``tensor`` -- multi-way decompositions (the tensor analogue of PCA/NMF): CP/
+    PARAFAC (uniquely-identifiable rank-1 sum), Tucker/HOSVD (core + per-mode
+    factors), tensor-train (a chain of 3-way cores), and non-negative CP.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
