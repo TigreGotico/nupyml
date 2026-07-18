@@ -330,6 +330,9 @@ A reasonable path through the library:
     assimilation), the Markov-switching regime model (Hamilton filter), Bayesian
     probabilistic matrix factorisation (Gibbs-sampled factors), and the
     Rao-Blackwellised particle filter (marginalise the linear-Gaussian part).
+98. causal inference v2 in ``causal`` -- the Causal Forest (heterogeneous treatment
+    effects via honest trees), Regression Discontinuity (local-linear effect at a
+    cutoff), and the R-learner (residual-on-residual heterogeneous effects).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

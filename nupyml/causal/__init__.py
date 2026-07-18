@@ -46,8 +46,10 @@ from .core import (InversePropensityWeighting, DoublyRobust,
 from ._advanced import (InstrumentalVariables, DoubleML, TLearner, XLearner,
                         difference_in_differences, SyntheticControl,
                         notears_linear)
+from ._advanced2 import CausalForest, RegressionDiscontinuity, RLearner
 
 __all__ = ["InversePropensityWeighting", "DoublyRobust", "propensity_score",
            "PropensityMatching", "uplift_score",
            "InstrumentalVariables", "DoubleML", "TLearner", "XLearner",
-           "difference_in_differences", "SyntheticControl", "notears_linear"]
+           "difference_in_differences", "SyntheticControl", "notears_linear",
+           "CausalForest", "RegressionDiscontinuity", "RLearner"]
