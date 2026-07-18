@@ -92,6 +92,7 @@ from ._optim_extra2 import (AdaBelief, Adamax, Yogi, AdaBound, Adafactor,
 from ._losses_extra2 import (SymmetricCrossEntropy, GeneralizedCrossEntropy,
                             AsymmetricLoss, CharbonnierLoss, MSLELoss, SMAPELoss,
                             ListMLELoss, VICRegLoss)
+from ._flows2 import MAF
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,
@@ -175,4 +176,5 @@ __all__ = [
     "NaturalGradient",
     "SymmetricCrossEntropy", "GeneralizedCrossEntropy", "AsymmetricLoss",
     "CharbonnierLoss", "MSLELoss", "SMAPELoss", "ListMLELoss", "VICRegLoss",
+    "MAF",
 ]

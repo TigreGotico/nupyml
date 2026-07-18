@@ -51,10 +51,12 @@ from ._kernel_ridge import KernelRidge
 from ._robust import TotalLeastSquares, LTSRegressor, NonlinearLeastSquares
 from ._bayes import RVMRegressor, BARTRegressor
 
+from ._conditional_density import ConditionalKDE  # noqa: E402
+
 __all__ = [
     "LOESS", "NadarayaWatson", "LocalLinearRegression",
     "GAM", "GAMClassifier", "SplineTransformer", "natural_cubic_basis",
     "MARS", "RuleFit", "Rule", "KernelRidge",
     "TotalLeastSquares", "LTSRegressor", "NonlinearLeastSquares",
-    "RVMRegressor", "BARTRegressor",
+    "RVMRegressor", "BARTRegressor", "ConditionalKDE",
 ]

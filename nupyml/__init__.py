@@ -203,6 +203,9 @@ A reasonable path through the library:
     tri-training (two agreeing classifiers teach the third), and positive-
     unlabeled learning (the Elkan-Noto correction for learning from positives and
     unlabeled data alone).
+59. density & generative v2 -- ``nn.MAF`` (masked autoregressive flow, an
+    exact-likelihood density), ``neighbors.KNNDensity`` (adaptive k-NN density),
+    and ``nonparametric.ConditionalKDE`` (the full conditional density p(y|x)).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
