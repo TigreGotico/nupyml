@@ -288,6 +288,10 @@ A reasonable path through the library:
 85. the deep belief network in ``nn`` -- stacked RBMs with greedy layer-wise
     unsupervised pretraining and a supervised softmax readout (the historical
     bridge from shallow models to deep learning).
+86. neural architectures v5 in ``nn`` -- the Vision Transformer (patch tokens +
+    transformer), the Neural Turing Machine (differentiable external memory), Glow
+    (normalizing flow with invertible linear mixing), DDIM (deterministic few-step
+    diffusion sampling), and relative-position attention (distance-only bias).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
