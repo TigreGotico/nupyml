@@ -240,6 +240,10 @@ A reasonable path through the library:
 70. feature engineering v2 in ``encoders`` -- MDLP supervised binning (target-
     driven cut points via minimum description length) and DateTimeFeatures
     (calendar fields plus their cyclical encodings from a timestamp).
+71. manifold + clustering v3 -- diffusion maps and PHATE in ``manifold`` (embed by
+    a random walk's spectrum / diffused potential), and in ``cluster`` DP-means
+    (nonparametric k), possibilistic c-means (memberships that need not sum to 1),
+    and sparse subspace clustering (grouping points by shared subspace).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

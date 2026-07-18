@@ -494,7 +494,10 @@ __all__ = ["KMeans", "MiniBatchKMeans", "DBSCAN", "AgglomerativeClustering",
            "AffinityPropagation", "HDBSCAN",
            "KMedoids", "KModes", "FuzzyCMeans",
            "BisectingKMeans", "FeatureAgglomeration",
-           "SpectralCoclustering", "DensityPeakClustering", "ConsensusClustering"]
+           "SpectralCoclustering", "DensityPeakClustering", "ConsensusClustering",
+           "DPMeans", "PossibilisticCMeans", "SparseSubspaceClustering"]
 from ._bisecting import BisectingKMeans, FeatureAgglomeration  # noqa: E402
 from ._biclustering import (SpectralCoclustering, DensityPeakClustering,  # noqa: E402
                             ConsensusClustering)
+from ._extra2 import (DPMeans, PossibilisticCMeans,  # noqa: E402
+                      SparseSubspaceClustering)
