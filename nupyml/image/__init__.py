@@ -28,6 +28,8 @@ from .vision3 import (sift, horn_schunck, felzenszwalb, estimate_homography,
                       ransac_homography, ViolaJones)
 from .vision4 import (fast_corners, blob_detection, hough_circles,
                       fundamental_matrix, ransac_fundamental, MeanShiftSegmentation)
+from .vision5 import (bilateral_filter, non_local_means, total_variation_denoise,
+                      anisotropic_diffusion, graph_cut_segmentation, hu_moments)
 
 __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "graycomatrix", "haralick_features", "gabor_kernel", "gabor_features",
@@ -42,4 +44,6 @@ __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "sift", "horn_schunck", "felzenszwalb", "estimate_homography",
            "ransac_homography", "ViolaJones",
            "fast_corners", "blob_detection", "hough_circles",
-           "fundamental_matrix", "ransac_fundamental", "MeanShiftSegmentation"]
+           "fundamental_matrix", "ransac_fundamental", "MeanShiftSegmentation",
+           "bilateral_filter", "non_local_means", "total_variation_denoise",
+           "anisotropic_diffusion", "graph_cut_segmentation", "hu_moments"]

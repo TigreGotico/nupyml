@@ -365,6 +365,9 @@ A reasonable path through the library:
 108. probabilistic v5 in ``inference`` -- nested sampling (Bayesian evidence),
      the determinantal point process (diverse-subset sampling), Bayesian quadrature
      (integration as GP regression), and the sparse variational GP (inducing points).
+109. vision v5 in ``image`` -- edge-preserving denoisers (bilateral filter,
+     non-local means, total-variation, anisotropic diffusion), graph-cut segmentation
+     (min-cut), and Hu invariant moments.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
