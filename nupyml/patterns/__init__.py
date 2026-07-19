@@ -37,5 +37,10 @@ the three algorithms differ only in how cleverly they exploit it:
 Agrawal & Srikant (1994); Han, Pei & Yin (2000).
 """
 from .rules import apriori, fpgrowth, eclat, association_rules
+from .prefixspan import prefixspan
+from .gsp import gsp
+from .high_utility_itemset import high_utility_itemsets
+from .frequent_subgraphs import frequent_subgraphs
 
-__all__ = ["apriori", "fpgrowth", "eclat", "association_rules"]
+__all__ = ["apriori", "fpgrowth", "eclat", "association_rules",
+           "prefixspan", "gsp", "high_utility_itemsets", "frequent_subgraphs"]

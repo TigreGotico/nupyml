@@ -390,6 +390,9 @@ A reasonable path through the library:
 116. embeddings v6 in ``embed`` -- Lorentz/hyperboloid embeddings (stable hyperbolic
      space), SDNE (deep autoencoder graph embedding), Sent2Vec (compositional sentence
      vectors), and spherical text embeddings (von Mises-Fisher).
+117. pattern mining v2 in ``patterns`` -- PrefixSpan and GSP (sequential patterns),
+     high-utility itemset mining (profit, not frequency), and frequent-subgraph mining
+     (gSpan-lite).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
