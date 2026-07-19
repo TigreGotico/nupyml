@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_naive` | 0.4966 | 0.08 |
-| 2 | `baseline_base_independent` | 0.5600 | 0.31 |
-| 3 | `baseline_reconciled` | 0.5611 | 0.32 |
+| 1 | `baseline_naive` | 0.4966 | 0.17 |
+| 2 | `baseline_base_independent` | 0.5600 | 0.71 |
+| 3 | `baseline_reconciled` | 0.5611 | 0.49 |
 
 _Regenerate with `python bench/harness.py hierarchical_forecast`._

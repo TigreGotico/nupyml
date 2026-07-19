@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_binary_relevance` | 0.8106 | 2.26 |
-| 2 | `baseline_classifier_chain` | 0.8064 | 2.53 |
-| 3 | `baseline_mlknn` | 0.6932 | 1.41 |
+| 1 | `baseline_binary_relevance` | 0.8106 | 0.67 |
+| 2 | `baseline_classifier_chain` | 0.8064 | 0.86 |
+| 3 | `baseline_mlknn` | 0.6932 | 0.61 |
 
 _Regenerate with `python bench/harness.py multilabel_emotions`._

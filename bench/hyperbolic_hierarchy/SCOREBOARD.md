@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_graph_distance` | 1.0000 | 0.11 |
-| 2 | `baseline_lorentz` | 0.7842 | 5.07 |
-| 3 | `baseline_poincare` | 0.7755 | 3.32 |
+| 1 | `baseline_graph_distance` | 1.0000 | 0.15 |
+| 2 | `baseline_lorentz` | 0.7842 | 5.44 |
+| 3 | `baseline_poincare` | 0.7755 | 3.42 |
 
 _Regenerate with `python bench/harness.py hyperbolic_hierarchy`._

@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_ridge` | 0.8174 | 1.75 |
-| 2 | `baseline_multitask_enet` | 0.8171 | 1.31 |
-| 3 | `baseline_rf` | 0.7090 | 134.41 |
+| 1 | `baseline_ridge` | 0.8174 | 0.51 |
+| 2 | `baseline_multitask_enet` | 0.8171 | 0.60 |
+| 3 | `baseline_rf` | 0.7045 | 35.00 |
 
 _Regenerate with `python bench/harness.py multi_output_regression`._

@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_pca_recon` | 0.9695 | 2.52 |
-| 2 | `baseline_mahalanobis` | 0.9622 | 2.80 |
-| 3 | `baseline_isolation_forest` | 0.8993 | 13.88 |
+| 1 | `baseline_pca_recon` | 0.9695 | 1.00 |
+| 2 | `baseline_mahalanobis` | 0.9622 | 0.99 |
+| 3 | `baseline_isolation_forest` | 0.8993 | 5.13 |
 
 _Regenerate with `python bench/harness.py ood_detection`._

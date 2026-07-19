@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_gmm` | -5.3229 | 1.40 |
-| 2 | `baseline_kde` | -5.5954 | 1.18 |
-| 3 | `reference_single_gaussian` | -6.4982 | 0.56 |
+| 1 | `baseline_gmm` | -5.3229 | 0.71 |
+| 2 | `baseline_kde` | -5.5954 | 0.70 |
+| 3 | `reference_single_gaussian` | -6.4982 | 0.16 |
 
 _Regenerate with `python bench/harness.py density_estimation`._

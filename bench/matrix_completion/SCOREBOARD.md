@@ -6,7 +6,7 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_matrix_factorization` | 0.8394 | 4.98 |
-| 2 | `reference_row_mean` | 1.8833 | 0.35 |
+| 1 | `baseline_matrix_factorization` | 0.8394 | 1.44 |
+| 2 | `reference_row_mean` | 1.8833 | 0.16 |
 
 _Regenerate with `python bench/harness.py matrix_completion`._

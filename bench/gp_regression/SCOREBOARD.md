@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_exact_gp` | 0.9951 | 0.71 |
-| 2 | `baseline_sparse_gp` | 0.9951 | 1.03 |
-| 3 | `baseline_knn` | 0.9941 | 0.48 |
+| 1 | `baseline_exact_gp` | 0.9951 | 1.01 |
+| 2 | `baseline_sparse_gp` | 0.9951 | 1.13 |
+| 3 | `baseline_knn` | 0.9941 | 0.56 |
 
 _Regenerate with `python bench/harness.py gp_regression`._

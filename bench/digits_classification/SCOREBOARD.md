@@ -6,9 +6,9 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_svc` | 0.9833 | 1.92 |
-| 2 | `baseline_random_forest` | 0.9777 | 34.57 |
-| 3 | `baseline_mlp` | 0.9759 | 6.81 |
-| 4 | `baseline_logistic` | 0.9740 | 2.64 |
+| 1 | `baseline_svc` | 0.9833 | 1.07 |
+| 2 | `baseline_random_forest` | 0.9777 | 14.13 |
+| 3 | `baseline_mlp` | 0.9759 | 2.74 |
+| 4 | `baseline_logistic` | 0.9740 | 1.15 |
 
 _Regenerate with `python bench/harness.py digits_classification`._

@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_var` | 0.3725 | 0.32 |
-| 2 | `baseline_per_series_ar` | 0.3770 | 0.32 |
-| 3 | `baseline_naive_last` | 0.4920 | 0.07 |
+| 1 | `baseline_var` | 0.3725 | 0.54 |
+| 2 | `baseline_per_series_ar` | 0.3770 | 0.61 |
+| 3 | `baseline_naive_last` | 0.4920 | 0.18 |
 
 _Regenerate with `python bench/harness.py multivariate_forecast`._

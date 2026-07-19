@@ -6,8 +6,8 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_self_training` | 0.9533 | 4.72 |
-| 2 | `reference_labeled_only` | 0.9400 | 1.92 |
-| 3 | `baseline_label_spreading` | 0.9367 | 1.84 |
+| 1 | `baseline_self_training` | 0.9533 | 1.85 |
+| 2 | `reference_labeled_only` | 0.9400 | 0.60 |
+| 3 | `baseline_label_spreading` | 0.9367 | 0.53 |
 
 _Regenerate with `python bench/harness.py semi_supervised`._

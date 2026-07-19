@@ -6,7 +6,7 @@
 
 | Rank | Submission | Score | Runtime (s) |
 |-----:|------------|------:|------------:|
-| 1 | `baseline_poly_ridge` | 0.9997 | 1.64 |
-| 2 | `baseline_gbdt` | 0.9482 | 2.81 |
+| 1 | `baseline_poly_ridge` | 0.9997 | 0.73 |
+| 2 | `baseline_gbdt` | 0.9482 | 1.14 |
 
 _Regenerate with `python bench/harness.py symbolic_regression`._
