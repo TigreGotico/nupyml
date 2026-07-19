@@ -33,11 +33,18 @@ The recurring theme: in high dimensions distance-based scores blur together
 Aggarwal, *Outlier Analysis*; the pyod library.
 """
 from .detectors import HBOS, ECOD, COPOD, KNN, CBLOF, ABOD
-from ._advanced import (LODA, FeatureBaggingDetector, HalfSpaceTrees,
-                        MahalanobisDetector, PCAReconstructionDetector,
-                        threshold_iqr, threshold_mad, threshold_gesd)
-from ._advanced2 import (ExtendedIsolationForest, IsolationKernel, DeepSVDD,
-                         energy_score)
+from .loda import LODA
+from .feature_bagging_detector import FeatureBaggingDetector
+from .half_space_trees import HalfSpaceTrees
+from .mahalanobis_detector import MahalanobisDetector
+from .pca_reconstruction_detector import PCAReconstructionDetector
+from .threshold_iqr import threshold_iqr
+from .threshold_mad import threshold_mad
+from .threshold_gesd import threshold_gesd
+from .extended_isolation_forest import ExtendedIsolationForest
+from .isolation_kernel import IsolationKernel
+from .deep_svdd import DeepSVDD
+from .energy_score import energy_score
 
 __all__ = ["HBOS", "ECOD", "COPOD", "KNN", "CBLOF", "ABOD",
            "LODA", "FeatureBaggingDetector", "HalfSpaceTrees",
