@@ -37,9 +37,4 @@ def threshold_gesd(scores, alpha=0.05, max_outliers=None):
     return mask
 
 
-__all__ = ["LODA", "FeatureBaggingDetector", "HalfSpaceTrees",
-           "MahalanobisDetector", "PCAReconstructionDetector",
-           "threshold_iqr", "threshold_mad", "threshold_gesd"]
-
-
 __all__ = ["threshold_gesd"]

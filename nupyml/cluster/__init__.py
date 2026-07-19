@@ -486,7 +486,10 @@ class SpectralClustering(BaseEstimator, ClusterMixin):
         return self
 
 
-from ._extra import Birch, OPTICS, AffinityPropagation, HDBSCAN  # noqa: E402
+from .birch import Birch
+from .optics import OPTICS
+from .affinity_propagation import AffinityPropagation
+from .hdbscan import HDBSCAN
 from ._variants import KMedoids, KModes, FuzzyCMeans  # noqa: E402
 
 __all__ = ["KMeans", "MiniBatchKMeans", "DBSCAN", "AgglomerativeClustering",
@@ -499,5 +502,6 @@ __all__ = ["KMeans", "MiniBatchKMeans", "DBSCAN", "AgglomerativeClustering",
 from ._bisecting import BisectingKMeans, FeatureAgglomeration  # noqa: E402
 from ._biclustering import (SpectralCoclustering, DensityPeakClustering,  # noqa: E402
                             ConsensusClustering)
-from ._extra2 import (DPMeans, PossibilisticCMeans,  # noqa: E402
-                      SparseSubspaceClustering)
+from .dp_means import DPMeans
+from .possibilistic_c_means import PossibilisticCMeans
+from .sparse_subspace_clustering import SparseSubspaceClustering

@@ -355,17 +355,32 @@ def adjusted_rand_score(labels_true, labels_pred):
     return float((sum_comb - expected) / (max_index - expected))
 
 
-from ._extra import (  # noqa: E402
-    balanced_accuracy_score, matthews_corrcoef, cohen_kappa_score,
-    brier_score_loss, hinge_loss, precision_recall_curve,
-    average_precision_score, calibration_curve, top_k_accuracy_score,
-    median_absolute_error, explained_variance_score,
-    mean_absolute_percentage_error, max_error, mean_poisson_deviance,
-    mean_gamma_deviance, mean_pinball_loss, dcg_score, ndcg_score,
-    mutual_info_score, normalized_mutual_info_score, homogeneity_score,
-    completeness_score, v_measure_score, fowlkes_mallows_score,
-    calinski_harabasz_score, davies_bouldin_score,
-)
+from .balanced_accuracy_score import balanced_accuracy_score
+from .matthews_corrcoef import matthews_corrcoef
+from .cohen_kappa_score import cohen_kappa_score
+from .brier_score_loss import brier_score_loss
+from .hinge_loss import hinge_loss
+from .precision_recall_curve import precision_recall_curve
+from .average_precision_score import average_precision_score
+from .calibration_curve import calibration_curve
+from .top_k_accuracy_score import top_k_accuracy_score
+from .median_absolute_error import median_absolute_error
+from .explained_variance_score import explained_variance_score
+from .mean_absolute_percentage_error import mean_absolute_percentage_error
+from .max_error import max_error
+from .mean_poisson_deviance import mean_poisson_deviance
+from .mean_gamma_deviance import mean_gamma_deviance
+from .mean_pinball_loss import mean_pinball_loss
+from .dcg_score import dcg_score
+from .ndcg_score import ndcg_score
+from .mutual_info_score import mutual_info_score
+from .normalized_mutual_info_score import normalized_mutual_info_score
+from .homogeneity_score import homogeneity_score
+from .completeness_score import completeness_score
+from .v_measure_score import v_measure_score
+from .fowlkes_mallows_score import fowlkes_mallows_score
+from .calinski_harabasz_score import calinski_harabasz_score
+from .davies_bouldin_score import davies_bouldin_score
 
 __all__ = [
     "accuracy_score", "confusion_matrix", "precision_score", "recall_score",

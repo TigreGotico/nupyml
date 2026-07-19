@@ -413,7 +413,10 @@ class SequentialFeatureSelector(_SelectorMixin, BaseEstimator):
         return self
 
 
-from ._advanced import Boruta, mrmr, relieff, StabilitySelection  # noqa: E402
+from .boruta import Boruta
+from .mrmr import mrmr
+from .relieff import relieff
+from .stability_selection import StabilitySelection
 
 __all__ = [
     "f_classif", "f_regression", "chi2", "mutual_info_classif",

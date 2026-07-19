@@ -1,17 +1,7 @@
-"""Diffusion-based manifold learning: diffusion maps and PHATE.
-
-Both build a random walk on the data graph and let it run. Where Laplacian
-eigenmaps (``SpectralEmbedding``) use the graph Laplacian directly, these use the
-DIFFUSION operator -- the transition matrix of a random walk -- whose powers
-reveal structure at successively coarser scales. Diffusion maps embed with its
-eigenvectors; PHATE turns the diffused probabilities into a distance and lays
-that out, which is what makes it preserve both local and global trajectory
-structure so well on biological data.
-"""
+"""Embed with the eigenvectors of a random walk on the data (Coifman, 2006)."""
 import numpy as np
 import scipy.linalg
 from scipy.spatial.distance import cdist, squareform
-
 from ..base import BaseEstimator, TransformerMixin
 from ..utils import check_array
 
@@ -79,45 +69,4 @@ class DiffusionMap(BaseEstimator, TransformerMixin):
         return self
 
 
-class PHATE(BaseEstimator, TransformerMixin):
-    """Diffuse, take the potential, then lay it out (Moon et al., 2019).
-
-    Diffusion distances collapse to noise at long times because the walk forgets
-    where it started. PHATE fixes this by taking the ``-log`` of the diffused
-    probabilities first -- the "potential" -- which keeps far-apart points
-    informatively separated, then embeds those potential distances with MDS. The
-    payoff is an embedding that preserves BOTH local neighbourhoods and global
-    branching/trajectory structure in one picture, which is why it became a
-    standard for single-cell data. ``knn`` sets the adaptive bandwidth.
-    """
-
-    def __init__(self, n_components=2, t=5, knn=5):
-        self.n_components = n_components
-        self.t = t
-        self.knn = knn
-
-    def fit_transform(self, X, y=None):
-        X = check_array(X)
-        P = _diffusion_operator(X, knn_bandwidth=self.knn)
-        Pt = np.linalg.matrix_power(P, self.t)        # diffuse t steps
-        potential = -np.log(Pt + 1e-12)               # informative-distance transform
-        # potential distance = euclidean distance between rows of the potential
-        Dpot = cdist(potential, potential)
-        self.embedding_ = self._classical_mds(Dpot)
-        return self.embedding_
-
-    def _classical_mds(self, D):
-        n = D.shape[0]
-        J = np.eye(n) - np.ones((n, n)) / n
-        B = -0.5 * J @ (D ** 2) @ J                   # double-centre
-        vals, vecs = scipy.linalg.eigh(B)
-        order = np.argsort(vals)[::-1][:self.n_components]
-        L = np.sqrt(np.clip(vals[order], 0, None))
-        return vecs[:, order] * L
-
-    def fit(self, X, y=None):
-        self.fit_transform(X)
-        return self
-
-
-__all__ = ["DiffusionMap", "PHATE"]
+__all__ = ["DiffusionMap"]

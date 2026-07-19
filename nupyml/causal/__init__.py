@@ -43,10 +43,16 @@ is part of using them responsibly.
 """
 from .core import (InversePropensityWeighting, DoublyRobust,
                    propensity_score, PropensityMatching, uplift_score)
-from ._advanced import (InstrumentalVariables, DoubleML, TLearner, XLearner,
-                        difference_in_differences, SyntheticControl,
-                        notears_linear)
-from ._advanced2 import CausalForest, RegressionDiscontinuity, RLearner
+from .instrumental_variables import InstrumentalVariables
+from .double_ml import DoubleML
+from .t_learner import TLearner
+from .x_learner import XLearner
+from .difference_in_differences import difference_in_differences
+from .synthetic_control import SyntheticControl
+from .notears_linear import notears_linear
+from .causal_forest import CausalForest
+from .regression_discontinuity import RegressionDiscontinuity
+from .r_learner import RLearner
 
 __all__ = ["InversePropensityWeighting", "DoublyRobust", "propensity_score",
            "PropensityMatching", "uplift_score",

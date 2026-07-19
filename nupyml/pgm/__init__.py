@@ -42,7 +42,8 @@ from .bayes_net import BayesianNetwork, DiscreteCPD
 from .markov import MarkovRandomField, MarkovChain
 from .inference import variable_elimination, belief_propagation
 from .structure import chow_liu, hill_climb_structure
-from ._extra import loopy_belief_propagation, GaussianBayesianNetwork
+from .loopy_belief_propagation import loopy_belief_propagation
+from .gaussian_bayesian_network import GaussianBayesianNetwork
 
 __all__ = [
     "Factor",

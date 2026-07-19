@@ -199,7 +199,9 @@ class SelfTrainingClassifier(BaseEstimator, ClassifierMixin):
         return self.estimator_.predict_proba(check_array(X))
 
 
-from ._extra import CoTraining, TriTraining, PUClassifier  # noqa: E402
+from .co_training import CoTraining
+from .tri_training import TriTraining
+from .pu_classifier import PUClassifier
 
 __all__ = ["LabelPropagation", "LabelSpreading", "SelfTrainingClassifier",
            "CoTraining", "TriTraining", "PUClassifier"]
