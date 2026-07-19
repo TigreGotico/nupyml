@@ -374,6 +374,9 @@ A reasonable path through the library:
 111. ensembles v5 in ``ensemble`` -- probabilistic random forest (propagates input
      uncertainty), Bayesian committee machine (precision-weighted expert fusion),
      regression-via-classification, and feature-weighted linear stacking.
+112. language v5 in ``text`` -- pLSA (topics by EM), Aho-Corasick multi-pattern
+     matching, Soundex/Metaphone phonetic codes, YAKE keyphrases, character n-gram
+     language identification, and Good-Turing smoothing.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

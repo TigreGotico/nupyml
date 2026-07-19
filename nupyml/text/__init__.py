@@ -17,9 +17,17 @@ from ._language2 import (UnigramTokenizer, beam_search, word_movers_distance,
                          AveragedPerceptronTagger, bleu, rouge_n, rouge_l)
 from ._language3 import (text_tiling, pmi_collocations, SpellCorrector, chrf,
                          meteor, HMMTagger)
+from .plsa import PLSA
+from .aho_corasick import AhoCorasick
+from .phonetic import soundex, metaphone
+from .yake import yake_keywords
+from .langid import LanguageDetector
+from .good_turing import good_turing_smoothing
 
 __all__ = ["KneserNeyLM", "TextRank", "LexRank", "rake_keywords", "MEMM",
            "UnigramTokenizer", "beam_search", "word_movers_distance",
            "AveragedPerceptronTagger", "bleu", "rouge_n", "rouge_l",
            "text_tiling", "pmi_collocations", "SpellCorrector", "chrf",
-           "meteor", "HMMTagger"]
+           "meteor", "HMMTagger",
+           "PLSA", "AhoCorasick", "soundex", "metaphone", "yake_keywords",
+           "LanguageDetector", "good_turing_smoothing"]
