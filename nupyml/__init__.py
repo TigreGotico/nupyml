@@ -387,6 +387,9 @@ A reasonable path through the library:
 115. losses v7 in ``nn`` -- SoftTriple (multiple centres per class), the active-contour
      boundary loss, ApproxNDCG (differentiable ranking), logit adjustment (long-tail),
      and MMCE (a differentiable calibration loss).
+116. embeddings v6 in ``embed`` -- Lorentz/hyperboloid embeddings (stable hyperbolic
+     space), SDNE (deep autoencoder graph embedding), Sent2Vec (compositional sentence
+     vectors), and spherical text embeddings (von Mises-Fisher).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

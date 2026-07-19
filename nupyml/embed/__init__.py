@@ -52,6 +52,10 @@ from .gra_rep import GraRep
 from .hope import HOPE
 from .personalized_page_rank_embedding import PersonalizedPageRankEmbedding
 from .ivfpq_index import IVFPQIndex
+from .lorentz_embedding import LorentzEmbedding
+from .sdne import SDNE
+from .sent2vec import Sent2Vec
+from .spherical_text_embedding import SphericalTextEmbedding
 
 __all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
            "CategoricalVectorizer", "LabelGuidedEmbeddings",
@@ -59,4 +63,5 @@ __all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
            "ppmi_svd", "Item2Vec", "FastText", "PoincareEmbedding", "StarSpace",
            "LSHIndex", "feature_hashing", "struc2vec", "metapath2vec",
            "GraphWave", "NetMF", "HashEmbedding", "HNSW",
-           "GraRep", "HOPE", "PersonalizedPageRankEmbedding", "IVFPQIndex"]
+           "GraRep", "HOPE", "PersonalizedPageRankEmbedding", "IVFPQIndex",
+           "LorentzEmbedding", "SDNE", "Sent2Vec", "SphericalTextEmbedding"]
