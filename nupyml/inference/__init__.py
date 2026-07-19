@@ -31,8 +31,10 @@ from ._advanced import (NUTS, SVGD, ExpectationPropagationClassifier,
 from ._advanced2 import RelevanceVectorMachine, BayesianNeuralNetwork
 from ._advanced3 import (EnsembleKalmanFilter, MarkovSwitchingModel, BayesianPMF,
                         RaoBlackwellisedParticleFilter)
-from ._advanced4 import (NestedSampling, DeterminantalPointProcess,
-                        BayesianQuadrature, SparseVariationalGP)
+from .nested_sampling import NestedSampling
+from .determinantal_point_process import DeterminantalPointProcess
+from .bayesian_quadrature import BayesianQuadrature
+from .sparse_variational_gp import SparseVariationalGP
 
 __all__ = [
     "NUTS", "SVGD", "ExpectationPropagationClassifier", "SliceSampler",

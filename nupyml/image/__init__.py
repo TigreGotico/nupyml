@@ -28,8 +28,12 @@ from .vision3 import (sift, horn_schunck, felzenszwalb, estimate_homography,
                       ransac_homography, ViolaJones)
 from .vision4 import (fast_corners, blob_detection, hough_circles,
                       fundamental_matrix, ransac_fundamental, MeanShiftSegmentation)
-from .vision5 import (bilateral_filter, non_local_means, total_variation_denoise,
-                      anisotropic_diffusion, graph_cut_segmentation, hu_moments)
+from .bilateral import bilateral_filter
+from .non_local_means import non_local_means
+from .total_variation import total_variation_denoise
+from .anisotropic_diffusion import anisotropic_diffusion
+from .graph_cut import graph_cut_segmentation
+from .hu_moments import hu_moments
 
 __all__ = ["histogram_of_oriented_gradients", "local_binary_pattern",
            "graycomatrix", "haralick_features", "gabor_kernel", "gabor_features",

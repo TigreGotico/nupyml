@@ -112,8 +112,11 @@ from ._architectures6 import (Bidirectional, DifferentiableNeuralComputer,
                              GraphTransformer)
 from ._losses_extra6 import (energy_score, DINOLoss, distribution_focal_loss,
                              region_mutual_information, BoxRegressionLoss2)
-from ._architectures7 import (ConditionalNeuralProcess, PointNet,
-                             EnergyBasedModel, SimSiam, VGAE)
+from .conditional_neural_process import ConditionalNeuralProcess
+from .pointnet import PointNet
+from .energy_based_model import EnergyBasedModel
+from .simsiam import SimSiam
+from .vgae import VGAE
 from .autoencoder import (
     AutoEncoder, DenoisingAutoEncoder, SparseAutoEncoder, VAE, ConditionalVAE,
     VAELoss, kl_divergence_normal,

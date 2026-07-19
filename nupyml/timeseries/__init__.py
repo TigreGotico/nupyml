@@ -54,8 +54,11 @@ from ._structural import BayesianStructuralTimeSeries
 from ._advanced3 import SARIMA, TBATS, reconcile_forecasts, NBeats
 from ._advanced4 import (VECM, DynamicFactorModel, CrostonSBA, CrostonTSB,
                         KalmanEM, DeepAR)
-from ._advanced5 import (KShape, convergent_cross_mapping, SPOT, BayesianVAR,
-                        block_bootstrap)
+from .k_shape import KShape
+from .cross_mapping import convergent_cross_mapping
+from .spot import SPOT
+from .bayesian_var import BayesianVAR
+from .block_bootstrap import block_bootstrap
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",

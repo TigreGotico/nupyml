@@ -753,8 +753,10 @@ from ._advanced2 import (MondrianForest, KNORA, SuperLearner,
                          BayesianModelAveraging)
 from ._advanced3 import (RandomSubspaceClassifier, NegativeCorrelationLearning,
                          GrowNet, SnapshotEnsemble)
-from ._advanced4 import (ProbabilisticRandomForest, BayesianCommitteeMachine,
-                         RegressionViaClassification, FeatureWeightedLinearStacking)
+from .probabilistic_random_forest import ProbabilisticRandomForest
+from .bayesian_committee_machine import BayesianCommitteeMachine
+from .regression_via_classification import RegressionViaClassification
+from .feature_weighted_stacking import FeatureWeightedLinearStacking
 
 __all__ = [
     "QuantileForest",
