@@ -166,6 +166,11 @@ from .dino_loss import DINOLoss
 from .distribution_focal_loss import distribution_focal_loss
 from .region_mutual_information import region_mutual_information
 from .box_regression_loss2 import BoxRegressionLoss2
+from .soft_triple_loss import SoftTripleLoss
+from .active_contour_loss import ActiveContourLoss
+from .approx_ndcg_loss import ApproxNDCGLoss
+from .logit_adjustment_loss import LogitAdjustmentLoss
+from .mmce_loss import MMCELoss
 from .conditional_neural_process import ConditionalNeuralProcess
 from .pointnet import PointNet
 from .energy_based_model import EnergyBasedModel
@@ -276,5 +281,7 @@ __all__ = [
     "ModernHopfieldNetwork", "GraphTransformer",
     "energy_score", "DINOLoss", "distribution_focal_loss",
     "region_mutual_information", "BoxRegressionLoss2",
+    "SoftTripleLoss", "ActiveContourLoss", "ApproxNDCGLoss", "LogitAdjustmentLoss",
+    "MMCELoss",
     "ConditionalNeuralProcess", "PointNet", "EnergyBasedModel", "SimSiam", "VGAE",
 ]

@@ -384,6 +384,9 @@ A reasonable path through the library:
 114. optimization v5 in ``optimize`` -- nonlinear conjugate gradient (Fletcher-Reeves /
      Polak-Ribiere), the subgradient method (non-smooth convex), generalised pattern
      search (derivative-free), and the Douglas-Rachford and Chambolle-Pock splittings.
+115. losses v7 in ``nn`` -- SoftTriple (multiple centres per class), the active-contour
+     boundary loss, ApproxNDCG (differentiable ranking), logit adjustment (long-tail),
+     and MMCE (a differentiable calibration loss).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
