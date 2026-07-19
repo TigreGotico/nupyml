@@ -35,11 +35,23 @@ from .word2vec import Word2Vec, GloVe
 from .tokenizer import BPETokenizer, WordPieceTokenizer
 from .guided import (CategoricalVectorizer, LabelGuidedEmbeddings,
                      EntityEmbeddingEncoder)
-from ._embeddings2 import (ppmi_svd, Item2Vec, FastText, PoincareEmbedding,
-                          StarSpace)
-from ._embeddings3 import LSHIndex, feature_hashing, struc2vec, metapath2vec
-from ._embeddings4 import GraphWave, NetMF, HashEmbedding, HNSW
-from ._embeddings5 import GraRep, HOPE, PersonalizedPageRankEmbedding, IVFPQIndex
+from .ppmi_svd import ppmi_svd
+from .item2_vec import Item2Vec
+from .fast_text import FastText
+from .poincare_embedding import PoincareEmbedding
+from .star_space import StarSpace
+from .lsh_index import LSHIndex
+from .feature_hashing import feature_hashing
+from .struc2vec import struc2vec
+from .metapath2vec import metapath2vec
+from .graph_wave import GraphWave
+from .net_mf import NetMF
+from .hash_embedding import HashEmbedding
+from .hnsw import HNSW
+from .gra_rep import GraRep
+from .hope import HOPE
+from .personalized_page_rank_embedding import PersonalizedPageRankEmbedding
+from .ivfpq_index import IVFPQIndex
 
 __all__ = ["Word2Vec", "GloVe", "BPETokenizer", "WordPieceTokenizer",
            "CategoricalVectorizer", "LabelGuidedEmbeddings",

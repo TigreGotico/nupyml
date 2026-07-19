@@ -735,7 +735,8 @@ class VotingRegressor(BaseEstimator, RegressorMixin):
         return np.average(preds, axis=1, weights=self.weights)
 
 
-from ._extra import AdaBoostRegressor, RandomTreesEmbedding
+from .ada_boost_regressor import AdaBoostRegressor
+from .random_trees_embedding import RandomTreesEmbedding
 from ._boosting_variants import (
     GOSSRegressor, OrderedBoostingRegressor, DARTRegressor, NGBoostRegressor,
     goss_sample, exclusive_feature_bundles, bundle_features,
@@ -747,12 +748,18 @@ from ._mixture_of_experts import (
 from ._quantile_forest import QuantileForest
 from ._ensemble_selection import (EnsembleSelectionClassifier,
                                   EnsembleSelectionRegressor)
-from ._advanced import (ExplainableBoostingClassifier, RotationForestClassifier,
-                        CascadeForestClassifier, RegularizedGreedyForest)
-from ._advanced2 import (MondrianForest, KNORA, SuperLearner,
-                         BayesianModelAveraging)
-from ._advanced3 import (RandomSubspaceClassifier, NegativeCorrelationLearning,
-                         GrowNet, SnapshotEnsemble)
+from .explainable_boosting_classifier import ExplainableBoostingClassifier
+from .rotation_forest_classifier import RotationForestClassifier
+from .cascade_forest_classifier import CascadeForestClassifier
+from .regularized_greedy_forest import RegularizedGreedyForest
+from .mondrian_forest import MondrianForest
+from .knora import KNORA
+from .super_learner import SuperLearner
+from .bayesian_model_averaging import BayesianModelAveraging
+from .random_subspace_classifier import RandomSubspaceClassifier
+from .negative_correlation_learning import NegativeCorrelationLearning
+from .grow_net import GrowNet
+from .snapshot_ensemble import SnapshotEnsemble
 from .probabilistic_random_forest import ProbabilisticRandomForest
 from .bayesian_committee_machine import BayesianCommitteeMachine
 from .regression_via_classification import RegressionViaClassification

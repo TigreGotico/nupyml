@@ -46,7 +46,10 @@ from .tabular import QLearning, SARSA, ExpectedSARSA, value_iteration, policy_it
 from .policy_gradient import REINFORCE, ActorCritic
 from ._deep import DQN, PPO
 from ._continuous import (DDPG, TD3, SAC, generalized_advantage_estimation, MCTS)
-from ._bandits2 import (LinearThompsonSampling, CombinatorialBandit, SleepingBandit, DynaQ)
+from .linear_thompson_sampling import LinearThompsonSampling
+from .combinatorial_bandit import CombinatorialBandit
+from .sleeping_bandit import SleepingBandit
+from .dyna_q import DynaQ
 
 __all__ = [
     "EpsilonGreedy", "UCB1", "ThompsonSampling", "LinUCB", "EXP3",

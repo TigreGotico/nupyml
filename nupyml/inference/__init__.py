@@ -25,12 +25,21 @@ from .conformal import (ConformalRegressor, ConformalClassifier,
                         AdaptiveConformalInference)
 from .bayesopt import BayesianOptimization, GaussianProcessRegressor
 from ._bayesian import MeanFieldVI, SequentialMonteCarlo, ABC, GPLVM
-from ._conformal2 import APS, RAPS, JackknifePlus, EnbPI, DeepEnsemble
-from ._advanced import (NUTS, SVGD, ExpectationPropagationClassifier,
-                        SliceSampler)
-from ._advanced2 import RelevanceVectorMachine, BayesianNeuralNetwork
-from ._advanced3 import (EnsembleKalmanFilter, MarkovSwitchingModel, BayesianPMF,
-                        RaoBlackwellisedParticleFilter)
+from .aps import APS
+from .raps import RAPS
+from .jackknife_plus import JackknifePlus
+from .enb_pi import EnbPI
+from .deep_ensemble import DeepEnsemble
+from .nuts import NUTS
+from .svgd import SVGD
+from .expectation_propagation_classifier import ExpectationPropagationClassifier
+from .slice_sampler import SliceSampler
+from .relevance_vector_machine import RelevanceVectorMachine
+from .bayesian_neural_network import BayesianNeuralNetwork
+from .ensemble_kalman_filter import EnsembleKalmanFilter
+from .markov_switching_model import MarkovSwitchingModel
+from .bayesian_pmf import BayesianPMF
+from .rao_blackwellised_particle_filter import RaoBlackwellisedParticleFilter
 from .nested_sampling import NestedSampling
 from .determinantal_point_process import DeterminantalPointProcess
 from .bayesian_quadrature import BayesianQuadrature

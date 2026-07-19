@@ -21,13 +21,27 @@ from .shape import (integral_image, rectangle_sum, label, erosion, dilation,
 from .vision import (harris_corners, corner_peaks, canny, match_template,
                      lucas_kanade, chamfer_distance_transform,
                      non_max_suppression, slic)
-from .vision2 import (gaussian_pyramid, laplacian_pyramid, pyramid_reconstruct,
-                      watershed, active_contour, orb_descriptors,
-                      match_descriptors, BagOfVisualWords, seam_carving)
-from .vision3 import (sift, horn_schunck, felzenszwalb, estimate_homography,
-                      ransac_homography, ViolaJones)
-from .vision4 import (fast_corners, blob_detection, hough_circles,
-                      fundamental_matrix, ransac_fundamental, MeanShiftSegmentation)
+from .gaussian_pyramid import gaussian_pyramid
+from .laplacian_pyramid import laplacian_pyramid
+from .pyramid_reconstruct import pyramid_reconstruct
+from .watershed import watershed
+from .active_contour import active_contour
+from .orb_descriptors import orb_descriptors
+from .match_descriptors import match_descriptors
+from .bag_of_visual_words import BagOfVisualWords
+from .seam_carving import seam_carving
+from .sift import sift
+from .horn_schunck import horn_schunck
+from .felzenszwalb import felzenszwalb
+from .estimate_homography import estimate_homography
+from .ransac_homography import ransac_homography
+from .viola_jones import ViolaJones
+from .fast_corners import fast_corners
+from .blob_detection import blob_detection
+from .hough_circles import hough_circles
+from .fundamental_matrix import fundamental_matrix
+from .ransac_fundamental import ransac_fundamental
+from .mean_shift_segmentation import MeanShiftSegmentation
 from .bilateral import bilateral_filter
 from .non_local_means import non_local_means
 from .total_variation import total_variation_denoise

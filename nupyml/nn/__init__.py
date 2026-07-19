@@ -70,48 +70,102 @@ from .metric_losses import (
     InfoNCELoss, CosFaceLoss, ArcFaceLoss, CenterLoss,
 )
 from .ctc import CTCLoss, ctc_greedy_decode
-from ._losses_extra import (
-    ClassBalancedLoss, BalancedSoftmaxLoss, PolyLoss, FocalTverskyLoss,
-    GHMLoss, WingLoss, PoissonNLLLoss, SupConLoss,
-)
-from ._optim_extra import (
-    Adadelta, AMSGrad, LAMB, SAM, SWA, EMA,
-    ExponentialLR, PolynomialLR, CyclicalLR, OneCycleLR,
-)
-from ._architectures import (
-    ResidualBlock, TransformerDecoderLayer, CausalLanguageModel,
-    MixtureDensityNetwork, SiameseNetwork,
-)
+from .class_balanced_loss import ClassBalancedLoss
+from .balanced_softmax_loss import BalancedSoftmaxLoss
+from .poly_loss import PolyLoss
+from .focal_tversky_loss import FocalTverskyLoss
+from .ghm_loss import GHMLoss
+from .wing_loss import WingLoss
+from .poisson_nll_loss import PoissonNLLLoss
+from .sup_con_loss import SupConLoss
+from .adadelta import Adadelta
+from .ams_grad import AMSGrad
+from .lamb import LAMB
+from .sam import SAM
+from .swa import SWA
+from .ema import EMA
+from .exponential_lr import ExponentialLR
+from .polynomial_lr import PolynomialLR
+from .cyclical_lr import CyclicalLR
+from .one_cycle_lr import OneCycleLR
+from .residual_block import ResidualBlock
+from .transformer_decoder_layer import TransformerDecoderLayer
+from .causal_language_model import CausalLanguageModel
+from .mixture_density_network import MixtureDensityNetwork
+from .siamese_network import SiameseNetwork
 from ._self_sup_extra import BarlowTwins, BYOL
 from ._compression import (magnitude_prune, quantize_weights,
                            low_rank_approximation, KnowledgeDistillation)
-from ._architectures2 import (DeepSets, SetTransformer, GIN, LinearAttention,
-                              NeuralODE, StateSpaceModel, KAN)
-from ._optim_extra2 import (AdaBelief, Adamax, Yogi, AdaBound, Adafactor,
-                            pcgrad, NaturalGradient)
-from ._losses_extra2 import (SymmetricCrossEntropy, GeneralizedCrossEntropy,
-                            AsymmetricLoss, CharbonnierLoss, MSLELoss, SMAPELoss,
-                            ListMLELoss, VICRegLoss)
-from ._flows2 import MAF
-from ._architectures3 import (HighwayNetwork, SqueezeExcitation, CausalConv1d,
-                             TemporalConvNet, GATv2, HyperNetwork)
-from ._optim_extra3 import Shampoo, LARS, LARC, NovoGrad, Adan
-from ._losses_extra3 import (CircleLoss, MultiSimilarityLoss, AngularLoss,
-                             BoxRegressionLoss, SSIMLoss, TukeyBiweightLoss)
-from ._architectures4 import (WaveNet, CapsuleLayer, SpatialTransformer,
-                             EchoStateNetwork, PointerNetwork)
-from ._losses_extra4 import (soft_dtw, EvidentialLoss, SeesawLoss, RankNetLoss,
-                             BoundaryLoss)
+from .deep_sets import DeepSets
+from .set_transformer import SetTransformer
+from .gin import GIN
+from .linear_attention import LinearAttention
+from .neural_ode import NeuralODE
+from .state_space_model import StateSpaceModel
+from .kan import KAN
+from .ada_belief import AdaBelief
+from .adamax import Adamax
+from .yogi import Yogi
+from .ada_bound import AdaBound
+from .adafactor import Adafactor
+from .pcgrad import pcgrad
+from .natural_gradient import NaturalGradient
+from .symmetric_cross_entropy import SymmetricCrossEntropy
+from .generalized_cross_entropy import GeneralizedCrossEntropy
+from .asymmetric_loss import AsymmetricLoss
+from .charbonnier_loss import CharbonnierLoss
+from .msle_loss import MSLELoss
+from .smape_loss import SMAPELoss
+from .list_mle_loss import ListMLELoss
+from .vic_reg_loss import VICRegLoss
+from .maf import MAF
+from .highway_network import HighwayNetwork
+from .squeeze_excitation import SqueezeExcitation
+from .causal_conv1d import CausalConv1d
+from .temporal_conv_net import TemporalConvNet
+from .ga_tv2 import GATv2
+from .hyper_network import HyperNetwork
+from .shampoo import Shampoo
+from .lars_larc import (LARS, LARC)
+from .novo_grad import NovoGrad
+from .adan import Adan
+from .circle_loss import CircleLoss
+from .multi_similarity_loss import MultiSimilarityLoss
+from .angular_loss import AngularLoss
+from .box_regression_loss import BoxRegressionLoss
+from .ssim_loss import SSIMLoss
+from .tukey_biweight_loss import TukeyBiweightLoss
+from .wave_net import WaveNet
+from .capsule_layer import CapsuleLayer
+from .spatial_transformer import SpatialTransformer
+from .echo_state_network import EchoStateNetwork
+from .pointer_network import PointerNetwork
+from .soft_dtw import soft_dtw
+from .evidential_loss import EvidentialLoss
+from .seesaw_loss import SeesawLoss
+from .rank_net_loss import RankNetLoss
+from .boundary_loss import BoundaryLoss
 from ._dbn import DeepBeliefNetwork
-from ._architectures5 import (VisionTransformer, NeuralTuringMachine, Glow,
-                             ddim_sample, RelativePositionAttention)
-from ._losses_extra5 import (BarronLoss, lovasz_hinge, crps_ensemble,
-                             ListNetLoss, ProxyAnchorLoss)
-from ._architectures6 import (Bidirectional, DifferentiableNeuralComputer,
-                             NeuralSplineFlow, ModernHopfieldNetwork,
-                             GraphTransformer)
-from ._losses_extra6 import (energy_score, DINOLoss, distribution_focal_loss,
-                             region_mutual_information, BoxRegressionLoss2)
+from .vision_transformer import VisionTransformer
+from .neural_turing_machine import NeuralTuringMachine
+from .glow import Glow
+from .ddim_sample import ddim_sample
+from .relative_position_attention import RelativePositionAttention
+from .barron_loss import BarronLoss
+from .lovasz_hinge import lovasz_hinge
+from .crps_ensemble import crps_ensemble
+from .list_net_loss import ListNetLoss
+from .proxy_anchor_loss import ProxyAnchorLoss
+from .bidirectional import Bidirectional
+from .differentiable_neural_computer import DifferentiableNeuralComputer
+from .neural_spline_flow import NeuralSplineFlow
+from .modern_hopfield_network import ModernHopfieldNetwork
+from .graph_transformer import GraphTransformer
+from .energy_score import energy_score
+from .dino_loss import DINOLoss
+from .distribution_focal_loss import distribution_focal_loss
+from .region_mutual_information import region_mutual_information
+from .box_regression_loss2 import BoxRegressionLoss2
 from .conditional_neural_process import ConditionalNeuralProcess
 from .pointnet import PointNet
 from .energy_based_model import EnergyBasedModel
@@ -141,7 +195,11 @@ from .optim import (
 )
 from .activations import SiLU, Mish, ELU, SELU, Softplus, GLU, SwiGLU
 from .normalization import RMSNorm, GroupNorm, InstanceNorm
-from .optim_extra import Adagrad, Nadam, RAdam, Lion, Lookahead
+from .adagrad import Adagrad
+from .nadam import Nadam
+from .r_adam import RAdam
+from .lion import Lion
+from .lookahead import Lookahead
 from .positional import RotaryPositionalEmbedding, ALiBi
 from .regularization import mixup, cutmix, StochasticDepth, drop_path
 from .recurrent import RNN, GRU, LSTM

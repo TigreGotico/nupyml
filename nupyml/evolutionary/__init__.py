@@ -79,10 +79,20 @@ from .multiobjective import NSGA2, pareto_front, non_dominated_sort
 from .programming import SymbolicRegressor, GeneticProgram
 from .sklearn_api import GAFeatureSelector, GASearchCV
 from ._qd import IslandModelGA, NoveltySearch, MAPElites
-from ._advanced2 import NEAT, MOEAD, GrammaticalEvolution, AntColonyOptimization
-from ._advanced3 import UMDA, CompactGA, SPEA2, CartesianGP, GreyWolfOptimizer
-from ._advanced4 import (GeneExpressionProgramming, HarmonySearch,
-                        MemeticAlgorithm, lexicase_selection, SHADE)
+from .neat import NEAT
+from .moead import MOEAD
+from .grammatical_evolution import GrammaticalEvolution
+from .ant_colony_optimization import AntColonyOptimization
+from .umda import UMDA
+from .compact_ga import CompactGA
+from .spea2 import SPEA2
+from .cartesian_gp import CartesianGP
+from .grey_wolf_optimizer import GreyWolfOptimizer
+from .gene_expression_programming import GeneExpressionProgramming
+from .harmony_search import HarmonySearch
+from .memetic_algorithm import MemeticAlgorithm
+from .lexicase_selection import lexicase_selection
+from .shade import SHADE
 
 __all__ = [
     "IslandModelGA", "NoveltySearch", "MAPElites",

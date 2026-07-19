@@ -47,13 +47,28 @@ from .kalman import (KalmanFilter, ExtendedKalmanFilter, UnscentedKalmanFilter,
 from .arima import AutoRegressive, ARMA, ARIMA
 from .smoothing import (SimpleExponentialSmoothing, Holt, HoltWinters,
                         STL, seasonal_decompose)
-from ._advanced import (Croston, Theta, SSA, sax, dtw_barycenter_averaging,
-                        fourier_features)
-from ._advanced2 import GARCH, VAR, AutoETS, ProphetForecaster, MSTL
+from .croston import Croston
+from .theta import Theta
+from .ssa import SSA
+from .sax import sax
+from .dtw_barycenter_averaging import dtw_barycenter_averaging
+from .fourier_features import fourier_features
+from .garch import GARCH
+from .var import VAR
+from .auto_ets import AutoETS
+from .prophet_forecaster import ProphetForecaster
+from .mstl import MSTL
 from ._structural import BayesianStructuralTimeSeries
-from ._advanced3 import SARIMA, TBATS, reconcile_forecasts, NBeats
-from ._advanced4 import (VECM, DynamicFactorModel, CrostonSBA, CrostonTSB,
-                        KalmanEM, DeepAR)
+from .sarima import SARIMA
+from .tbats import TBATS
+from .reconcile_forecasts import reconcile_forecasts
+from .n_beats import NBeats
+from .vecm import VECM
+from .dynamic_factor_model import DynamicFactorModel
+from .croston_sba import CrostonSBA
+from .croston_tsb import CrostonTSB
+from .kalman_em import KalmanEM
+from .deep_ar import DeepAR
 from .k_shape import KShape
 from .cross_mapping import convergent_cross_mapping
 from .spot import SPOT
