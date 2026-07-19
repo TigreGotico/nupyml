@@ -368,6 +368,9 @@ A reasonable path through the library:
 109. vision v5 in ``image`` -- edge-preserving denoisers (bilateral filter,
      non-local means, total-variation, anisotropic diffusion), graph-cut segmentation
      (min-cut), and Hu invariant moments.
+110. time series v6 in ``timeseries`` -- k-Shape (shift/scale-invariant shape
+     clustering), convergent cross mapping (nonlinear causality), SPOT (extreme-value
+     anomaly detection), Bayesian VAR (Minnesota prior), and the block bootstrap.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------

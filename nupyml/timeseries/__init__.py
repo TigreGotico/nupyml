@@ -54,6 +54,8 @@ from ._structural import BayesianStructuralTimeSeries
 from ._advanced3 import SARIMA, TBATS, reconcile_forecasts, NBeats
 from ._advanced4 import (VECM, DynamicFactorModel, CrostonSBA, CrostonTSB,
                         KalmanEM, DeepAR)
+from ._advanced5 import (KShape, convergent_cross_mapping, SPOT, BayesianVAR,
+                        block_bootstrap)
 
 __all__ = [
     "KalmanFilter", "ExtendedKalmanFilter", "UnscentedKalmanFilter",
@@ -67,4 +69,5 @@ __all__ = [
     "BayesianStructuralTimeSeries",
     "SARIMA", "TBATS", "reconcile_forecasts", "NBeats",
     "VECM", "DynamicFactorModel", "CrostonSBA", "CrostonTSB", "KalmanEM", "DeepAR",
+    "KShape", "convergent_cross_mapping", "SPOT", "BayesianVAR", "block_bootstrap",
 ]
