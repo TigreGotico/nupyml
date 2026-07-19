@@ -36,6 +36,11 @@ from .svrg import svrg
 from .saga import saga
 from .mirror_descent import mirror_descent
 from .proximal_newton import proximal_newton
+from .nonlinear_conjugate_gradient import nonlinear_conjugate_gradient
+from .subgradient_method import subgradient_method
+from .pattern_search import pattern_search
+from .douglas_rachford import douglas_rachford
+from .chambolle_pock import chambolle_pock
 
 __all__ = ["linprog_simplex", "quadratic_program", "conjugate_gradient",
            "fista", "soft_threshold", "lasso_fista", "admm_lasso",
@@ -45,4 +50,6 @@ __all__ = ["linprog_simplex", "quadratic_program", "conjugate_gradient",
            "trust_region_newton_cg", "interior_point_qp", "spsa", "owlqn",
            "basin_hopping",
            "slsqp", "augmented_lagrangian", "svrg", "saga", "mirror_descent",
-           "proximal_newton"]
+           "proximal_newton",
+           "nonlinear_conjugate_gradient", "subgradient_method", "pattern_search",
+           "douglas_rachford", "chambolle_pock"]

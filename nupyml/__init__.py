@@ -381,6 +381,9 @@ A reasonable path through the library:
      cooperative coevolution (subcomponents in separate populations), surrogate-assisted
      EA (a learned model replaces costly evaluations), and age-fitness Pareto
      optimisation (age as a second objective to preserve novelty).
+114. optimization v5 in ``optimize`` -- nonlinear conjugate gradient (Fletcher-Reeves /
+     Polak-Ribiere), the subgradient method (non-smooth convex), generalised pattern
+     search (derivative-free), and the Douglas-Rachford and Chambolle-Pock splittings.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
