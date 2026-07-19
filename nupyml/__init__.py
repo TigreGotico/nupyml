@@ -371,6 +371,9 @@ A reasonable path through the library:
 110. time series v6 in ``timeseries`` -- k-Shape (shift/scale-invariant shape
      clustering), convergent cross mapping (nonlinear causality), SPOT (extreme-value
      anomaly detection), Bayesian VAR (Minnesota prior), and the block bootstrap.
+111. ensembles v5 in ``ensemble`` -- probabilistic random forest (propagates input
+     uncertainty), Bayesian committee machine (precision-weighted expert fusion),
+     regression-via-classification, and feature-weighted linear stacking.
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
