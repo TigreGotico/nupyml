@@ -93,6 +93,10 @@ from .harmony_search import HarmonySearch
 from .memetic_algorithm import MemeticAlgorithm
 from .lexicase_selection import lexicase_selection
 from .shade import SHADE
+from .whale_optimization import WhaleOptimization
+from .coevolution import CooperativeCoevolution
+from .surrogate_assisted import SurrogateAssistedEA
+from .age_fitness_pareto import AgeFitnessParetoOptimization
 
 __all__ = [
     "IslandModelGA", "NoveltySearch", "MAPElites",
@@ -100,6 +104,8 @@ __all__ = [
     "UMDA", "CompactGA", "SPEA2", "CartesianGP", "GreyWolfOptimizer",
     "GeneExpressionProgramming", "HarmonySearch", "MemeticAlgorithm",
     "lexicase_selection", "SHADE",
+    "WhaleOptimization", "CooperativeCoevolution", "SurrogateAssistedEA",
+    "AgeFitnessParetoOptimization",
     "GeneticAlgorithm", "BinaryGeneticAlgorithm", "tournament_selection",
     "roulette_selection", "rank_selection",
     "CMAES", "EvolutionStrategy",

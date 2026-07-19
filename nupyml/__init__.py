@@ -377,6 +377,10 @@ A reasonable path through the library:
 112. language v5 in ``text`` -- pLSA (topics by EM), Aho-Corasick multi-pattern
      matching, Soundex/Metaphone phonetic codes, YAKE keyphrases, character n-gram
      language identification, and Good-Turing smoothing.
+113. genetic v5 in ``evolutionary`` -- whale optimisation (bubble-net hunting),
+     cooperative coevolution (subcomponents in separate populations), surrogate-assisted
+     EA (a learned model replaces costly evaluations), and age-fitness Pareto
+     optimisation (age as a second objective to preserve novelty).
 
 WHERE THE INTERESTING IMPLEMENTATION IS
 ---------------------------------------
