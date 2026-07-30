@@ -30,13 +30,13 @@ The `solve` signature is chosen by the task's `KIND`:
 | `survival` | `solve(X_train, durations_train, events_train, X_test) -> risk_scores` |
 | `density` | `solve(X_train, X_test) -> log_density` |
 
-There are **31 tasks** across those KINDs — supervised classification and
+There are **31 tasks** across those KINDs: supervised classification and
 regression (digits, moons, diabetes, fraud, text, image features, keypoints,
 symbolic regression, semi-supervised, multi-label, multi-output, matrix
 completion, node classification, **link prediction**, …), clustering and
 OOD/anomaly ranking (including **image segmentation**, **regime detection**, **time-series anomaly**), forecasting (sine,
 intermittent demand, **volatility**, **multivariate**, **hierarchical**),
-learning-to-rank, survival risk, and density estimation — with more added over
+learning-to-rank, survival risk, and density estimation, with more added over
 time. See [`bench/README.md`](../bench/README.md) for the full list.
 
 ## Running it
@@ -49,7 +49,7 @@ python bench/harness.py digits_classification # a single task
 The harness runs each submission in an **isolated subprocess** with a wall-clock
 timeout, after statically checking its imports (an AST parse that rejects
 anything outside the allowlist). A crashing, hanging, or rule-breaking entry is
-recorded as such and cannot affect the rest of the run — which is exactly what
+recorded as such and cannot affect the rest of the run, which is exactly what
 makes it safe to point at untrusted community submissions. The held-out test
 labels are never handed to the submission.
 
@@ -64,3 +64,6 @@ regresses an estimator is caught by the benchmark, not just by the unit tests.
 See [`bench/CONTRIBUTING.md`](../bench/CONTRIBUTING.md): drop a `<name>.py` with a
 `solve()` into a task's `submissions/`, run the harness, and the scoreboard
 re-ranks. Adding a *task* is the `task.py` contract plus a `README.md`.
+
+---
+[← Beyond scikit-learn](beyond-sklearn.md) · [Home](index.md) · [Reading guide →](reading-guide.md)

@@ -6,41 +6,41 @@ scratch and written to be read: if you can read numpy, you can read every line
 of every model here.
 
 These pages are a guided tour. Start with getting started, then read whichever
-area you care about — each page explains not just the API but *why* the
+area you care about. Each page explains not just the API but *why* the
 algorithms work the way they do.
 
 ## Contents
 
-- **[Getting started](getting-started.md)** — install, the two core APIs
+- **[Getting started](getting-started.md)**: install, the two core APIs
   (estimators and autograd), and a first pipeline.
-- **[Classic ML](classic-ml.md)** — the scikit-learn-parity estimators: linear
+- **[Classic ML](classic-ml.md)**: the scikit-learn-parity estimators, linear
   models, trees and ensembles, SVMs, clustering, decomposition, the works.
-- **[Neural networks](neural-networks.md)** — the autograd engine, layers, the
+- **[Neural networks](neural-networks.md)**: the autograd engine, layers, the
   architecture zoo (transformers, WaveNet, capsule nets, S4, …), the loss and
   optimizer families, generative and self-supervised models, and the `MLP*`
   wrappers.
-- **[Statistics & inference](statistics.md)** — the `stats` package (regression
+- **[Statistics & inference](statistics.md)**: the `stats` package (regression
   *with* standard errors, p-values, CIs, diagnostics) and `inference`
   (MCMC / NUTS / SVGD / slice sampling, variational inference, expectation
   propagation, Bayesian optimization, conformal prediction).
-- **[Beyond scikit-learn](beyond-sklearn.md)** — the ecosystem-adjacent families:
+- **[Beyond scikit-learn](beyond-sklearn.md)**: the ecosystem-adjacent families,
   graphical models, anomaly / OOD / drift, topic models and language (`text`),
   optimal transport, graphs and network embeddings, survival, copulas,
   recommenders, computer vision, time-series forecasting and classification,
   fairness, meta-learning, numerical optimization, signal / tensor / matrix
   methods, and more.
-- **[The benchmark suite](benchmarks.md)** — `bench/`, a nupyml-only community
+- **[The benchmark suite](benchmarks.md)**: `bench/`, a nupyml-only community
   benchmark that doubles as end-to-end QA.
-- **[Reading guide](reading-guide.md)** — the handful of files most worth reading
+- **[Reading guide](reading-guide.md)**: the handful of files most worth reading
   to understand how the interesting optimizations actually work.
-- **[Contributing](contributing.md)** — running the tests, the API contract, and
+- **[Contributing](contributing.md)**: running the tests, the API contract, and
   how the code is meant to read.
 
 ## Design in one paragraph
 
-Every estimator follows the same contract — `fit` / `predict` / `transform`,
+Every estimator follows the same contract: `fit` / `predict` / `transform`,
 parameters set in `__init__` and never mutated there, learned attributes ending
-in a trailing underscore — so they compose in a `Pipeline` and are tunable by the
+in a trailing underscore, so they compose in a `Pipeline` and are tunable by the
 `*SearchCV` estimators. `utils.estimator_checks.check_estimator` enforces that
 contract and is worth reading as a statement of what the contract *is*.
 Optimizations are not avoided, but they are explained rather than assumed: where

@@ -95,3 +95,6 @@ StandardScaler().set_output(transform="pandas").fit_transform(df)
   [Statistics & inference](statistics.md)
 - Graphs, text, anomalies, recommenders, images →
   [Beyond scikit-learn](beyond-sklearn.md)
+
+---
+[Home](index.md) · [Classic ML →](classic-ml.md)
