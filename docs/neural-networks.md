@@ -69,20 +69,20 @@ the numerically stable softmax / log-softmax.
 
 ## Losses, optimizers, schedulers
 
-- **Losses** (40+): the base set — MSE, MAE, Huber, cross-entropy (fused
-  log-softmax), BCE, BCE-with-logits — plus:
-  - *segmentation*: Dice, Tversky, focal-Tversky, IoU, boundary;
-  - *imbalance / robustness*: focal, class-balanced, PolyLoss, GHM, seesaw,
-    symmetric/generalized/asymmetric cross-entropy, Tukey biweight;
+- **Losses** (40+): the base set: MSE, MAE, Huber, cross-entropy (fused
+  log-softmax), BCE, BCE-with-logits, plus:
+  - *segmentation*: Dice, Tversky, focal-Tversky, IoU, boundary,
+  - *imbalance handling*: focal, class-balanced, PolyLoss, GHM, seesaw,
+    symmetric/generalized/asymmetric cross-entropy, Tukey biweight,
   - *metric learning*: contrastive, triplet, N-pairs, InfoNCE, SupCon, ArcFace,
-    CosFace, center, Circle, multi-similarity, angular;
-  - *ranking*: RankNet (pairwise), ListNet (listwise);
-  - *robust / probabilistic*: Barron adaptive (spans L2/Charbonnier/Cauchy/Welsch),
+    CosFace, center, Circle, multi-similarity, angular,
+  - *ranking*: RankNet (pairwise), ListNet (listwise),
+  - *outlier-resistant / probabilistic*: `BarronLoss` (spans L2/Charbonnier/Cauchy/Welsch),
     Tukey biweight, CRPS and the multivariate energy score (proper scores),
-    distribution focal loss;
+    distribution focal loss,
   - *segmentation*: Dice, Tversky, boundary, Lovász-softmax (IoU surrogate),
-    region mutual information; *detection*: IoU/GIoU/DIoU/CIoU/EIoU/SIoU;
-  - *metric / self-supervised*: proxy-anchor, ArcFace/CosFace/SupCon, DINO;
+    region mutual information, *detection*: IoU/GIoU/DIoU/CIoU/EIoU/SIoU,
+  - *metric / self-supervised*: proxy-anchor, ArcFace/CosFace/SupCon, DINO,
   - *other*: soft-DTW (differentiable alignment), evidential (Dirichlet
     uncertainty), SSIM, VICReg, quantile, Tweedie, Wasserstein.
 - **Optimizers**: SGD (momentum / Nesterov), Adam, AdamW, RMSprop, Adagrad,
@@ -111,6 +111,9 @@ model.load("weights.npz")
 
 ## Worth reading
 
-`nn/vqvae.py` implements the straight-through estimator — a deliberate lie about
+`nn/vqvae.py` implements the straight-through estimator: a deliberate lie about
 a derivative, and a good illustration of when that is the honest engineering
 choice. See the [reading guide](reading-guide.md) for more.
+
+---
+[← Classic ML](classic-ml.md) · [Home](index.md) · [Statistics & inference →](statistics.md)
